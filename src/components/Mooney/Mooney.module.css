@@ -8,106 +8,277 @@
   --mooney-divider: #DDD9D0;
   --mooney-tear: #CEC9BF;
 
-  min-height: 100vh;
-  padding: var(--section-padding);
+  background: var(--mooney-bg);
+  color: var(--mooney-text);
+  padding: 80px 40px;
+  position: relative;
+  overflow: visible;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
-  background: var(--mooney-bg);
-  color: var(--mooney-text);
-}
-
-.title {
-  font-family: var(--font-mono);
-  font-size: 1.6rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  color: var(--mooney-text);
-}
-
-.subtitle {
-  color: var(--mooney-muted);
-  font-size: 0.9rem;
-  text-align: center;
-  max-width: 400px;
-}
-
-.stats {
-  display: flex;
-  gap: 24px;
-  flex-wrap: wrap;
+  min-height: 100vh;
   justify-content: center;
-  margin-top: 8px;
 }
 
-.stat {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
+.transition {
+  height: 140px;
+  background: linear-gradient(to bottom, #0a0a0a 0%, #F2EFE7 100%);
+}
+
+/* Headline */
+.title {
+  font-size: clamp(2.2rem, 5vw, 3.2rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  color: var(--mooney-text);
+  text-align: center;
+}
+
+.accent {
+  color: var(--mooney-accent);
+}
+
+.tagline {
+  margin-top: 10px;
+  font-size: 1rem;
   color: var(--mooney-muted);
-  letter-spacing: 0.03em;
+  text-align: center;
+  margin-bottom: 40px;
 }
 
-/* Voice Demo */
+/* Demo area */
+.demoArea {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+}
+
+.mascotPeek {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  margin-bottom: -40px;
+  pointer-events: none;
+}
+
+.demoCard {
+  background: var(--mooney-surface);
+  border-radius: 24px;
+  padding: 36px 28px 28px;
+  box-shadow:
+    0 8px 40px rgba(0, 0, 0, 0.06),
+    0 1px 3px rgba(0, 0, 0, 0.02);
+  position: relative;
+  z-index: 1;
+}
+
+/* Floating bubbles */
+.bubble {
+  position: absolute;
+  background: var(--mooney-surface);
+  padding: 14px 18px;
+  border-radius: 16px;
+  font-size: 0.82rem;
+  color: var(--mooney-text);
+  line-height: 1.55;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  max-width: 230px;
+  z-index: 3;
+}
+
+.bubble strong {
+  color: var(--mooney-accent);
+}
+
+.bubbleLeft {
+  top: 20%;
+  left: calc(50% - 480px);
+  border-bottom-left-radius: 6px;
+  animation: float 5s ease-in-out infinite;
+}
+
+.bubbleRight {
+  top: 45%;
+  right: calc(50% - 480px);
+  border-bottom-right-radius: 6px;
+  animation: float 5s ease-in-out infinite 1.5s;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+/* Voice demo */
 .voiceDemo {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
-  margin: 24px 0;
-  min-height: 200px;
+  gap: 10px;
+  min-height: 180px;
   justify-content: center;
+}
+
+.demoHint {
+  font-size: 0.85rem;
+  color: var(--mooney-dim);
+}
+
+.demoExample {
+  font-size: 0.92rem;
+  color: var(--mooney-muted);
+  margin-bottom: 16px;
 }
 
 .micButton {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 12px;
-  padding: 28px;
-  border-radius: 50%;
-  background: var(--mooney-surface);
-  border: 2px solid var(--mooney-divider);
-  color: var(--mooney-text);
-  transition: all 0.3s;
-  width: 96px;
-  height: 96px;
   justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--mooney-accent);
+  border: none;
+  color: var(--mooney-surface);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .micButton:hover {
-  border-color: var(--mooney-accent);
-  color: var(--mooney-accent);
+  transform: scale(1.08);
+  box-shadow: 0 6px 28px rgba(42, 107, 79, 0.3);
 }
 
 .micButton.recording {
-  border-color: var(--mooney-accent);
-  color: var(--mooney-accent);
+  background: #c0392b;
   animation: pulse 1.5s ease-in-out infinite;
 }
 
 .micLabel {
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  color: var(--mooney-muted);
-  margin-top: 12px;
+  font-size: 0.85rem;
+  color: var(--mooney-text);
+  font-weight: 500;
 }
 
 @keyframes pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(42, 107, 79, 0.2); }
-  50% { box-shadow: 0 0 0 16px rgba(42, 107, 79, 0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(192, 57, 43, 0.3); }
+  50% { box-shadow: 0 0 0 18px rgba(192, 57, 43, 0); }
 }
 
-.status {
+/* Waveform animation */
+.waveform {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 40px;
+  margin-bottom: 8px;
+}
+
+.waveBar {
+  width: 3px;
+  height: 8px;
+  background: var(--mooney-accent);
+  border-radius: 2px;
+  animation: wave 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes wave {
+  from { height: 6px; opacity: 0.4; }
+  to { height: 28px; opacity: 1; }
+}
+
+/* Processing dots */
+.processingState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.dots {
+  display: flex;
+  gap: 6px;
+}
+
+.dots span {
+  width: 8px;
+  height: 8px;
+  background: var(--mooney-accent);
+  border-radius: 50%;
+  animation: bounce 1.2s ease-in-out infinite;
+}
+
+.dots span:nth-child(2) { animation-delay: 0.15s; }
+.dots span:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes bounce {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+/* Receipt card */
+.receiptCard {
+  width: 100%;
+  padding: 20px;
+  background: var(--mooney-bg);
+  border: 1px dashed var(--mooney-tear);
+  border-radius: 12px;
   font-family: var(--font-mono);
-  font-size: 0.85rem;
-  color: var(--mooney-muted);
-  animation: fadeIn 0.3s ease;
+  animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: left;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.transcript {
+  font-size: 0.72rem;
+  color: var(--mooney-muted);
+  font-style: italic;
+  margin-bottom: 10px;
+}
+
+.receiptDivider {
+  border: none;
+  height: 1px;
+  margin: 10px 0;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--mooney-tear) 0,
+    var(--mooney-tear) 6px,
+    transparent 6px,
+    transparent 12px
+  );
+}
+
+.amount {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--mooney-text);
+  letter-spacing: -0.02em;
+}
+
+.merchant {
+  font-size: 0.85rem;
+  color: var(--mooney-text);
+  margin-top: 2px;
+}
+
+.category {
+  font-size: 0.68rem;
+  color: var(--mooney-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 4px;
+}
+
+.insight {
+  font-size: 0.72rem;
+  color: var(--mooney-muted);
+  font-style: italic;
 }
 
 .error {
@@ -116,73 +287,28 @@
 }
 
 .tryAgain {
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  color: var(--mooney-muted);
-  padding: 6px 14px;
-  border: 1px solid var(--mooney-divider);
-  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  color: var(--mooney-accent);
+  padding: 8px 18px;
+  border: 1.5px solid var(--mooney-accent);
+  border-radius: 8px;
   transition: all 0.2s;
+  font-weight: 500;
 }
 
 .tryAgain:hover {
-  color: var(--mooney-text);
-  border-color: var(--mooney-muted);
+  background: var(--mooney-accent);
+  color: var(--mooney-surface);
 }
 
-/* Receipt Card */
-.receiptCard {
-  width: 100%;
-  max-width: 340px;
-  padding: 24px;
-  background: var(--mooney-surface);
-  border: 1px dashed var(--mooney-tear);
-  border-radius: var(--radius-md);
-  font-family: var(--font-mono);
-  animation: slideUp 0.4s ease;
+@media (max-width: 1100px) {
+  .bubbleLeft, .bubbleRight {
+    display: none;
+  }
 }
 
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.transcript {
-  font-size: 0.78rem;
-  color: var(--mooney-muted);
-  font-style: italic;
-  margin-bottom: 12px;
-}
-
-.receiptDivider {
-  border: none;
-  border-top: 1px dashed var(--mooney-tear);
-  margin: 12px 0;
-}
-
-.amount {
-  font-size: 2rem;
-  font-weight: 600;
-  color: var(--mooney-text);
-  letter-spacing: -0.02em;
-}
-
-.merchant {
-  font-size: 0.9rem;
-  color: var(--mooney-text);
-  margin-top: 4px;
-}
-
-.category {
-  font-size: 0.75rem;
-  color: var(--mooney-accent);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-top: 2px;
-}
-
-.insight {
-  font-size: 0.75rem;
-  color: var(--mooney-muted);
-  font-style: italic;
+@media (max-width: 768px) {
+  .section {
+    padding: 60px 20px;
+  }
 }

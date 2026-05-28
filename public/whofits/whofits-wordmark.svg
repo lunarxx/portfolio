@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 36" role="img" aria-label="whofits">
+  <defs>
+    <linearGradient id="wf-dark" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#D4A574"/>
+      <stop offset="55%" stop-color="#E8C094"/>
+      <stop offset="100%" stop-color="#B5AFA6"/>
+    </linearGradient>
+    <linearGradient id="wf-dot-dark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F0C87A"/>
+      <stop offset="100%" stop-color="#D4A574"/>
+    </linearGradient>
+  </defs>
+  <text
+    x="2"
+    y="26"
+    font-family="'Space Grotesk', 'Inter', system-ui, -apple-system, sans-serif"
+    font-size="22"
+    font-weight="600"
+    letter-spacing="-0.03em"
+    fill="url(#wf-dark)"
+  >whofits</text>
+  <circle cx="97" cy="25" r="3.2" fill="url(#wf-dot-dark)"/>
+  <!-- Topographic accent line -->
+  <path d="M 110 20 Q 125 16, 140 20 T 175 20"
+        fill="none"
+        stroke="#D4A574"
+        stroke-width="1"
+        stroke-linecap="round"
+        opacity="0.35"/>
+</svg>

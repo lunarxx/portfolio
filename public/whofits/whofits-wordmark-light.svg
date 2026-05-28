@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 36" role="img" aria-label="whofits">
+  <defs>
+    <linearGradient id="wf-light" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#A8742E"/>
+      <stop offset="55%" stop-color="#8A5E22"/>
+      <stop offset="100%" stop-color="#7A7264"/>
+    </linearGradient>
+    <linearGradient id="wf-dot-light" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#C99960"/>
+      <stop offset="100%" stop-color="#A8742E"/>
+    </linearGradient>
+  </defs>
+  <text
+    x="2"
+    y="26"
+    font-family="'Space Grotesk', 'Inter', system-ui, -apple-system, sans-serif"
+    font-size="22"
+    font-weight="600"
+    letter-spacing="-0.03em"
+    fill="url(#wf-light)"
+  >whofits</text>
+  <circle cx="97" cy="25" r="3.2" fill="url(#wf-dot-light)"/>
+  <path d="M 110 20 Q 125 16, 140 20 T 175 20"
+        fill="none"
+        stroke="#A8742E"
+        stroke-width="1"
+        stroke-linecap="round"
+        opacity="0.32"/>
+</svg>

@@ -4,7 +4,7 @@ import { useState, useRef } from 'react'
 import { ReceiptCard } from './ReceiptCard'
 import styles from './Mooney.module.css'
 
-type DemoState = 'idle' | 'recording' | 'transcribing' | 'parsing' | 'done' | 'error'
+type Phase = 'idle' | 'recording' | 'transcribing' | 'parsing' | 'done' | 'error'
 
 interface Expense {
   amount: number
@@ -15,7 +15,7 @@ interface Expense {
 }
 
 export function VoiceDemo() {
-  const [state, setState] = useState<DemoState>('idle')
+  const [phase, setPhase] = useState<Phase>('idle')
   const [expense, setExpense] = useState<Expense | null>(null)
   const [error, setError] = useState('')
   const mediaRef = useRef<MediaRecorder | null>(null)
@@ -30,10 +30,10 @@ export function VoiceDemo() {
       recorder.onstop = () => processAudio()
       mediaRef.current = recorder
       recorder.start()
-      setState('recording')
+      setPhase('recording')
     } catch {
-      setError('mic access needed to try this demo')
-      setState('error')
+      setError('mic access needed to try this')
+      setPhase('error')
     }
   }
 
@@ -43,7 +43,7 @@ export function VoiceDemo() {
   }
 
   const processAudio = async () => {
-    setState('transcribing')
+    setPhase('transcribing')
     const blob = new Blob(chunksRef.current, { type: 'audio/webm' })
     const form = new FormData()
     form.append('audio', blob)
@@ -53,7 +53,7 @@ export function VoiceDemo() {
       if (!transcribeRes.ok) throw new Error()
       const { transcript } = await transcribeRes.json()
 
-      setState('parsing')
+      setPhase('parsing')
       const parseRes = await fetch('/api/parse-expense', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -63,50 +63,71 @@ export function VoiceDemo() {
       const parsed = await parseRes.json()
 
       setExpense({ ...parsed, transcript })
-      setState('done')
+      setPhase('done')
     } catch {
-      setError('something went wrong — try again')
-      setState('error')
+      setError('something went wrong')
+      setPhase('error')
     }
   }
 
   const reset = () => {
-    setState('idle')
+    setPhase('idle')
     setExpense(null)
     setError('')
   }
 
+  if (phase === 'done' && expense) {
+    return (
+      <div className={styles.voiceDemo}>
+        <ReceiptCard expense={expense} />
+        <button className={styles.tryAgain} onClick={reset}>try another</button>
+      </div>
+    )
+  }
+
+  if (phase === 'error') {
+    return (
+      <div className={styles.voiceDemo}>
+        <p className={styles.error}>{error}</p>
+        <button className={styles.tryAgain} onClick={reset}>retry</button>
+      </div>
+    )
+  }
+
   return (
     <div className={styles.voiceDemo}>
-      {state === 'idle' && (
+      {phase === 'idle' && (
         <>
+          <p className={styles.demoHint}>try saying:</p>
+          <p className={styles.demoExample}>&ldquo;five dollars on coffee&rdquo;</p>
           <button className={styles.micButton} onClick={startRecording}>
             <MicIcon />
           </button>
-          <p className={styles.micLabel}>try logging an expense</p>
+          <p className={styles.micLabel}>tap to speak</p>
         </>
       )}
-      {state === 'recording' && (
+      {phase === 'recording' && (
         <>
+          <div className={styles.waveform}>
+            {Array.from({ length: 12 }).map((_, i) => (
+              <div key={i} className={styles.waveBar} style={{ animationDelay: `${i * 0.08}s` }} />
+            ))}
+          </div>
           <button className={`${styles.micButton} ${styles.recording}`} onClick={stopRecording}>
-            <MicIcon />
+            <StopIcon />
           </button>
-          <p className={styles.micLabel}>tap to stop</p>
+          <p className={styles.micLabel}>listening...</p>
         </>
       )}
-      {state === 'transcribing' && <p className={styles.status}>transcribing...</p>}
-      {state === 'parsing' && <p className={styles.status}>parsing expense...</p>}
-      {state === 'done' && expense && (
-        <>
-          <ReceiptCard expense={expense} />
-          <button className={styles.tryAgain} onClick={reset}>try another</button>
-        </>
-      )}
-      {state === 'error' && (
-        <>
-          <p className={styles.error}>{error}</p>
-          <button className={styles.tryAgain} onClick={reset}>try again</button>
-        </>
+      {(phase === 'transcribing' || phase === 'parsing') && (
+        <div className={styles.processingState}>
+          <div className={styles.dots}>
+            <span /><span /><span />
+          </div>
+          <p className={styles.micLabel}>
+            {phase === 'transcribing' ? 'transcribing your voice...' : 'parsing the expense...'}
+          </p>
+        </div>
       )}
     </div>
   )
@@ -114,10 +135,18 @@ export function VoiceDemo() {
 
 function MicIcon() {
   return (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
       <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
       <line x1="12" x2="12" y1="19" y2="22" />
+    </svg>
+  )
+}
+
+function StopIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+      <rect x="6" y="6" width="12" height="12" rx="2" />
     </svg>
   )
 }

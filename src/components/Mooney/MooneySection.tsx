@@ -1,26 +1,42 @@
+import Image from 'next/image'
 import { VoiceDemo } from './VoiceDemo'
-import { ExpandToggle } from '../shared/ExpandToggle'
 import styles from './Mooney.module.css'
 
 export function MooneySection() {
   return (
-    <section className={styles.section} id="mooney">
-      <h2 className={styles.title}>mooney</h2>
-      <p className={styles.subtitle}>
-        talk to it, it logs your money. voice first expense tracker with a brain.
-      </p>
+    <>
+      <div className={styles.transition} />
+      <section className={styles.section} id="mooney">
+        {/* Floating sarcastic bubbles */}
+        <div className={`${styles.bubble} ${styles.bubbleLeft}`}>
+          third coffee today. at this point just <strong>buy the machine</strong>.
+        </div>
+        <div className={`${styles.bubble} ${styles.bubbleRight}`}>
+          your gym membership is basically a <strong>monthly donation</strong>.
+        </div>
 
-      <VoiceDemo />
+        {/* Headline */}
+        <h2 className={styles.title}>
+          your money, <span className={styles.accent}>spoken for.</span>
+        </h2>
+        <p className={styles.tagline}>just say it. mooney tracks it.</p>
 
-      <div className={styles.stats}>
-        <span className={styles.stat}>19 beta testers</span>
-        <span className={styles.stat}>voice to data in &lt;2s</span>
-        <span className={styles.stat}>60+ countries</span>
-      </div>
-
-      <ExpandToggle label="how the pipeline works">
-        <p style={{ color: 'var(--fg-muted)', fontSize: '0.85rem' }}>pipeline diagram coming soon</p>
-      </ExpandToggle>
-    </section>
+        {/* Demo card with mascot */}
+        <div className={styles.demoArea}>
+          <div className={styles.mascotPeek}>
+            <Image
+              src="/mooney/peeking-over.png"
+              alt="mooney mascot peeking"
+              width={200}
+              height={130}
+              draggable={false}
+            />
+          </div>
+          <div className={styles.demoCard}>
+            <VoiceDemo />
+          </div>
+        </div>
+      </section>
+    </>
   )
 }
