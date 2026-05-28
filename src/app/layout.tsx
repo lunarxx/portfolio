@@ -1,16 +1,15 @@
 import type { Metadata } from 'next'
-import { IBM_Plex_Mono, Space_Grotesk } from 'next/font/google'
+import { JetBrains_Mono, Outfit } from 'next/font/google'
 import './globals.css'
 
-const mono = IBM_Plex_Mono({
+const mono = JetBrains_Mono({
   subsets: ['latin'],
-  weight: ['400', '500', '600'],
-  variable: '--font-ibm-plex-mono',
+  variable: '--font-jetbrains-mono',
 })
 
-const sans = Space_Grotesk({
+const sans = Outfit({
   subsets: ['latin'],
-  variable: '--font-space-grotesk',
+  variable: '--font-outfit',
 })
 
 export const metadata: Metadata = {

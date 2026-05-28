@@ -13,7 +13,7 @@ export function Hero() {
     <section className={styles.hero}>
       <h1 className={styles.name}>Ashwini Tiwari</h1>
       <p className={styles.tagline}>
-        i build <span>ai products</span> that people actually use — then build the tools that feed them
+        i make <span>things that work</span> and sometimes they even have users
       </p>
       <nav className={styles.projectNav}>
         {projects.map(p => (

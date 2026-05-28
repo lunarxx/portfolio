@@ -1,0 +1,176 @@
+.section {
+  min-height: 100vh;
+  padding: var(--section-padding);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.title {
+  font-family: var(--font-mono);
+  font-size: 1.6rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.subtitle {
+  color: var(--fg-muted);
+  font-size: 0.9rem;
+  text-align: center;
+  max-width: 400px;
+}
+
+.stats {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.stat {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--fg-dim);
+  letter-spacing: 0.03em;
+}
+
+/* Voice Demo */
+.voiceDemo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin: 24px 0;
+  min-height: 200px;
+  justify-content: center;
+}
+
+.micButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 28px;
+  border-radius: 50%;
+  background: var(--bg-raised);
+  border: 2px solid var(--fg-dim);
+  color: var(--fg);
+  transition: all 0.3s;
+  width: 96px;
+  height: 96px;
+  justify-content: center;
+}
+
+.micButton:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.micButton.recording {
+  border-color: var(--accent);
+  color: var(--accent);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.micLabel {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--fg-muted);
+  margin-top: 12px;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(232, 160, 191, 0.3); }
+  50% { box-shadow: 0 0 0 16px rgba(232, 160, 191, 0); }
+}
+
+.status {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--fg-muted);
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.error {
+  font-size: 0.85rem;
+  color: var(--red);
+}
+
+.tryAgain {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--fg-muted);
+  padding: 6px 14px;
+  border: 1px solid var(--fg-dim);
+  border-radius: var(--radius-sm);
+  transition: all 0.2s;
+}
+
+.tryAgain:hover {
+  color: var(--fg);
+  border-color: var(--fg-muted);
+}
+
+/* Receipt Card */
+.receiptCard {
+  width: 100%;
+  max-width: 340px;
+  padding: 24px;
+  background: #1e1d26;
+  border: 1px dashed var(--fg-dim);
+  border-radius: var(--radius-md);
+  font-family: var(--font-mono);
+  animation: slideUp 0.4s ease;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.transcript {
+  font-size: 0.78rem;
+  color: var(--fg-dim);
+  font-style: italic;
+  margin-bottom: 12px;
+}
+
+.receiptDivider {
+  border: none;
+  border-top: 1px dashed var(--fg-dim);
+  margin: 12px 0;
+}
+
+.amount {
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--fg);
+  letter-spacing: -0.02em;
+}
+
+.merchant {
+  font-size: 0.9rem;
+  color: var(--fg);
+  margin-top: 4px;
+}
+
+.category {
+  font-size: 0.75rem;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: 2px;
+}
+
+.insight {
+  font-size: 0.75rem;
+  color: var(--fg-muted);
+  font-style: italic;
+}
