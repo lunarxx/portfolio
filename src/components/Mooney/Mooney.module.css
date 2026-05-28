@@ -20,9 +20,36 @@
   justify-content: center;
 }
 
-.transition {
-  height: 140px;
-  background: linear-gradient(to bottom, #0a0a0a 0%, #F2EFE7 100%);
+/* Section divider: wave + mascot */
+.divider {
+  position: relative;
+  height: 200px;
+  background: #0a0a0a;
+  overflow: visible;
+}
+
+.dividerWave {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 80px;
+  display: block;
+}
+
+.dividerMascot {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 4;
+  animation: mascotBob 3s ease-in-out infinite;
+  filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.15));
+}
+
+@keyframes mascotBob {
+  0%, 100% { transform: translateX(-50%) translateY(0) rotate(-2deg); }
+  50% { transform: translateX(-50%) translateY(-10px) rotate(2deg); }
 }
 
 /* Headline */

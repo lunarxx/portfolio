@@ -1,11 +1,12 @@
 import Image from 'next/image'
 import { VoiceDemo } from './VoiceDemo'
+import { SectionDivider } from './SectionDivider'
 import styles from './Mooney.module.css'
 
 export function MooneySection() {
   return (
     <>
-      <div className={styles.transition} />
+      <SectionDivider />
       <section className={styles.section} id="mooney">
         {/* Floating sarcastic bubbles */}
         <div className={`${styles.bubble} ${styles.bubbleLeft}`}>
