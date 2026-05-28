@@ -1,0 +1,194 @@
+.wrapper {
+  max-width: 900px;
+  margin: 48px auto 0;
+  width: 100%;
+}
+
+/* Stimulus button — the "tear here" line */
+.stimulus {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 12px 0;
+  transition: opacity 0.2s;
+}
+
+.stimulus:hover {
+  opacity: 0.7;
+}
+
+.stimulusLine {
+  flex: 1;
+  height: 1px;
+  background: repeating-linear-gradient(
+    90deg,
+    #CEC9BF 0,
+    #CEC9BF 6px,
+    transparent 6px,
+    transparent 12px
+  );
+}
+
+.stimulusText {
+  font-size: 0.82rem;
+  color: #9E9A94;
+  white-space: nowrap;
+  letter-spacing: 0.03em;
+  font-weight: 500;
+}
+
+/* Expanded panel */
+.panel {
+  display: flex;
+  gap: 0;
+  margin-top: 24px;
+  background: #FFFFFF;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow:
+    0 8px 40px rgba(0, 0, 0, 0.06),
+    0 1px 3px rgba(0, 0, 0, 0.02);
+  animation: panelReveal 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes panelReveal {
+  from { opacity: 0; transform: translateY(12px) scaleY(0.97); }
+  to { opacity: 1; transform: translateY(0) scaleY(1); }
+}
+
+.panelLeft, .panelRight {
+  flex: 1;
+  padding: 32px 28px;
+}
+
+.panelDivider {
+  width: 1px;
+  background: repeating-linear-gradient(
+    180deg,
+    #DDD9D0 0,
+    #DDD9D0 6px,
+    transparent 6px,
+    transparent 12px
+  );
+  margin: 24px 0;
+}
+
+.panelTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1A1A1A;
+  margin-bottom: 4px;
+}
+
+.panelSubtitle {
+  font-size: 0.8rem;
+  color: #9E9A94;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+/* Pipeline flow (left panel) */
+.pipelineFlow {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.pipelineNode {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  position: relative;
+  padding-bottom: 16px;
+}
+
+.nodeDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+.nodeConnector {
+  position: absolute;
+  left: 4px;
+  top: 16px;
+  width: 2px;
+  height: calc(100% - 10px);
+  background: repeating-linear-gradient(
+    180deg,
+    #DDD9D0 0,
+    #DDD9D0 3px,
+    transparent 3px,
+    transparent 6px
+  );
+}
+
+.nodeContent {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nodeLabel {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1A1A1A;
+}
+
+.nodeDetail {
+  font-size: 0.72rem;
+  color: #9E9A94;
+  line-height: 1.5;
+}
+
+/* Tech grid (right panel) */
+.techGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.techCard {
+  padding: 14px;
+  background: #F2EFE7;
+  border-radius: 10px;
+}
+
+.techCard h4 {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #1A1A1A;
+  margin-bottom: 4px;
+}
+
+.techCard p {
+  font-size: 0.7rem;
+  color: #9E9A94;
+  line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+  .panel {
+    flex-direction: column;
+  }
+
+  .panelDivider {
+    width: 100%;
+    height: 1px;
+    margin: 0 24px;
+    background: repeating-linear-gradient(
+      90deg,
+      #DDD9D0 0,
+      #DDD9D0 6px,
+      transparent 6px,
+      transparent 12px
+    );
+  }
+
+  .techGrid {
+    grid-template-columns: 1fr;
+  }
+}

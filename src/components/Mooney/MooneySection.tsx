@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import { VoiceDemo } from './VoiceDemo'
 import { SectionDivider } from './SectionDivider'
+import { UnderTheHood } from './UnderTheHood'
 import styles from './Mooney.module.css'
 
 export function MooneySection() {
@@ -37,6 +38,9 @@ export function MooneySection() {
             <VoiceDemo />
           </div>
         </div>
+
+        {/* Portfolio breakdown — what went into building this */}
+        <UnderTheHood />
       </section>
     </>
   )
