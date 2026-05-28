@@ -431,7 +431,7 @@
 
 @media (max-width: 768px) {
   .section { padding: 40px 16px; }
-  .characterWrap { max-width: 140px; height: 180px; margin-bottom: -40px; }
+  .characterWrap { max-width: 120px; height: 150px; margin-bottom: -30px; }
   .tagline { font-size: 0.82rem; padding: 0 8px; }
   .demoArea { max-width: 100%; }
   .engineWrap { margin: 0 8px 8px; overflow-x: auto; }
