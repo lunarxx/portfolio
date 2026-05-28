@@ -120,22 +120,6 @@ export function Hero() {
         </motion.div>
       </motion.div>
 
-      {/* Scrolling marquee */}
-      <div className={styles.marquee}>
-        <motion.div
-          className={styles.marqueeTrack}
-          animate={{ x: ['0%', '-50%'] }}
-          transition={{ repeat: Infinity, duration: 25, ease: 'linear' }}
-        >
-          {['voice ai', 'flutter', 'next.js', 'supabase', 'groq vision', 'deepgram', 'blender', 'playwright', 'creator tools', 'full-stack',
-            'voice ai', 'flutter', 'next.js', 'supabase', 'groq vision', 'deepgram', 'blender', 'playwright', 'creator tools', 'full-stack',
-          ].map((tag, i) => (
-            <span key={i} className={styles.marqueeItem}>
-              {tag} <span className={styles.marqueeDot}>·</span>
-            </span>
-          ))}
-        </motion.div>
-      </div>
     </section>
   )
 }

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { samples, type Sample } from '@/data/aarttsii-samples'
 import { ScrollReveal } from '../ScrollEngine/ScrollReveal'
@@ -64,7 +65,8 @@ export function AarttsiiSection() {
                 className={`${styles.sampleCard} ${selected?.id === s.id ? styles.sampleCardActive : ''}`}
                 onClick={() => { setSelected(s); setCustomEstimate(null); setError('') }}
               >
-                {s.label}
+                <Image src={s.image} alt={s.label} width={200} height={200} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 12 }} />
+                <span className={styles.sampleLabel}>{s.label}</span>
               </div>
             ))}
           </div>
