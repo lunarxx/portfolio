@@ -88,12 +88,12 @@
 @media (max-width: 768px) {
   .section { padding: 48px 20px; }
   .title { margin-bottom: 28px; }
-  .track { flex-direction: column; gap: 0; align-items: stretch; position: relative; padding-left: 24px; }
-  .track::before { left: 7px; right: auto; top: 0; bottom: 0; width: 2px; height: 100%; transform: none; }
-  .node { flex-direction: column; padding: 0 0 28px 0; align-items: flex-start; }
-  .dot { position: absolute; left: 0; margin-bottom: 0; width: 16px; height: 16px; }
-  .years { text-align: left; font-size: 0.7rem; margin-bottom: 6px; }
-  .card { text-align: left; max-width: none; width: 100%; padding: 16px 18px; }
+  .track { flex-direction: column; gap: 0; align-items: stretch; padding-left: 0; }
+  .track::before { display: none; }
+  .node { flex-direction: column; padding: 0 0 24px 0; align-items: flex-start; gap: 0; }
+  .dot { display: none; }
+  .years { text-align: left; font-size: 0.72rem; margin-bottom: 8px; }
+  .card { text-align: left; max-width: none; width: 100%; padding: 18px 20px; }
   .expanded { width: 100%; }
   .eraTitle { font-size: 0.95rem; }
   .role { font-size: 0.75rem; }
