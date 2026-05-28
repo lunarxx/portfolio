@@ -86,13 +86,14 @@
 .highlights li::before { content: '·'; position: absolute; left: 0; color: #B5704A; font-weight: 700; }
 
 @media (max-width: 768px) {
-  .section { padding: 60px 16px; }
-  .track { flex-direction: column; gap: 20px; align-items: stretch; }
+  .section { padding: 48px 16px; }
+  .title { margin-bottom: 28px; }
+  .track { flex-direction: column; gap: 24px; align-items: stretch; }
   .track::before { display: none; }
-  .node { flex-direction: row; gap: 14px; padding: 0; align-items: flex-start; }
-  .dot { margin-bottom: 0; margin-top: 4px; flex-shrink: 0; }
-  .years { text-align: left; white-space: nowrap; min-width: 60px; }
-  .card { text-align: left; max-width: none; flex: 1; }
+  .node { display: grid; grid-template-columns: 14px auto 1fr; gap: 12px; padding: 0; align-items: start; }
+  .dot { margin-bottom: 0; margin-top: 6px; width: 14px; height: 14px; }
+  .years { text-align: left; white-space: nowrap; font-size: 0.68rem; margin-bottom: 0; margin-top: 4px; }
+  .card { text-align: left; max-width: none; padding: 14px 16px; }
   .expanded { width: auto; }
   .eraTitle { font-size: 0.92rem; }
   .eraDescription { font-size: 0.75rem; }
