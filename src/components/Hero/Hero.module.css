@@ -62,10 +62,22 @@
   pointer-events: none;
 }
 
-.cutout1 { top: 15%; left: 8%; }
-.cutout2 { top: 55%; right: 6%; }
-.cutout3 { bottom: 18%; left: 15%; }
-.cutout4 { top: 20%; right: 14%; }
+.float1 { bottom: 25%; left: 8%; }
+
+.float2 { bottom: -40px; right: 12%; display: flex; flex-direction: column; align-items: center; }
+
+.chatBubble {
+  background: #fff;
+  padding: 10px 16px;
+  border-radius: 14px 14px 4px 14px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--fg-muted);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  margin-bottom: 6px;
+  margin-right: 40px;
+  white-space: nowrap;
+}
 
 /* Sticky notes */
 .stickyNote {
@@ -89,19 +101,27 @@
 }
 
 .sticky2 {
-  bottom: 28%;
-  left: 22%;
+  bottom: 30%;
+  left: 18%;
   background: #d4edda;
   color: #1a5928;
   transform: rotate(3deg);
 }
 
 .sticky3 {
-  top: 60%;
-  right: 18%;
-  background: #d6e9ff;
-  color: #1a3a5c;
+  top: 55%;
+  right: 8%;
+  background: #e8dfff;
+  color: #3d2b6b;
   transform: rotate(2deg);
+}
+
+.sticky4 {
+  bottom: 15%;
+  right: 22%;
+  background: #fde8d8;
+  color: #6b3a1a;
+  transform: rotate(-2deg);
 }
 
 /* Center content */

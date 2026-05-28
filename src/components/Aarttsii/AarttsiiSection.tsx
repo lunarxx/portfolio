@@ -7,21 +7,60 @@ import { samples, type Sample } from '@/data/aarttsii-samples'
 import { ScrollReveal } from '../ScrollEngine/ScrollReveal'
 import styles from './Aarttsii.module.css'
 
+type Tier = 'Mousse' | 'Chenille'
+type Size = 'Mini' | 'Standard'
+type Step = 'pick' | 'configure' | 'analyzing' | 'result'
+
+const PRICE_BANDS: Record<Size, Record<Tier, { min: number; max: number }>> = {
+  Mini: { Mousse: { min: 250, max: 800 }, Chenille: { min: 400, max: 1300 } },
+  Standard: { Mousse: { min: 400, max: 1500 }, Chenille: { min: 700, max: 2500 } },
+}
+const MATERIALS: Record<Size, Record<Tier, number>> = {
+  Mini: { Mousse: 80, Chenille: 120 }, Standard: { Mousse: 150, Chenille: 220 },
+}
+const HOURLY: Record<Tier, number> = { Mousse: 220, Chenille: 250 }
+
+function calcPrice(ci: number, size: Size, tier: Tier) {
+  const band = PRICE_BANDS[size][tier]
+  const pos = Math.pow(Math.min(ci, 10) / 10, 0.65)
+  const range = band.max - band.min
+  const point = band.min + range * pos
+  const v = point * 0.18
+  const min = Math.round((point - v) / 10) * 10
+  const max = Math.round((point + v) / 10) * 10
+  const mat = MATERIALS[size][tier]
+  const base = size === 'Mini' ? 80 : 100
+  const labour = Math.max(min - mat - base, 0)
+  const hours = Math.round((labour / HOURLY[tier]) * 4) / 4
+  return { min, max, materials: mat, labour, hours, hourlyRate: HOURLY[tier], base }
+}
+
 export function AarttsiiSection() {
+  const [step, setStep] = useState<Step>('pick')
   const [selected, setSelected] = useState<Sample | null>(null)
+  const [tier, setTier] = useState<Tier>('Mousse')
+  const [size, setSize] = useState<Size>('Mini')
   const [customEstimate, setCustomEstimate] = useState<Sample['estimate'] | null>(null)
-  const [analyzing, setAnalyzing] = useState(false)
   const [error, setError] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
+
+  const pickProduct = (s: Sample) => {
+    setSelected(s)
+    setCustomEstimate(null)
+    setStep('configure')
+  }
+
+  const runEstimate = () => {
+    setStep('analyzing')
+    setTimeout(() => setStep('result'), 1600)
+  }
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
     setSelected(null)
-    setCustomEstimate(null)
-    setAnalyzing(true)
+    setStep('analyzing')
     setError('')
-
     try {
       const reader = new FileReader()
       reader.readAsDataURL(file)
@@ -30,20 +69,23 @@ export function AarttsiiSection() {
         const res = await fetch('/api/estimate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ base64Image: base64, size: 'Standard (8-12 inches)' }),
+          body: JSON.stringify({ base64Image: base64, size: `${size} (${size === 'Mini' ? '4-6' : '8-12'} inches)` }),
         })
         if (!res.ok) throw new Error()
         const data = await res.json()
-        setCustomEstimate({ ...data, price_min: Math.round(data.ci * 280), price_max: Math.round(data.ci * 450) })
-        setAnalyzing(false)
+        setCustomEstimate(data)
+        setStep('result')
       }
     } catch {
       setError('analysis failed, try another image')
-      setAnalyzing(false)
+      setStep('pick')
     }
   }
 
+  const reset = () => { setStep('pick'); setSelected(null); setCustomEstimate(null); setError('') }
+
   const estimate = selected?.estimate || customEstimate
+  const price = estimate ? calcPrice(estimate.ci, size, tier) : null
 
   return (
     <section className={styles.section} id="aarttsii">
@@ -52,73 +94,119 @@ export function AarttsiiSection() {
           no more <span className={styles.accent}>dm bargaining.</span>
         </h2>
         <p className={styles.tagline}>
-          upload any image. ai scores its crochet complexity on 8 axes and gives you a price range instantly.
+          aarttsii is a crochet e-commerce site. customers upload a photo, ai scores its complexity,
+          and they get a transparent price breakdown. try it.
         </p>
       </ScrollReveal>
 
-      <ScrollReveal delay={200}>
+      <ScrollReveal delay={100}>
         <div className={styles.demoArea}>
-          <div className={styles.sampleRow}>
-            {samples.map(s => (
-              <div
-                key={s.id}
-                className={`${styles.sampleCard} ${selected?.id === s.id ? styles.sampleCardActive : ''}`}
-                onClick={() => { setSelected(s); setCustomEstimate(null); setError('') }}
-              >
-                <Image src={s.image} alt={s.label} width={200} height={200} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 12 }} />
-                <span className={styles.sampleLabel}>{s.label}</span>
+          {step === 'pick' && (
+            <>
+              <div className={styles.sampleRow}>
+                {samples.map(s => (
+                  <div key={s.id} className={styles.sampleCard} onClick={() => pickProduct(s)}>
+                    <div className={styles.sampleImg}>
+                      <Image src={s.image} alt={s.label} width={500} height={500} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    </div>
+                    <span className={styles.sampleLabel}>{s.label}</span>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+              <button className={styles.uploadBtn} onClick={() => fileRef.current?.click()}>or upload your own image</button>
+              <input ref={fileRef} type="file" accept="image/*" hidden onChange={handleUpload} />
+              {error && <p className={styles.error}>{error}</p>}
+            </>
+          )}
 
-          <div className={styles.uploadArea}>
-            <button className={styles.uploadButton} onClick={() => fileRef.current?.click()}>
-              or upload your own image
-            </button>
-            <input ref={fileRef} type="file" accept="image/*" className={styles.uploadInput} onChange={handleUpload} />
-          </div>
+          {step === 'configure' && selected && (
+            <div className={styles.configPanel}>
+              <div className={styles.configTop}>
+                <Image src={selected.image} alt={selected.label} width={100} height={100} className={styles.configThumb} />
+                <div>
+                  <h3 className={styles.configName}>{selected.label}</h3>
+                  <p className={styles.configHint}>choose yarn and size</p>
+                </div>
+              </div>
 
-          {analyzing && <p className={styles.analyzing}>analyzing complexity...</p>}
-          {error && <p className={styles.error}>{error}</p>}
+              <div className={styles.optionsRow}>
+                <div className={styles.optGroup}>
+                  <span className={styles.optLabel}>yarn type</span>
+                  <div className={styles.optBtns}>
+                    {(['Mousse', 'Chenille'] as Tier[]).map(t => (
+                      <button key={t} className={`${styles.optBtn} ${tier === t ? styles.optActive : ''}`} onClick={() => setTier(t)}>
+                        <strong>{t.toLowerCase()}</strong>
+                        <small>{t === 'Mousse' ? 'soft, baby-safe' : 'velvet plush'}</small>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className={styles.optGroup}>
+                  <span className={styles.optLabel}>size</span>
+                  <div className={styles.optBtns}>
+                    {(['Mini', 'Standard'] as Size[]).map(s => (
+                      <button key={s} className={`${styles.optBtn} ${size === s ? styles.optActive : ''}`} onClick={() => setSize(s)}>
+                        <strong>{s.toLowerCase()}</strong>
+                        <small>{s === 'Mini' ? '4-6 inches' : '8-12 inches'}</small>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
 
-          {estimate && !analyzing && (
-            <div className={styles.estimateCard}>
-              <h3 className={styles.estimateTitle}>{selected?.label || 'Your Image'}</h3>
-              <p className={styles.categoryLabel}>
-                {estimate.category.replace(/_/g, ' ')}
-              </p>
+              <div className={styles.configActions}>
+                <button className={styles.backBtn} onClick={reset}>back</button>
+                <button className={styles.goBtn} onClick={runEstimate}>get estimate</button>
+              </div>
+            </div>
+          )}
+
+          {step === 'analyzing' && (
+            <div className={styles.analyzingPanel}>
+              <div className={styles.spinner} />
+              <p className={styles.analyzingText}>scoring complexity across 8 axes...</p>
+            </div>
+          )}
+
+          {step === 'result' && estimate && price && (
+            <div className={styles.resultPanel}>
+              <div className={styles.resultTop}>
+                <div>
+                  <h3 className={styles.resultName}>{selected?.label || 'Your Image'}</h3>
+                  <span className={styles.resultCat}>{estimate.category.replace(/_/g, ' ')}</span>
+                </div>
+                <div className={styles.ciScore}>
+                  <span className={styles.ciNum}>{estimate.ci}</span>
+                  <span className={styles.ciMax}>/10</span>
+                </div>
+              </div>
 
               <div className={styles.ciMeter}>
                 <span className={styles.ciLabel}>complexity</span>
-                <div className={styles.ciTrack}>
-                  <div className={styles.ciFill} style={{ width: `${(estimate.ci / 10) * 100}%` }} />
-                </div>
-                <span className={styles.ciValue}>{estimate.ci}/10</span>
+                <div className={styles.ciTrack}><div className={styles.ciFill} style={{ width: `${(estimate.ci / 10) * 100}%` }} /></div>
               </div>
 
               <ul className={styles.factors}>
                 {estimate.factors.map((f, i) => <li key={i}>{f}</li>)}
               </ul>
 
-              <div className={styles.details}>
-                {estimate.detected_details.map((d, i) => (
-                  <span key={i} className={styles.detail} data-impact={d.impact}>{d.label}</span>
-                ))}
+              <div className={styles.breakdown}>
+                <div className={styles.bRow}><span>{tier.toLowerCase()} yarn</span><span>₹{price.materials}</span></div>
+                <div className={styles.bRow}><span>labour ({price.hours}h × ₹{price.hourlyRate}/h)</span><span>₹{price.labour}</span></div>
+                <div className={styles.bRow}><span>base rate</span><span>₹{price.base}</span></div>
+                <div className={`${styles.bRow} ${styles.bTotal}`}>
+                  <span>estimate</span>
+                  <span>₹{price.min.toLocaleString()} — ₹{price.max.toLocaleString()}</span>
+                </div>
               </div>
 
-              <div className={styles.priceRange}>
-                <span>₹{estimate.price_min.toLocaleString()}</span>
-                <span className={styles.priceDash}>—</span>
-                <span>₹{estimate.price_max.toLocaleString()}</span>
-              </div>
+              <button className={styles.tryAgain} onClick={reset}>try another product</button>
             </div>
           )}
         </div>
       </ScrollReveal>
 
-      <Link href="/case/aarttsii" className={styles.viewCase}>
-        view case study →
-      </Link>
+      <Link href="/case/aarttsii" className={styles.viewCase}>view case study</Link>
     </section>
   )
 }

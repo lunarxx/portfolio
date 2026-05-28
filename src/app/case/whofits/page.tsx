@@ -1,34 +1,92 @@
 import Link from 'next/link'
+import styles from '../case.module.css'
 
 export default function WhoFitsCaseStudy() {
   return (
-    <article style={{ maxWidth: 800, margin: '0 auto', padding: '80px 40px', color: '#F9F8F6', background: '#12100e', minHeight: '100vh' }}>
-      <Link href="/" style={{ fontSize: '0.82rem', color: '#8a8078' }}>← back</Link>
-      <h1 style={{ fontSize: '2.5rem', fontWeight: 600, marginTop: 32, letterSpacing: '-0.03em' }}>
-        whofits: finding creators worth working with
-      </h1>
-      <p style={{ color: '#8a8078', marginTop: 8 }}>network-aware creator qualification for influencer marketing agencies.</p>
+    <article className={styles.page} style={{
+      '--case-fg': '#F9F8F6',
+      '--case-body': '#b5ada5',
+      '--case-muted': '#8a8078',
+      '--case-accent': '#d4a574',
+      '--case-callout': 'rgba(212, 165, 116, 0.08)',
+      '--case-border': '#2a2522',
+      background: '#12100e',
+    } as React.CSSProperties}>
+      <Link href="/" className={styles.back}>back</Link>
 
-      <section style={{ marginTop: 48, lineHeight: 1.8, fontSize: '1rem', color: '#b5ada5' }}>
-        <h2 style={{ fontSize: '1.4rem', fontWeight: 600, marginBottom: 12, color: '#F9F8F6' }}>the problem</h2>
-        <p>influencer marketing agencies discover creators by manually scrolling their X feed for days. no structured way to find, vet, or defend creator selections to clients. they check profiles one by one and record findings in spreadsheets.</p>
+      <div className={styles.hero}>
+        <h1 className={styles.title}>finding creators worth working with</h1>
+        <p className={styles.subtitle}>
+          whofits is a creator discovery and qualification platform for influencer marketing agencies. instead of scrolling feeds for days, you upload a seed list and the system tells you who&apos;s actually worth reaching out to.
+        </p>
+        <div className={styles.meta}>
+          <div className={styles.metaItem}>role<strong>co founded</strong></div>
+          <div className={styles.metaItem}>stack<strong>next.js, supabase, grok, playwright</strong></div>
+          <div className={styles.metaItem}>status<strong>crawler built, qualification shipping</strong></div>
+          <div className={styles.metaItem}>data<strong>25,000+ creators crawled</strong></div>
+        </div>
+      </div>
 
-        <h2 style={{ fontSize: '1.4rem', fontWeight: 600, marginTop: 40, marginBottom: 12, color: '#F9F8F6' }}>the insight</h2>
-        <p>follower count is a vanity metric. you can buy 50k followers overnight. what you can&apos;t fake is being embedded in a creator ecosystem — who replies to you, who engages with your content, where you sit in the network graph. whofits ranks creators by network position, not just numbers.</p>
+      <div className={styles.content}>
+        <div className={styles.section}>
+          <p className={styles.sectionLabel}>the problem</p>
+          <h2 className={styles.sectionTitle}>agencies spend days scrolling feeds</h2>
+          <p className={styles.body}>
+            influencer marketing agencies discover creators by manually scrolling their twitter feed. there&apos;s no structured way to find, vet, or defend creator selections to clients. they check profiles one by one, copy metrics into spreadsheets, and hope they didn&apos;t miss anyone good. it&apos;s slow, subjective, and impossible to scale.
+          </p>
+        </div>
 
-        <h2 style={{ fontSize: '1.4rem', fontWeight: 600, marginTop: 40, marginBottom: 12, color: '#F9F8F6' }}>the crawler</h2>
-        <p>25,000+ creators crawled. the pipeline: CSV seeds → twitterapi.io batch ingestion at $0.004 per profile → brand classification (60% ollama LLM, 40% heuristic) → playwright browser crawling for reply threads (the one thing without an API). quality gate: ollama qwen3 scoring each reply on text quality, sentiment, and engagement.</p>
+        <div className={styles.section}>
+          <p className={styles.sectionLabel}>the insight</p>
+          <h2 className={styles.sectionTitle}>follower count is meaningless</h2>
+          <p className={styles.body}>
+            you can buy 50k followers overnight. what you can&apos;t fake is being embedded in a creator ecosystem. who replies to your tweets, who engages with your content consistently, where you sit in the network graph. whofits ranks creators by their actual position in the network, not by a number anyone can inflate.
+          </p>
+          <div className={styles.callout}>
+            the product started with a simple question: what if follower count is actually a bad signal? that question led to crawling 25,000 profiles and building a 7 signal ranking formula to find out.
+          </div>
+        </div>
 
-        <h2 style={{ fontSize: '1.4rem', fontWeight: 600, marginTop: 40, marginBottom: 12, color: '#F9F8F6' }}>two-layer qualification</h2>
-        <p>layer 1 is instant: stored profile data for free pre-filtering. layer 2 triggers a grok-powered deep analysis that returns a qualification card with top 3 reasons, evidence posts with URLs, integrity flags, and a qualified/monitor/reject verdict. all auditable and reproducible.</p>
+        <hr className={styles.divider} />
 
-        <h2 style={{ fontSize: '1.4rem', fontWeight: 600, marginTop: 40, marginBottom: 12, color: '#F9F8F6' }}>the architecture</h2>
-        <p>pnpm monorepo with turborepo. next.js 16 app router. 2,618-line technical plan with locked formulas: evidence scoring with 14-day recency decay, per-post caps, evidence-weighted embedding pooling (bio 15%, posts 85%), HNSW vector index, pagerank per niche, louvain clustering, 7-signal ranking formula.</p>
-        <p style={{ marginTop: 12 }}>immutable raw blobs, model versioning on every derived field, append-only audit log. the system is designed so every qualification decision can be traced back to the evidence that produced it.</p>
+        <div className={styles.section}>
+          <p className={styles.sectionLabel}>the crawler</p>
+          <h2 className={styles.sectionTitle}>25,000 profiles, scored and ranked</h2>
+          <p className={styles.body}>
+            the pipeline takes csv seed lists from agencies, batch processes them through twitter&apos;s api for profile data, runs brand classification on each creator (60% llm, 40% heuristic rules), then sends playwright to crawl reply threads because that&apos;s the one signal without an api endpoint.
+          </p>
+          <p className={styles.body}>
+            every reply gets scored by an llm on text quality, sentiment, and engagement. the whole thing runs with live terminal progress and auto saves per item so nothing gets lost if it crashes halfway through a 2,000 profile batch.
+          </p>
+        </div>
 
-        <h2 style={{ fontSize: '1.4rem', fontWeight: 600, marginTop: 40, marginBottom: 12, color: '#F9F8F6' }}>where it stands</h2>
-        <p>crawler pipeline built and running. qualification engine designed with locked formulas. marketing website shipped with 3D character models. full mock dashboard (50+ components). qualification ships before discovery — agencies bring their own creator lists first.</p>
-      </section>
+        <div className={styles.section}>
+          <p className={styles.sectionLabel}>qualification</p>
+          <h2 className={styles.sectionTitle}>seven signals, not seven opinions</h2>
+          <p className={styles.body}>
+            the ranking formula uses 7 signals: engagement velocity, audience overlap, brand safety, content consistency, growth trajectory, niche relevance, and response rate. each signal is weighted and combined into a composite score. the result isn&apos;t &ldquo;this creator is good.&rdquo; it&apos;s &ldquo;this creator is good for this specific campaign, and here&apos;s the evidence.&rdquo;
+          </p>
+          <div className={styles.grid}>
+            <div className={styles.gridCard}><strong>engagement velocity</strong><span>how quickly and consistently their audience responds</span></div>
+            <div className={styles.gridCard}><strong>audience overlap</strong><span>how much their followers match the target demographic</span></div>
+            <div className={styles.gridCard}><strong>brand safety</strong><span>automated flag scanning across post history</span></div>
+            <div className={styles.gridCard}><strong>content consistency</strong><span>do they post regularly or in random bursts</span></div>
+            <div className={styles.gridCard}><strong>growth trajectory</strong><span>real organic growth vs bought spikes</span></div>
+            <div className={styles.gridCard}><strong>niche relevance</strong><span>embedding similarity to the campaign brief</span></div>
+          </div>
+          <p className={styles.body}>
+            deep qualification triggers a grok powered analysis that returns a qualification card with top 3 reasons, evidence posts with urls, integrity flags, and a qualified/monitor/reject verdict. all auditable. all reproducible.
+          </p>
+        </div>
+
+        <div className={styles.section}>
+          <p className={styles.sectionLabel}>status</p>
+          <h2 className={styles.sectionTitle}>crawler running, qualification shipping next</h2>
+          <p className={styles.body}>
+            the crawler pipeline is built and has processed 25,000+ creator profiles. the qualification engine formulas are locked. the marketing site is live with a 3d character model. full mock dashboard with 50+ components. the plan is to ship qualification before discovery because agencies already have their own creator lists. they just need a better way to vet them.
+          </p>
+        </div>
+      </div>
     </article>
   )
 }

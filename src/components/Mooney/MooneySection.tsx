@@ -48,7 +48,10 @@ export function MooneySection() {
         <h2 className={styles.title}>
           your money, <span className={styles.accent}>spoken for.</span>
         </h2>
-        <p className={styles.tagline}>just say it. mooney tracks it.</p>
+        <p className={styles.tagline}>
+          mooney is a voice first expense tracker. you talk, it logs. no typing, no categories, no spreadsheets.
+          19 people are beta testing it right now. the mic below is the real pipeline.
+        </p>
 
         {/* Main content area — always renders both sides, CSS handles visibility */}
         <div className={`${styles.contentArea} ${expanded ? styles.contentExpanded : ''}`}>

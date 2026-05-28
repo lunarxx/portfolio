@@ -1,0 +1,243 @@
+.page {
+  background: #faf9f6;
+  min-height: 100vh;
+  padding: 40px;
+}
+
+.resume {
+  max-width: 800px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.04);
+  padding: 56px 52px;
+  position: relative;
+}
+
+.backLink {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  font-size: 0.78rem;
+  color: #999;
+  transition: color 0.2s;
+}
+
+.backLink:hover { color: #333; }
+
+.printBtn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  font-size: 0.72rem;
+  padding: 6px 14px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  color: #999;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: none;
+}
+
+.printBtn:hover { color: #333; border-color: #333; }
+
+/* Header */
+.header {
+  margin-bottom: 36px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.name {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin-bottom: 4px;
+}
+
+.headline {
+  font-size: 0.95rem;
+  color: #666;
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+
+.contact {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.contactItem {
+  font-size: 0.78rem;
+  color: #888;
+}
+
+.contactItem a {
+  color: #555;
+  transition: color 0.2s;
+}
+
+.contactItem a:hover { color: #000; }
+
+/* Sections */
+.section {
+  margin-bottom: 32px;
+}
+
+.sectionTitle {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #999;
+  font-weight: 600;
+  margin-bottom: 16px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+/* Experience */
+.expItem {
+  margin-bottom: 20px;
+}
+
+.expTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 4px;
+}
+
+.expRole {
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.expCompany {
+  font-weight: 400;
+  color: #666;
+}
+
+.expDate {
+  font-size: 0.75rem;
+  color: #999;
+  flex-shrink: 0;
+}
+
+.expDesc {
+  font-size: 0.82rem;
+  color: #666;
+  line-height: 1.7;
+  margin-top: 4px;
+}
+
+.expList {
+  list-style: none;
+  margin-top: 6px;
+}
+
+.expList li {
+  font-size: 0.82rem;
+  color: #666;
+  line-height: 1.6;
+  padding-left: 12px;
+  position: relative;
+}
+
+.expList li::before {
+  content: '·';
+  position: absolute;
+  left: 0;
+  color: #ccc;
+  font-weight: 700;
+}
+
+/* Projects */
+.projectGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.project {
+  display: flex;
+  gap: 16px;
+  align-items: baseline;
+}
+
+.projectName {
+  font-size: 0.88rem;
+  font-weight: 600;
+  min-width: 100px;
+  flex-shrink: 0;
+}
+
+.projectDesc {
+  font-size: 0.82rem;
+  color: #666;
+  line-height: 1.6;
+  flex: 1;
+}
+
+.projectMeta {
+  font-size: 0.7rem;
+  color: #999;
+  flex-shrink: 0;
+}
+
+/* Skills */
+.skillGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.skillGroup {
+  font-size: 0.82rem;
+}
+
+.skillGroup strong {
+  display: block;
+  font-size: 0.78rem;
+  color: #333;
+  margin-bottom: 3px;
+}
+
+.skillGroup span {
+  color: #777;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+/* LOR */
+.lorLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: #888;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 6px 14px;
+  border-radius: 6px;
+  transition: all 0.2s;
+  margin-top: 8px;
+}
+
+.lorLink:hover { color: #333; border-color: #333; }
+
+/* Print */
+@media print {
+  .page { padding: 0; background: #fff; }
+  .resume { box-shadow: none; border: none; border-radius: 0; padding: 32px 40px; }
+  .backLink, .printBtn { display: none; }
+}
+
+@media (max-width: 768px) {
+  .page { padding: 16px; }
+  .resume { padding: 32px 24px; }
+  .expTop { flex-direction: column; }
+  .skillGrid { grid-template-columns: 1fr; }
+  .project { flex-direction: column; gap: 2px; }
+  .contact { gap: 12px; }
+}

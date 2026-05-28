@@ -16,7 +16,7 @@ const mono = DM_Mono({
 
 export const metadata: Metadata = {
   title: 'Ashwini Tiwari',
-  description: 'Product engineer building AI-powered products.',
+  description: 'generalist. i build ai products, design 3d characters, and somehow all of it works together.',
 }
 
 export default function RootLayout({

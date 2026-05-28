@@ -1,132 +1,204 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
-import { creators, qualifications, type Qualification } from '@/data/creators'
+import { creators, qualifications } from '@/data/creators'
 import { ScrollReveal } from '../ScrollEngine/ScrollReveal'
 import styles from './WhoFits.module.css'
 
-const ScrollSequence = dynamic(() => import('./ScrollSequence').then(m => ({ default: m.ScrollSequence })), {
+const WhoFitsModel = dynamic(() => import('./WhoFitsModel').then(m => ({ default: m.WhoFitsModel })), {
   ssr: false,
+  loading: () => <div className={styles.modelPlaceholder} />,
 })
 
-function formatFollowers(n: number) {
-  if (n >= 1000) return `${(n / 1000).toFixed(1).replace(/\.0$/, '')}K`
-  return String(n)
-}
+type Phase = 'seed' | 'scanning' | 'done'
 
 export function WhoFitsSection() {
-  const [qualifiedId, setQualifiedId] = useState<string | null>(null)
-  const [dragOverDashboard, setDragOverDashboard] = useState(false)
+  const [phase, setPhase] = useState<Phase>('seed')
+  const [scannedRows, setScannedRows] = useState(0)
+  const [dragOver, setDragOver] = useState(false)
+  const [fileDragging, setFileDragging] = useState(false)
+  const [selectedRow, setSelectedRow] = useState<string | null>(null)
 
-  const qual: Qualification | null = qualifiedId ? qualifications[qualifiedId] : null
+  const startScan = useCallback(() => {
+    if (phase !== 'seed') return
+    setPhase('scanning')
+    setScannedRows(0)
+    setFileDragging(false)
+    let row = 0
+    const interval = setInterval(() => {
+      row++
+      setScannedRows(row)
+      if (row >= creators.length) {
+        clearInterval(interval)
+        setTimeout(() => {
+          setPhase('done')
+          setSelectedRow('c3')
+        }, 400)
+      }
+    }, 350)
+  }, [phase])
 
-  const handleDragStart = (e: React.DragEvent, id: string) => {
-    e.dataTransfer.setData('creatorId', id)
-  }
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault()
-    const id = e.dataTransfer.getData('creatorId')
-    if (id) setQualifiedId(id)
-    setDragOverDashboard(false)
-  }
+  const selected = selectedRow ? qualifications[selectedRow] : null
 
   return (
-    <>
-      <div className={styles.divider} />
-      <section className={styles.section} id="whofits">
-        <ScrollReveal>
-          <h2 className={styles.title}>
-            find creators <span className={styles.accent}>worth working with.</span>
-          </h2>
-          <p className={styles.tagline}>
-            network aware qualification, not just follower counts. drag a creator to see it work.
-          </p>
-        </ScrollReveal>
+    <section className={styles.section} id="whofits">
+      <ScrollReveal>
+        <p className={styles.label}>CREATOR INTELLIGENCE PLATFORM</p>
+        <h2 className={styles.title}>
+          The Complete<br />Scouting System.
+        </h2>
+        <p className={styles.subtitle}>
+          whofits is a SaaS that helps influencer agencies find creators worth working with. not by follower count,
+          but by where they sit in the network. 25,000 creators crawled. drop a seed list and watch it qualify.
+        </p>
+      </ScrollReveal>
 
-        <ScrollSequence />
+      <div className={styles.showcase}>
+        <div className={styles.characterWrap}>
+          <WhoFitsModel />
+        </div>
+
+        {phase === 'seed' && (
+          <div
+            className={`${styles.floatingFile} ${fileDragging ? styles.fileDragging : ''}`}
+            draggable
+            onDragStart={() => setFileDragging(true)}
+            onDragEnd={() => setFileDragging(false)}
+          >
+            <div className={styles.fileIcon}>
+              <svg width="28" height="34" viewBox="0 0 28 34" fill="none">
+                <path d="M2 1h16l8 8v24H2V1z" fill="#272220" stroke="#d4a574" strokeWidth="1.2" />
+                <path d="M18 1v8h8" stroke="#d4a574" strokeWidth="1.2" />
+                <text x="14" y="24" textAnchor="middle" fill="#d4a574" fontSize="7" fontFamily="monospace">CSV</text>
+              </svg>
+            </div>
+            <span className={styles.fileName}>seed_list.csv</span>
+            <span className={styles.fileSize}>6 creators</span>
+          </div>
+        )}
 
         <ScrollReveal delay={200}>
-          <div className={styles.demoArea}>
-            <div className={styles.creatorList}>
-              {creators.map(c => (
-                <div
-                  key={c.id}
-                  className={styles.creatorCard}
-                  draggable
-                  onDragStart={(e) => handleDragStart(e, c.id)}
-                  onClick={() => setQualifiedId(c.id)}
-                >
-                  <div className={styles.avatar}>{c.name.split(' ').map(n => n[0]).join('')}</div>
-                  <div className={styles.handle}>{c.handle}</div>
-                  <div className={styles.creatorName}>{c.name}</div>
-                  <div className={styles.bio}>{c.bio}</div>
-                  <div className={styles.followers}>{formatFollowers(c.followers)} followers</div>
-                </div>
-              ))}
+          <div
+            className={`${styles.engineContainer} ${dragOver ? styles.engineActive : ''}`}
+            onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
+            onDragLeave={() => setDragOver(false)}
+            onDrop={(e) => { e.preventDefault(); setDragOver(false); startScan() }}
+          >
+            <div className={styles.engineHeader}>
+              <div className={styles.windowDots}>
+                <span className={styles.dot} style={{ background: '#ff5f57' }} />
+                <span className={styles.dot} style={{ background: '#febc2e' }} />
+                <span className={styles.dot} style={{ background: '#28c840' }} />
+                <span className={styles.engineTitle}>DISCOVERY ENGINE</span>
+              </div>
             </div>
 
-            {!qualifiedId && (
-              <div className={styles.arrowArea}>
-                <svg className={styles.arrow} viewBox="0 0 200 100" fill="none">
-                  <path
-                    d="M 10 50 C 50 20, 80 80, 120 45 S 170 30, 185 50"
-                    stroke="var(--wf-accent)"
-                    strokeWidth="2"
-                    strokeDasharray="8 6"
-                    strokeLinecap="round"
-                    className={styles.arrowPath}
-                  />
-                  <polygon points="185,50 175,44 175,56" fill="var(--wf-accent)" />
-                </svg>
+            {phase === 'seed' && (
+              <div className={styles.dropZone} onClick={startScan}>
+                <p className={styles.dropText}>drag the seed list here to qualify</p>
+                <p className={styles.dropHint}>or click anywhere</p>
               </div>
             )}
 
-            <div
-              className={`${styles.dashboard} ${dragOverDashboard ? styles.dashboardOver : ''}`}
-              onDragOver={(e) => { e.preventDefault(); setDragOverDashboard(true) }}
-              onDragLeave={() => setDragOverDashboard(false)}
-              onDrop={handleDrop}
-            >
-              {!qual ? (
-                <p className={styles.dropHint}>drop a creator here to qualify them</p>
-              ) : (
-                <div className={styles.qualData}>
-                  <div className={styles.overallScore} data-level={qual.overallScore >= 80 ? 'high' : qual.overallScore >= 60 ? 'mid' : 'low'}>
-                    {qual.overallScore}
+            {(phase === 'scanning' || phase === 'done') && (
+              <div className={styles.tableWrap}>
+                {phase === 'scanning' && (
+                  <div className={styles.scanBar}>
+                    <div className={styles.scanFill} style={{ width: `${(scannedRows / creators.length) * 100}%` }} />
                   </div>
-                  <p className={styles.niche}>{qual.niche}</p>
-                  <p className={styles.audience}>{qual.audienceType}</p>
-                  <div className={styles.scores}>
-                    {[
-                      { label: 'Brand Safety', value: qual.brandSafety },
-                      { label: 'Engagement', value: qual.engagementQuality },
-                      { label: 'Niche Fit', value: qual.nicheRelevance },
-                      { label: 'Network', value: qual.networkPosition },
-                    ].map(s => (
-                      <div key={s.label} className={styles.scoreBar}>
-                        <span className={styles.scoreLabel}>{s.label}</span>
-                        <div className={styles.barTrack}><div className={styles.barFill} style={{ width: `${s.value}%` }} /></div>
-                        <span className={styles.scoreValue}>{s.value}</span>
-                      </div>
-                    ))}
+                )}
+                <table className={styles.table}>
+                  <thead>
+                    <tr>
+                      <th>CREATOR</th>
+                      <th>NETWORK</th>
+                      <th>CONSISTENCY</th>
+                      <th>STATUS</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {creators.map((c, i) => {
+                      const q = qualifications[c.id]
+                      const isVisible = i < scannedRows || phase === 'done'
+                      const isScanning = phase === 'scanning' && i === scannedRows - 1
+                      return (
+                        <tr
+                          key={c.id}
+                          className={`${styles.row} ${!isVisible ? styles.rowHidden : ''} ${isScanning ? styles.rowScanning : ''} ${selectedRow === c.id ? styles.rowSelected : ''}`}
+                          onClick={() => phase === 'done' && setSelectedRow(c.id)}
+                        >
+                          <td>
+                            <div className={styles.creatorCell}>
+                              <div className={styles.avatar}>{c.name.split(' ').map(n => n[0]).join('')}</div>
+                              <div>
+                                <span className={styles.creatorHandle}>{c.handle.replace('@', '').toUpperCase()}</span>
+                                <span className={styles.creatorNiche}>{c.nicheLabel}</span>
+                              </div>
+                            </div>
+                          </td>
+                          <td>
+                            {isVisible && phase === 'done' ? (
+                              <span className={styles.networkGrade} data-grade={q.networkGrade[0]}>
+                                {q.networkGrade} ({q.networkScore})
+                              </span>
+                            ) : isVisible ? (
+                              <span className={styles.scanning}>scanning...</span>
+                            ) : null}
+                          </td>
+                          <td>
+                            {isVisible && phase === 'done' ? (
+                              <span className={styles.consistency}>{q.consistencyScore}</span>
+                            ) : isVisible ? (
+                              <span className={styles.scanning}>...</span>
+                            ) : null}
+                          </td>
+                          <td>
+                            {isVisible && phase === 'done' ? (
+                              <span className={styles.statusBadge} data-status={q.status}>{q.status}</span>
+                            ) : null}
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </ScrollReveal>
+      </div>
+
+      {phase === 'done' && selected && (
+        <ScrollReveal>
+          <div className={styles.detailPanel}>
+            <div className={styles.signals}>
+              {[
+                { label: 'Niche Relevance', desc: 'content alignment and niche authority', value: selected.nicheRelevance },
+                { label: 'Engagement Quality', desc: 'authentic engagement signals', value: selected.engagementQuality },
+                { label: 'Brand Safety', desc: 'content risk assessment', value: selected.brandSafety },
+                { label: 'Network Centrality', desc: 'key connectors in niche', value: selected.networkPosition },
+              ].map(s => (
+                <div key={s.label} className={styles.signalCard}>
+                  <div className={styles.signalHeader}>
+                    <span className={styles.signalName}>{s.label}</span>
+                    <span className={styles.signalValue}>{s.value}</span>
                   </div>
-                  <div className={styles.topics}>
-                    {qual.topTopics.map(t => <span key={t} className={styles.topic}>{t}</span>)}
+                  <p className={styles.signalDesc}>{s.desc}</p>
+                  <div className={styles.signalBar}>
+                    <div className={styles.signalFill} style={{ width: `${s.value}%` }} />
                   </div>
-                  <span className={styles.riskBadge} data-risk={qual.risk}>{qual.risk} risk</span>
                 </div>
-              )}
+              ))}
             </div>
           </div>
         </ScrollReveal>
+      )}
 
-        <Link href="/case/whofits" className={styles.viewCase}>
-          view case study →
-        </Link>
-      </section>
-    </>
+      <Link href="/case/whofits" className={styles.viewCase}>
+        view case study
+      </Link>
+    </section>
   )
 }
