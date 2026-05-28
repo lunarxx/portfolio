@@ -58,8 +58,8 @@ export function MooneySection() {
                 <Image
                   src="/mooney/peeking-over.png"
                   alt="mooney mascot peeking"
-                  width={200}
-                  height={130}
+                  width={1430}
+                  height={830}
                   draggable={false}
                 />
               </div>

@@ -6,10 +6,10 @@ export function SectionDivider() {
     <div className={styles.divider}>
       <div className={styles.dividerMascot}>
         <Image
-          src="/mooney/waving.png"
-          alt="mooney mascot waving"
-          width={916}
-          height={2018}
+          src="/mooney/sitting.png"
+          alt="mooney mascot sitting"
+          width={1146}
+          height={1373}
           draggable={false}
           priority
         />
