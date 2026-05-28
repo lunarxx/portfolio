@@ -20,11 +20,11 @@
   justify-content: center;
 }
 
-/* ── Divider: straight cut, mascot straddling boundary ── */
+/* ── Divider ── */
 .divider {
   position: relative;
-  height: 0;
-  background: transparent;
+  height: 40px;
+  background: linear-gradient(to bottom, #faf9f6, #F2EFE7);
   overflow: visible;
   z-index: 10;
 }

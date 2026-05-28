@@ -1,10 +1,16 @@
 'use client'
 
 import { useState } from 'react'
+import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { creators, qualifications, type Qualification } from '@/data/creators'
 import { ScrollReveal } from '../ScrollEngine/ScrollReveal'
 import styles from './WhoFits.module.css'
+
+const WhoFitsModel = dynamic(() => import('./WhoFitsModel').then(m => ({ default: m.WhoFitsModel })), {
+  ssr: false,
+  loading: () => <div style={{ width: '100%', height: 400, background: 'var(--wf-surface)', borderRadius: 20 }} />,
+})
 
 function formatFollowers(n: number) {
   if (n >= 1000) return `${(n / 1000).toFixed(1).replace(/\.0$/, '')}K`
@@ -39,6 +45,10 @@ export function WhoFitsSection() {
           <p className={styles.tagline}>
             network aware qualification, not just follower counts. drag a creator to see it work.
           </p>
+        </ScrollReveal>
+
+        <ScrollReveal delay={100}>
+          <WhoFitsModel />
         </ScrollReveal>
 
         <ScrollReveal delay={200}>

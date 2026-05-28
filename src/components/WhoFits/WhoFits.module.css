@@ -1,12 +1,12 @@
 .section {
-  --wf-bg: #12100e;
-  --wf-surface: #1c1815;
-  --wf-surface2: #241f1a;
-  --wf-text: #F9F8F6;
-  --wf-muted: #8a8078;
+  --wf-bg: #151210;
+  --wf-surface: #1e1a16;
+  --wf-surface2: #272220;
+  --wf-text: #f5f2ee;
+  --wf-muted: #9a9088;
   --wf-accent: #d4a574;
   --wf-sage: #8aad96;
-  --wf-border: rgba(255, 245, 230, 0.07);
+  --wf-border: rgba(255, 245, 230, 0.08);
 
   background: var(--wf-bg);
   color: var(--wf-text);

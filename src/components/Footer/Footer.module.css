@@ -1,6 +1,6 @@
 .footer {
-  background: #0a0a0a;
-  color: #8a8a8a;
+  background: #1a1a1a;
+  color: #a09890;
   padding: 48px 40px;
   display: flex;
   flex-direction: column;
@@ -8,20 +8,7 @@
   gap: 16px;
 }
 
-.links {
-  display: flex;
-  gap: 24px;
-}
-
-.link {
-  font-family: var(--font-mono);
-  font-size: 0.82rem;
-  transition: color 0.2s;
-}
-
+.links { display: flex; gap: 24px; }
+.link { font-family: var(--font-mono); font-size: 0.82rem; transition: color 0.2s; }
 .link:hover { color: #f5f5f5; }
-
-.credit {
-  font-size: 0.72rem;
-  font-style: italic;
-}
+.credit { font-size: 0.72rem; font-style: italic; }
