@@ -5,7 +5,7 @@ import { motion, useScroll, useTransform } from 'framer-motion'
 import { useRef } from 'react'
 import styles from './Hero.module.css'
 
-const MAILTO = 'mailto:ashwinitiwari8888@gmail.com?subject=this%20better%20not%20be%20a%20prefilled%20subject%20line&body=(it%20was)%0A%0Aanyway%20what%20i%20actually%20wanted%20to%20say%3A%0A%0A'
+const MAILTO = 'mailto:ashwinitiwari8888@gmail.com'
 
 export function Hero() {
   const ref = useRef<HTMLDivElement>(null)
