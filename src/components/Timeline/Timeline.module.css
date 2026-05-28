@@ -86,9 +86,15 @@
 .highlights li::before { content: '·'; position: absolute; left: 0; color: #B5704A; font-weight: 700; }
 
 @media (max-width: 768px) {
-  .section { padding: 60px 20px; }
-  .track { flex-direction: column; gap: 24px; }
+  .section { padding: 60px 16px; }
+  .track { flex-direction: column; gap: 20px; align-items: stretch; }
   .track::before { display: none; }
-  .node { flex-direction: row; gap: 16px; }
-  .card { text-align: left; }
+  .node { flex-direction: row; gap: 14px; padding: 0; align-items: flex-start; }
+  .dot { margin-bottom: 0; margin-top: 4px; flex-shrink: 0; }
+  .years { text-align: left; white-space: nowrap; min-width: 60px; }
+  .card { text-align: left; max-width: none; flex: 1; }
+  .expanded { width: auto; }
+  .eraTitle { font-size: 0.92rem; }
+  .eraDescription { font-size: 0.75rem; }
+  .highlights li { font-size: 0.7rem; }
 }

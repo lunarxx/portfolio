@@ -408,8 +408,17 @@
 }
 
 @media (max-width: 768px) {
-  .section { padding: 60px 20px; }
+  .section { padding: 60px 16px; min-height: auto; }
+  .contentArea { flex-direction: column; gap: 24px; }
   .contentExpanded { flex-direction: column; }
   .contentExpanded .demoSide { flex: unset; }
+  .demoCard { padding: 24px 20px 20px; }
+  .mascotPeek img { width: 180px !important; }
+  .dividerMascot img { width: 120px !important; }
   .techGrid { grid-template-columns: 1fr; }
+  .breakdownPanel { padding: 24px 20px; }
+  .stimulus { width: 100%; margin-top: 24px; }
+  .micButton { width: 60px; height: 60px; }
+  .amount { font-size: 1.4rem; }
+  .tagline { font-size: 0.88rem; margin-bottom: 24px; }
 }

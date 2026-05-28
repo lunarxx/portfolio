@@ -382,10 +382,24 @@
 }
 
 @media (max-width: 768px) {
-  .section { padding: 60px 20px; }
-  .bgGrid { grid-template-columns: 1fr; }
+  .section { padding: 48px 16px; }
+  .title { margin-bottom: 10px; }
+  .intro { font-size: 0.88rem; margin-bottom: 32px; }
+  .sectionLabel { font-size: 1rem; }
+  .bgGrid { grid-template-columns: 1fr; gap: 10px; }
   .toolsGrid { grid-template-columns: 1fr; }
-  .sanshuCard { flex-direction: column; }
+  .thinkingGrid { gap: 12px; }
+  .thinkingCard { padding: 18px 20px; }
+  .thinkingBody { font-size: 0.82rem; }
+  .sanshuCard { flex-direction: column; padding: 20px; gap: 20px; }
   .sanshuGallery { width: 100%; grid-template-columns: repeat(4, 1fr); }
   .sanshuImg { width: 100%; height: auto; aspect-ratio: 1; }
+  .sanshuTitle { font-size: 1.2rem; }
+  .sanshuBody { font-size: 0.78rem; }
+  .sanshuLinks { flex-wrap: wrap; }
+  .sites { max-width: 100%; }
+  .embedGrid { flex-direction: column; gap: 8px; }
+  .embedCard { justify-content: center; }
+  .embedFrame { display: none; }
+  .embedCardActive { pointer-events: none; }
 }

@@ -97,8 +97,8 @@ export function WhoFitsSection() {
 
             {phase === 'seed' && (
               <div className={styles.dropZone} onClick={startScan}>
-                <p className={styles.dropText}>drag the seed list here to qualify</p>
-                <p className={styles.dropHint}>or click anywhere</p>
+                <p className={styles.dropText}><span className={styles.desktopOnly}>drag the seed list here to qualify</span><span className={styles.mobileOnly}>tap to start qualification</span></p>
+                <p className={`${styles.dropHint} ${styles.desktopOnly}`}>or click anywhere</p>
               </div>
             )}
 

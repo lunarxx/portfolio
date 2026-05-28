@@ -114,8 +114,16 @@
 .viewCase:hover { color: var(--aa-accent); border-color: var(--aa-accent); }
 
 @media (max-width: 768px) {
-  .section { padding: 40px 20px; }
-  .sampleRow { flex-wrap: wrap; gap: 8px; }
-  .sampleCard { width: 110px; }
+  .section { padding: 40px 16px; }
+  .tagline { font-size: 0.82rem; }
+  .sampleRow { flex-wrap: wrap; gap: 8px; justify-content: center; }
+  .sampleCard { width: calc(50% - 6px); }
   .optionsRow { flex-direction: column; gap: 12px; }
+  .configTop { gap: 12px; }
+  .configThumb { width: 56px; height: 56px; }
+  .configName { font-size: 0.95rem; }
+  .resultPanel { padding: 18px; }
+  .resultName { font-size: 0.92rem; }
+  .ciNum { font-size: 1.3rem; }
+  .viewCase { margin-top: 20px; padding: 8px 20px; font-size: 0.78rem; }
 }

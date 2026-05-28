@@ -220,3 +220,19 @@
   .section { padding: 60px 20px; }
   .productGrid { grid-template-columns: repeat(2, 1fr); }
 }
+
+@media (max-width: 768px) {
+  .section { padding: 40px 16px; }
+  .sectionTitle { margin-bottom: 24px; }
+  .cardLeft { padding: 20px 18px 14px; }
+  .cardTitle { font-size: 1.2rem; }
+  .cardDesc { font-size: 0.78rem; }
+  .modelSlot { height: 260px; margin-bottom: -60px; }
+  .engineWrap { margin: 0 8px 8px; }
+  .engineBar { padding: 6px 10px; }
+  .table thead th, .table td { padding: 6px 8px; font-size: 0.65rem; }
+  .handle { font-size: 0.65rem; }
+  .aaDemo { padding: 18px; }
+  .optBtn { padding: 10px 12px; }
+  .optBtnTitle { font-size: 0.78rem; }
+}
