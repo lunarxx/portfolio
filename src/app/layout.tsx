@@ -1,15 +1,11 @@
 import type { Metadata } from 'next'
-import { Caveat, DM_Sans, DM_Mono } from 'next/font/google'
+import { Barlow, DM_Mono } from 'next/font/google'
 import './globals.css'
 
-const hand = Caveat({
+const sans = Barlow({
   subsets: ['latin'],
-  variable: '--font-caveat',
-})
-
-const sans = DM_Sans({
-  subsets: ['latin'],
-  variable: '--font-dm-sans',
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-barlow',
 })
 
 const mono = DM_Mono({
@@ -29,7 +25,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${hand.variable} ${sans.variable} ${mono.variable}`}>
+    <html lang="en" className={`${sans.variable} ${mono.variable}`}>
       <body>{children}</body>
     </html>
   )

@@ -1,104 +1,38 @@
 .hero {
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
   padding: 60px 40px;
-  gap: 48px;
-  max-width: 1100px;
+  max-width: 900px;
   margin: 0 auto;
   width: 100%;
-}
-
-.intro {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  position: relative;
 }
 
 .name {
-  font-family: var(--font-hand);
-  font-size: clamp(2.8rem, 6vw, 4.2rem);
+  font-size: clamp(3.5rem, 8vw, 6rem);
   font-weight: 700;
   color: var(--fg);
-  line-height: 1.1;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
 }
 
 .tagline {
-  font-size: 1.05rem;
+  font-size: clamp(1rem, 2vw, 1.2rem);
   color: var(--fg-muted);
-  max-width: 420px;
+  max-width: 460px;
   line-height: 1.6;
-}
-
-/* Bento Grid */
-.bento {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  grid-template-rows: auto auto;
-  gap: 14px;
-}
-
-.card {
-  background: var(--bg-raised);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: var(--radius-md);
-  padding: 22px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  transition: border-color 0.25s, transform 0.25s;
-  cursor: pointer;
-  text-decoration: none;
-  color: inherit;
-}
-
-.card:hover {
-  border-color: rgba(255, 255, 255, 0.12);
-  transform: translateY(-2px);
-}
-
-.cardWide {
-  grid-column: span 2;
-}
-
-.cardLabel {
-  font-family: var(--font-hand);
-  font-size: 1.5rem;
-  color: var(--accent);
-}
-
-.cardDescription {
-  font-size: 0.85rem;
-  color: var(--fg-muted);
-  line-height: 1.5;
-}
-
-.cardTags {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-  margin-top: auto;
-}
-
-.tag {
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  color: var(--fg-dim);
-  padding: 3px 8px;
-  background: rgba(255, 255, 255, 0.04);
-  border-radius: 4px;
-  letter-spacing: 0.02em;
-}
-
-.cardHighlight {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  color: var(--accent-secondary);
-  letter-spacing: 0.02em;
+  margin-top: 20px;
+  font-weight: 400;
 }
 
 .scrollHint {
+  position: absolute;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -108,7 +42,6 @@
   font-family: var(--font-mono);
   letter-spacing: 0.06em;
   animation: drift 2.5s ease-in-out infinite;
-  align-self: center;
 }
 
 .scrollLine {
@@ -118,21 +51,12 @@
 }
 
 @keyframes drift {
-  0%, 100% { transform: translateY(0); opacity: 0.5; }
-  50% { transform: translateY(6px); opacity: 1; }
+  0%, 100% { transform: translateX(-50%) translateY(0); opacity: 0.5; }
+  50% { transform: translateX(-50%) translateY(6px); opacity: 1; }
 }
 
 @media (max-width: 768px) {
   .hero {
     padding: 48px 20px;
-    gap: 32px;
-  }
-
-  .bento {
-    grid-template-columns: 1fr;
-  }
-
-  .cardWide {
-    grid-column: span 1;
   }
 }
