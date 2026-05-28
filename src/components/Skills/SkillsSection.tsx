@@ -60,7 +60,7 @@ export function SkillsSection() {
       <ScrollReveal>
         <h2 className={styles.title}>about me</h2>
         <p className={styles.intro}>
-          i am a generalist. i went from sculpting 3D characters in zbrush to building AI pipelines in typescript.
+          i am a generalist. i went from sculpting 3D characters in zbrush to designing AI powered products.
           i learn fast, i build end to end, and i obsess over making things that people actually want to use.
           mooney and whofits are co founded. aarttsii and everything else here is solo built.
         </p>
