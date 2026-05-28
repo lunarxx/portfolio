@@ -49,7 +49,7 @@ export function MooneySection() {
         </h2>
         <p className={styles.tagline}>just say it. mooney tracks it.</p>
 
-        {/* Main content area — shifts layout when expanded */}
+        {/* Main content area — always renders both sides, CSS handles visibility */}
         <div className={`${styles.contentArea} ${expanded ? styles.contentExpanded : ''}`}>
           {/* Demo side */}
           <div className={styles.demoSide}>
@@ -69,40 +69,38 @@ export function MooneySection() {
             </div>
           </div>
 
-          {/* Engineering breakdown (right side, visible when expanded) */}
-          {expanded && (
-            <div className={styles.breakdownSide}>
-              <div className={styles.breakdownPanel}>
-                <h3 className={styles.breakdownTitle}>the ai pipeline</h3>
-                <p className={styles.breakdownSub}>4 providers. if one dies, the next catches it.</p>
-                <div className={styles.pipelineFlow}>
-                  {pipeline.map((node, i) => (
-                    <div key={node.label} className={styles.pipelineNode}>
-                      <div className={styles.nodeDot} />
-                      <div className={styles.nodeContent}>
-                        <span className={styles.nodeLabel}>{node.label}</span>
-                        <span className={styles.nodeDetail}>{node.detail}</span>
-                      </div>
-                      {i < pipeline.length - 1 && <div className={styles.nodeConnector} />}
+          {/* Breakdown side — always in DOM, animated via CSS */}
+          <div className={styles.breakdownSide}>
+            <div className={styles.breakdownPanel}>
+              <h3 className={styles.breakdownTitle}>the ai pipeline</h3>
+              <p className={styles.breakdownSub}>4 providers. if one dies, the next catches it.</p>
+              <div className={styles.pipelineFlow}>
+                {pipeline.map((node, i) => (
+                  <div key={node.label} className={styles.pipelineNode}>
+                    <div className={styles.nodeDot} />
+                    <div className={styles.nodeContent}>
+                      <span className={styles.nodeLabel}>{node.label}</span>
+                      <span className={styles.nodeDetail}>{node.detail}</span>
                     </div>
-                  ))}
-                </div>
+                    {i < pipeline.length - 1 && <div className={styles.nodeConnector} />}
+                  </div>
+                ))}
+              </div>
 
-                <div className={styles.breakdownDivider} />
+              <div className={styles.breakdownDivider} />
 
-                <h3 className={styles.breakdownTitle}>what i actually built</h3>
-                <p className={styles.breakdownSub}>not just the app. the whole system behind it.</p>
-                <div className={styles.techGrid}>
-                  {techCards.map(card => (
-                    <div key={card.title} className={styles.techCard}>
-                      <h4>{card.title}</h4>
-                      <p>{card.body}</p>
-                    </div>
-                  ))}
-                </div>
+              <h3 className={styles.breakdownTitle}>what i actually built</h3>
+              <p className={styles.breakdownSub}>not just the app. the whole system behind it.</p>
+              <div className={styles.techGrid}>
+                {techCards.map(card => (
+                  <div key={card.title} className={styles.techCard}>
+                    <h4>{card.title}</h4>
+                    <p>{card.body}</p>
+                  </div>
+                ))}
               </div>
             </div>
-          )}
+          </div>
         </div>
 
         {/* Stimulus button */}

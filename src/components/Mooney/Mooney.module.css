@@ -96,7 +96,7 @@
 .demoArea {
   position: relative;
   width: 100%;
-  max-width: 700px;
+  max-width: 800px;
 }
 
 .mascotPeek {
@@ -104,7 +104,7 @@
   z-index: 1;
   display: flex;
   justify-content: center;
-  margin-bottom: -35px;
+  margin-bottom: -25px;
   pointer-events: none;
 }
 
@@ -125,16 +125,19 @@
   width: 100%;
 }
 
-/* ── Breakdown side (appears on expand) ── */
+/* ── Breakdown side (always in DOM, animated via width + opacity) ── */
 .breakdownSide {
-  flex: 1;
+  flex: 0 0 0px;
   min-width: 0;
-  animation: slideInRight 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  opacity: 0;
+  overflow: hidden;
+  transition: flex 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+              opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.1s;
 }
 
-@keyframes slideInRight {
-  from { opacity: 0; transform: translateX(60px) scale(0.95); }
-  to { opacity: 1; transform: translateX(0) scale(1); }
+.contentExpanded .breakdownSide {
+  flex: 1 1 0px;
+  opacity: 1;
 }
 
 .breakdownPanel {
