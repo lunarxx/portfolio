@@ -1,15 +1,21 @@
 import type { Metadata } from 'next'
-import { JetBrains_Mono, Outfit } from 'next/font/google'
+import { Caveat, DM_Sans, DM_Mono } from 'next/font/google'
 import './globals.css'
 
-const mono = JetBrains_Mono({
+const hand = Caveat({
   subsets: ['latin'],
-  variable: '--font-jetbrains-mono',
+  variable: '--font-caveat',
 })
 
-const sans = Outfit({
+const sans = DM_Sans({
   subsets: ['latin'],
-  variable: '--font-outfit',
+  variable: '--font-dm-sans',
+})
+
+const mono = DM_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  variable: '--font-dm-mono',
 })
 
 export const metadata: Metadata = {
@@ -23,7 +29,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${mono.variable} ${sans.variable}`}>
+    <html lang="en" className={`${hand.variable} ${sans.variable} ${mono.variable}`}>
       <body>{children}</body>
     </html>
   )

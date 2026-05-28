@@ -1,22 +1,22 @@
 :root {
-  --bg: #141417;
-  --bg-raised: #1c1c20;
-  --bg-section-alt: #18181c;
-  --fg: #e6e1db;
-  --fg-muted: #918b84;
-  --fg-dim: #585350;
-  --accent: #d4a574;
-  --accent-dim: #b8905f;
-  --accent-secondary: #7ea5a0;
-  --red: #d98e8e;
-  --yellow: #d9c07e;
-  --green: #8ec5a0;
-  --font-mono: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
-  --font-sans: var(--font-outfit), 'Outfit', system-ui, sans-serif;
+  --bg: #1C1917;
+  --bg-raised: #252220;
+  --bg-section-alt: #201e1b;
+  --fg: #F5F0EB;
+  --fg-muted: #a09890;
+  --fg-dim: #686058;
+  --accent: #e0d5c7;
+  --accent-dim: #c4b9ab;
+  --accent-secondary: #a8b0a0;
+  --red: #c97070;
+  --yellow: #c9b070;
+  --green: #7ab88a;
+  --font-hand: var(--font-caveat), 'Caveat', cursive;
+  --font-sans: var(--font-dm-sans), 'DM Sans', system-ui, sans-serif;
+  --font-mono: var(--font-dm-mono), 'DM Mono', monospace;
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 16px;
-  --section-gap: 0;
   --section-padding: 80px 40px;
 }
 
