@@ -69,8 +69,8 @@ export function MooneySection() {
             </div>
           </div>
 
-          {/* Breakdown side — always in DOM, animated via CSS */}
-          <div className={styles.breakdownSide}>
+          {/* Breakdown side — conditional render with animation */}
+          {expanded && <div className={styles.breakdownSide}>
             <div className={styles.breakdownPanel}>
               <h3 className={styles.breakdownTitle}>the ai pipeline</h3>
               <p className={styles.breakdownSub}>4 providers. if one dies, the next catches it.</p>
@@ -100,7 +100,7 @@ export function MooneySection() {
                 ))}
               </div>
             </div>
-          </div>
+          </div>}
         </div>
 
         {/* Stimulus button */}
