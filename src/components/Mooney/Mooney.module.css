@@ -385,6 +385,24 @@
 }
 .tryAgain:hover { background: var(--mooney-accent); color: var(--mooney-surface); }
 
+.viewCase {
+  margin-top: 24px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 28px;
+  border: 1px solid var(--mooney-divider);
+  border-radius: 8px;
+  color: var(--mooney-muted);
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.viewCase:hover {
+  color: var(--mooney-accent);
+  border-color: var(--mooney-accent);
+}
+
 @media (max-width: 1100px) {
   .bubbleLeft, .bubbleRight { display: none; }
 }

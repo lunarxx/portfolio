@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { VoiceDemo } from './VoiceDemo'
 import { SectionDivider } from './SectionDivider'
 import styles from './Mooney.module.css'
@@ -111,6 +112,10 @@ export function MooneySection() {
           </span>
           <div className={styles.stimulusLine} />
         </button>
+
+        <Link href="/case/mooney" className={styles.viewCase}>
+          view full case study →
+        </Link>
       </section>
     </>
   )
