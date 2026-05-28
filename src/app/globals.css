@@ -1,17 +1,18 @@
 :root {
-  --bg: #0a0a0c;
-  --bg-raised: #131316;
-  --bg-section-alt: #0e0e11;
-  --fg: #e8e4df;
-  --fg-muted: #8a857e;
-  --fg-dim: #5a564f;
-  --accent: #c8ff47;
-  --accent-dim: #a3cc3a;
-  --red: #ff6b6b;
-  --yellow: #ffd43b;
-  --green: #69db7c;
+  --bg: #191820;
+  --bg-raised: #211f2b;
+  --bg-section-alt: #1c1b24;
+  --fg: #ede8e3;
+  --fg-muted: #9b9490;
+  --fg-dim: #5e5955;
+  --accent: #e8a0bf;
+  --accent-dim: #c48ba3;
+  --accent-secondary: #a8c4e0;
+  --red: #e89090;
+  --yellow: #f0d090;
+  --green: #a3d9a5;
   --font-mono: var(--font-ibm-plex-mono), 'IBM Plex Mono', monospace;
-  --font-sans: var(--font-inter), 'Inter', system-ui, sans-serif;
+  --font-sans: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 16px;
@@ -45,7 +46,7 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 a {

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { IBM_Plex_Mono, Inter } from 'next/font/google'
+import { IBM_Plex_Mono, Space_Grotesk } from 'next/font/google'
 import './globals.css'
 
 const mono = IBM_Plex_Mono({
@@ -8,9 +8,9 @@ const mono = IBM_Plex_Mono({
   variable: '--font-ibm-plex-mono',
 })
 
-const sans = Inter({
+const sans = Space_Grotesk({
   subsets: ['latin'],
-  variable: '--font-inter',
+  variable: '--font-space-grotesk',
 })
 
 export const metadata: Metadata = {
