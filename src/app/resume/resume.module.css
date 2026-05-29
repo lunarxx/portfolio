@@ -13,6 +13,11 @@
   box-shadow: 0 8px 40px rgba(0, 0, 0, 0.04);
   padding: 56px 52px;
   position: relative;
+  transition: padding 0.4s ease;
+}
+
+.resume.compact {
+  padding: 40px 44px;
 }
 
 .backLink {
@@ -42,11 +47,67 @@
 
 .printBtn:hover { color: #333; border-color: #333; }
 
+/* Mode toggle */
+.modeToggle {
+  position: fixed;
+  right: max(calc((100vw - 800px) / 2 - 60px), 16px);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 8px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+.modeToggle:hover {
+  border-color: #333;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.modeArrow {
+  font-size: 0.9rem;
+  color: #333;
+  transition: transform 0.3s ease;
+  line-height: 1;
+}
+
+.modeToggle:hover .modeArrow {
+  transform: scale(1.2);
+}
+
+.modeLabel {
+  font-size: 0.58rem;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  writing-mode: vertical-lr;
+  text-orientation: mixed;
+  transition: color 0.2s;
+}
+
+.modeToggle:hover .modeLabel {
+  color: #333;
+}
+
 /* Header */
 .header {
   margin-bottom: 36px;
   padding-bottom: 24px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  transition: margin-bottom 0.4s ease, padding-bottom 0.4s ease;
+}
+
+.compact .header {
+  margin-bottom: 20px;
+  padding-bottom: 14px;
 }
 
 .name {
@@ -54,6 +115,11 @@
   font-weight: 800;
   letter-spacing: -0.03em;
   margin-bottom: 4px;
+  transition: font-size 0.4s ease;
+}
+
+.compact .name {
+  font-size: 1.6rem;
 }
 
 .headline {
@@ -61,17 +127,33 @@
   color: #666;
   margin-bottom: 14px;
   line-height: 1.5;
+  transition: font-size 0.4s ease, margin-bottom 0.4s ease;
+}
+
+.compact .headline {
+  font-size: 0.85rem;
+  margin-bottom: 10px;
 }
 
 .contact {
   display: flex;
   gap: 20px;
   flex-wrap: wrap;
+  transition: gap 0.4s ease;
+}
+
+.compact .contact {
+  gap: 16px;
 }
 
 .contactItem {
   font-size: 0.78rem;
   color: #888;
+  transition: font-size 0.4s ease;
+}
+
+.compact .contactItem {
+  font-size: 0.72rem;
 }
 
 .contactItem a {
@@ -84,6 +166,11 @@
 /* Sections */
 .section {
   margin-bottom: 32px;
+  transition: margin-bottom 0.4s ease;
+}
+
+.compact .section {
+  margin-bottom: 16px;
 }
 
 .sectionTitle {
@@ -95,11 +182,22 @@
   margin-bottom: 16px;
   padding-bottom: 6px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  transition: font-size 0.4s ease, margin-bottom 0.4s ease;
+}
+
+.compact .sectionTitle {
+  font-size: 0.62rem;
+  margin-bottom: 8px;
 }
 
 /* Experience */
 .expItem {
   margin-bottom: 20px;
+  transition: margin-bottom 0.4s ease;
+}
+
+.compact .expItem {
+  margin-bottom: 12px;
 }
 
 .expTop {
@@ -112,6 +210,11 @@
 .expRole {
   font-size: 0.92rem;
   font-weight: 600;
+  transition: font-size 0.4s ease;
+}
+
+.compact .expRole {
+  font-size: 0.82rem;
 }
 
 .expCompany {
@@ -123,13 +226,11 @@
   font-size: 0.75rem;
   color: #999;
   flex-shrink: 0;
+  transition: font-size 0.4s ease;
 }
 
-.expDesc {
-  font-size: 0.82rem;
-  color: #666;
-  line-height: 1.7;
-  margin-top: 4px;
+.compact .expDate {
+  font-size: 0.7rem;
 }
 
 .expList {
@@ -143,10 +244,16 @@
   line-height: 1.6;
   padding-left: 12px;
   position: relative;
+  transition: font-size 0.4s ease, line-height 0.4s ease;
+}
+
+.compact .expList li {
+  font-size: 0.74rem;
+  line-height: 1.5;
 }
 
 .expList li::before {
-  content: '·';
+  content: '\00B7';
   position: absolute;
   left: 0;
   color: #ccc;
@@ -158,12 +265,22 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  transition: gap 0.4s ease;
+}
+
+.compact .projectGrid {
+  gap: 8px;
 }
 
 .project {
   display: flex;
   gap: 16px;
   align-items: baseline;
+  transition: gap 0.4s ease;
+}
+
+.compact .project {
+  gap: 12px;
 }
 
 .projectName {
@@ -171,6 +288,12 @@
   font-weight: 600;
   min-width: 100px;
   flex-shrink: 0;
+  transition: font-size 0.4s ease;
+}
+
+.compact .projectName {
+  font-size: 0.78rem;
+  min-width: 90px;
 }
 
 .projectDesc {
@@ -178,12 +301,23 @@
   color: #666;
   line-height: 1.6;
   flex: 1;
+  transition: font-size 0.4s ease, line-height 0.4s ease;
+}
+
+.compact .projectDesc {
+  font-size: 0.74rem;
+  line-height: 1.5;
 }
 
 .projectMeta {
   font-size: 0.7rem;
   color: #999;
   flex-shrink: 0;
+  transition: font-size 0.4s ease;
+}
+
+.compact .projectMeta {
+  font-size: 0.65rem;
 }
 
 /* Skills */
@@ -191,10 +325,20 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
+  transition: gap 0.4s ease;
+}
+
+.compact .skillGrid {
+  gap: 8px;
 }
 
 .skillGroup {
   font-size: 0.82rem;
+  transition: font-size 0.4s ease;
+}
+
+.compact .skillGroup {
+  font-size: 0.74rem;
 }
 
 .skillGroup strong {
@@ -202,12 +346,98 @@
   font-size: 0.78rem;
   color: #333;
   margin-bottom: 3px;
+  transition: font-size 0.4s ease;
+}
+
+.compact .skillGroup strong {
+  font-size: 0.72rem;
+  margin-bottom: 1px;
 }
 
 .skillGroup span {
   color: #777;
   font-size: 0.78rem;
   line-height: 1.5;
+  transition: font-size 0.4s ease;
+}
+
+.compact .skillGroup span {
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
+/* How I Think - full */
+.thinkGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.thinkItem {
+  font-size: 0.82rem;
+}
+
+.thinkItem strong {
+  display: block;
+  font-size: 0.82rem;
+  color: #333;
+  margin-bottom: 3px;
+}
+
+.thinkItem span {
+  color: #666;
+  font-size: 0.78rem;
+  line-height: 1.6;
+}
+
+/* How I Think - compact one-liners */
+.thinkListCompact {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.thinkListCompact li {
+  font-size: 0.74rem;
+  color: #666;
+  line-height: 1.5;
+}
+
+.thinkListCompact li strong {
+  color: #333;
+  margin-right: 6px;
+}
+
+/* Full/Compact visibility */
+.fullOnly {
+  overflow: hidden;
+  max-height: 500px;
+  opacity: 1;
+  transition: max-height 0.5s ease, opacity 0.4s ease, margin-bottom 0.4s ease;
+}
+
+.compact .fullOnly {
+  max-height: 0;
+  opacity: 0;
+  margin-bottom: 0;
+  pointer-events: none;
+}
+
+.compactOnly {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  margin-bottom: 0;
+  pointer-events: none;
+  transition: max-height 0.5s ease, opacity 0.4s ease, margin-bottom 0.4s ease;
+}
+
+.compact .compactOnly {
+  max-height: 500px;
+  opacity: 1;
+  margin-bottom: 16px;
+  pointer-events: auto;
 }
 
 /* LOR */
@@ -224,20 +454,102 @@
   margin-top: 8px;
 }
 
+.compact .lorLink {
+  font-size: 0.72rem;
+  padding: 4px 10px;
+}
+
 .lorLink:hover { color: #333; border-color: #333; }
 
 /* Print */
 @media print {
   .page { padding: 0; background: #fff; }
   .resume { box-shadow: none; border: none; border-radius: 0; padding: 32px 40px; }
-  .backLink, .printBtn { display: none; }
+  .compact.resume { padding: 24px 32px; }
+  .backLink, .printBtn, .modeToggle { display: none; }
+
+  .compact .section { margin-bottom: 12px; }
+  .compact .expItem { margin-bottom: 8px; }
+  .compact .projectGrid { gap: 6px; }
+  .compact .header { margin-bottom: 16px; padding-bottom: 10px; }
+
+  .compact .fullOnly { display: none; }
+  .fullOnly { max-height: none; }
+  .compactOnly { max-height: none; }
 }
 
 @media (max-width: 768px) {
-  .page { padding: 16px; }
-  .resume { padding: 32px 24px; }
-  .expTop { flex-direction: column; }
-  .skillGrid { grid-template-columns: 1fr; }
-  .project { flex-direction: column; gap: 2px; }
-  .contact { gap: 12px; }
+  .page { padding: 12px; }
+  .resume { padding: 28px 20px; border-radius: 12px; }
+  .compact.resume { padding: 24px 18px; }
+  .backLink { top: 12px; left: 14px; font-size: 0.72rem; }
+  .printBtn { top: 12px; right: 14px; font-size: 0.68rem; padding: 5px 10px; }
+
+  .name { font-size: 1.6rem; }
+  .compact .name { font-size: 1.4rem; }
+  .headline { font-size: 0.85rem; margin-bottom: 10px; }
+  .contact { gap: 10px; }
+  .contactItem { font-size: 0.72rem; }
+
+  .expTop { flex-direction: column; gap: 2px; }
+  .expRole { font-size: 0.85rem; }
+  .expDate { font-size: 0.7rem; }
+  .expList li { font-size: 0.78rem; }
+  .compact .expList li { font-size: 0.72rem; }
+
+  .project { flex-direction: column; gap: 4px; }
+  .projectName { min-width: unset; font-size: 0.82rem; }
+  .projectDesc { font-size: 0.78rem; }
+  .projectMeta { font-size: 0.68rem; }
+  .compact .projectName { font-size: 0.76rem; min-width: unset; }
+  .compact .projectDesc { font-size: 0.72rem; }
+
+  .skillGrid { grid-template-columns: 1fr; gap: 10px; }
+  .skillGroup strong { font-size: 0.76rem; }
+  .skillGroup span { font-size: 0.74rem; }
+
+  .thinkItem strong { font-size: 0.78rem; }
+  .thinkItem span { font-size: 0.74rem; }
+  .thinkListCompact li { font-size: 0.72rem; }
+
+  .lorLink { font-size: 0.72rem; padding: 5px 12px; }
+
+  .section { margin-bottom: 24px; }
+  .compact .section { margin-bottom: 14px; }
+  .header { margin-bottom: 24px; padding-bottom: 16px; }
+  .compact .header { margin-bottom: 16px; padding-bottom: 12px; }
+
+  .modeToggle {
+    position: fixed;
+    right: 16px;
+    top: auto;
+    bottom: 24px;
+    transform: none;
+    flex-direction: row;
+    gap: 8px;
+    padding: 10px 14px;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  }
+  .modeLabel {
+    writing-mode: horizontal-tb;
+    text-orientation: initial;
+    font-size: 0.62rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .page { padding: 8px; }
+  .resume { padding: 24px 16px; border-radius: 10px; }
+  .compact.resume { padding: 20px 14px; }
+  .name { font-size: 1.4rem; }
+  .compact .name { font-size: 1.25rem; }
+  .headline { font-size: 0.8rem; }
+  .contact { flex-direction: column; gap: 6px; }
+  .contactItem { font-size: 0.7rem; }
+  .expRole { font-size: 0.8rem; }
+  .expList li { font-size: 0.74rem; }
+  .projectName { font-size: 0.78rem; }
+  .projectDesc { font-size: 0.74rem; }
+  .modeToggle { right: 12px; bottom: 16px; padding: 8px 12px; }
 }
