@@ -83,6 +83,7 @@ export function Hero() {
           <a href="#mooney" className={styles.pill}>mooney</a>
           <a href="#whofits" className={styles.pill}>whofits</a>
           <a href="#aarttsii" className={styles.pill}>aarttsii</a>
+          <a href="#inkling" className={styles.pill}>inkling</a>
         </motion.div>
       </motion.div>
     </section>

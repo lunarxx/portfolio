@@ -66,8 +66,16 @@
   font-size: 1rem;
   color: var(--mooney-muted);
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 20px;
 }
+
+.playBadge {
+  display: inline-block;
+  margin-bottom: 36px;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+.playBadge img { width: 172px; height: auto; display: block; }
+.playBadge:hover { transform: translateY(-2px); opacity: 0.92; }
 
 /* ── Content area ── */
 .contentArea {

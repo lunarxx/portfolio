@@ -9,6 +9,7 @@ const sites = [
   { name: 'mooney.octyn.co', url: 'https://mooney.octyn.co', color: '#2A6B4F' },
   { name: 'aarttsii.com', url: 'https://aarttsii.com', color: '#B5704A' },
   { name: 'whofits.co', url: 'https://whofits.co', color: '#d4a574' },
+  { name: 'inkling.octyn.co', url: 'https://inkling.octyn.co', color: '#1f8fce' },
 ]
 
 const thinkingPoints = [
@@ -27,9 +28,26 @@ const thinkingPoints = [
 ]
 
 const toolProjects = [
-  { name: 'TweetBrain', desc: 'personality engine that learns how i write and generates tweets that actually sound like me', tags: ['Groq', 'Supabase', 'Flutter'] },
-  { name: 'ImageToPattern', desc: 'upload any image, CLIP finds the closest matching crochet pattern from 92,000 indexed patterns', tags: ['CLIP', 'pgvector', 'Flutter'] },
-  { name: 'Blue Collar Dashboard', desc: 'lead gen scraper for local businesses. finds prospects, scores them, builds outreach lists', tags: ['Playwright', 'Python', 'Supabase'] },
+  {
+    name: 'The Lead Engine',
+    desc: 'a self tuning engine that finds a client\'s real buyers, qualifies them on genuine intent, and drafts outreach in the client\'s own voice. it derives its own weighting for each source from the ideal customer profile, then reprioritises whatever actually converts, so a channel that returns nothing gets dropped on its own. two separate gates check mentality and feasibility before anyone gets enriched, which is what stopped it drowning in junk.',
+    tags: ['Groq', 'Python', 'self-tuning'],
+  },
+  {
+    name: 'Lead Sourcer',
+    desc: 'the discovery layer under the engine. it harvests a huge pool of free proxies and rotates proxy, search engine and fingerprint to pull clean lead lists at scale, resilient to blocks and never running through my own connection. source patterns regenerate per client instead of a fixed url list that goes stale.',
+    tags: ['Python', 'distributed scraping', 'SERP'],
+  },
+  {
+    name: 'WhoFits, blue collar',
+    desc: 'whofits started as a creator matching tool, then pivoted to blue collar businesses where the money and the need actually are. the engine now turns free public building permit records into a weekly feed of ready to pitch leads plus a competitor tracker for contractors across california, washington and oregon. i sell the outcome, a steady stream of real jobs, not the plumbing behind it.',
+    tags: ['permit data', 'ArcGIS', 'Supabase'],
+  },
+  {
+    name: 'ImageToPattern',
+    desc: 'upload any image, CLIP finds the closest matching crochet pattern from 92,000 indexed patterns',
+    tags: ['CLIP', 'pgvector', 'Flutter'],
+  },
 ]
 
 const background = [
@@ -130,9 +148,10 @@ export function SkillsSection() {
       </ScrollReveal>
 
       <ScrollReveal>
-        <h3 className={styles.sectionLabel}>internal tools i built for myself</h3>
+        <h3 className={styles.sectionLabel}>the engines behind the products</h3>
         <p className={styles.toolsIntro}>
-          not client work. tools i built because i needed them. they feed the products above.
+          not just the apps. these are the systems underneath. some i built to feed my own products,
+          one became the thing whofits actually sells.
         </p>
         <div className={styles.toolsGrid}>
           {toolProjects.map((tool, i) => (

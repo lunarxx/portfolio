@@ -89,7 +89,19 @@ export function AarttsiiSection() {
 
   return (
     <section className={styles.section} id="aarttsii">
+      {/* crochet-blanket scalloped top edge */}
+      <div className={styles.scallopTop} aria-hidden="true" />
+      {/* cozy warm light + floating yarn */}
+      <div className={styles.glow} aria-hidden="true" />
+      <YarnBall className={`${styles.yarn} ${styles.yarn1}`} fill="#f3b7c6" line="#e491a4" />
+      <YarnBall className={`${styles.yarn} ${styles.yarn2}`} fill="#a9d7c6" line="#78bfa7" />
+      <YarnBall className={`${styles.yarn} ${styles.yarn3}`} fill="#f6d485" line="#e4b558" />
+
       <ScrollReveal>
+        <div className={styles.brandMark}>
+          <Image src="/aarttsii/logo.png" alt="aarttsii" width={160} height={160} className={styles.logo} />
+          <span className={styles.handmade}>handmade, priced honestly</span>
+        </div>
         <h2 className={styles.title}>
           no more <span className={styles.accent}>dm bargaining.</span>
         </h2>
@@ -208,5 +220,23 @@ export function AarttsiiSection() {
 
       <Link href="/case/aarttsii" className={styles.viewCase}>view case study</Link>
     </section>
+  )
+}
+
+function YarnBall({ className, fill, line }: { className?: string; fill: string; line: string }) {
+  return (
+    <div className={className} aria-hidden="true">
+      <svg viewBox="0 0 100 108" width="100%" height="100%">
+        <circle cx="50" cy="50" r="38" fill={fill} />
+        <g stroke={line} strokeWidth="2.4" fill="none" opacity="0.75" strokeLinecap="round">
+          <ellipse cx="50" cy="50" rx="38" ry="15" transform="rotate(34 50 50)" />
+          <ellipse cx="50" cy="50" rx="38" ry="15" transform="rotate(-34 50 50)" />
+          <path d="M15 44 Q50 22 85 44" />
+          <path d="M14 58 Q50 36 86 58" />
+        </g>
+        {/* dangling thread */}
+        <path d="M84 60 q13 8 8 22 q-4 10 6 20" stroke={line} strokeWidth="2.4" fill="none" strokeLinecap="round" opacity="0.8" />
+      </svg>
+    </div>
   )
 }

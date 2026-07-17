@@ -50,8 +50,17 @@ export function MooneySection() {
         </h2>
         <p className={styles.tagline}>
           mooney is a voice first expense tracker. you talk, it logs. no typing, no categories, no spreadsheets.
-          19 people are beta testing it right now. the mic below is the real pipeline.
+          it&rsquo;s live on google play now. the mic below is the real pipeline.
         </p>
+        <a
+          className={styles.playBadge}
+          href="https://play.google.com/store/apps/details?id=com.octyn.mooney"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Get Mooney on Google Play"
+        >
+          <Image src="/google-play-badge.png" alt="Get it on Google Play" width={646} height={250} priority />
+        </a>
 
         {/* Main content area — always renders both sides, CSS handles visibility */}
         <div className={`${styles.contentArea} ${expanded ? styles.contentExpanded : ''}`}>
