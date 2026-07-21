@@ -523,7 +523,9 @@
   .expItem, .project, .skillGroup, .thinkListCompact li { break-inside: avoid; }
 }
 
-@media (max-width: 768px) {
+/* screen-only: on paper the printable width falls under 768px once margins are
+   applied, and the stacked mobile layout would blow the resume onto a 2nd page */
+@media screen and (max-width: 768px) {
   .page { padding: 12px; }
   .resume { padding: 28px 20px; border-radius: 12px; }
   .compact.resume { padding: 24px 18px; }
@@ -583,7 +585,7 @@
   }
 }
 
-@media (max-width: 400px) {
+@media screen and (max-width: 400px) {
   .page { padding: 8px; }
   .resume { padding: 24px 16px; border-radius: 10px; }
   .compact.resume { padding: 20px 14px; }
