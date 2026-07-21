@@ -64,6 +64,19 @@ export default function ResumePage() {
               <li>handled the full creative pipeline from concept to final delivery: modeling, texturing, lighting, compositing, editing</li>
             </ul>
           </div>
+
+          <div className={styles.expItem}>
+            <div className={styles.expTop}>
+              <span className={styles.expRole}>Co-Founder <span className={styles.expCompany}>at Octyn</span></span>
+              <span className={styles.expDate}>2025 – present</span>
+            </div>
+            <ul className={styles.expList}>
+              <li>product studio behind mooney, inkling and whofits. i own the whole stack: product, design, engineering, brand and go to market</li>
+              <li>shipped mooney to google play production and inkling to desktop with a tagged, self updating release pipeline</li>
+              <li>built the internal engines the products and client work run on: lead sourcing, qualification, content and multi channel outreach</li>
+              <li>run the infrastructure end to end. self hosted VPS with coolify, supabase backends, deploy on push CI</li>
+            </ul>
+          </div>
         </div>
 
         <div className={styles.section}>
@@ -73,11 +86,21 @@ export default function ResumePage() {
               <span className={styles.projectName}>mooney</span>
               <span className={styles.projectDesc}>
                 {compact
-                  ? 'voice first expense tracker. 4 layer voice pipeline (deepgram, groq, cerebras, openrouter), receipt scanning, overlay widget. 19 beta testers.'
-                  : 'voice first expense tracker. hold a button, say what you spent, done. 4 layer voice pipeline (deepgram, groq, cerebras, openrouter), receipt scanning, overlay widget. 19 beta testers.'
+                  ? 'voice first expense tracker, live on google play. 4 layer voice pipeline (deepgram, groq, cerebras, openrouter), receipt scanning, overlay widget.'
+                  : 'voice first expense tracker, live on google play. hold a button, say what you spent, done. 4 layer voice pipeline (deepgram, groq, cerebras, openrouter), receipt scanning, overlay widget.'
                 }
               </span>
               <span className={styles.projectMeta}>co founded</span>
+            </div>
+            <div className={styles.project}>
+              <span className={styles.projectName}>inkling</span>
+              <span className={styles.projectDesc}>
+                {compact
+                  ? 'local first markdown workspace, shipped on desktop. your vault is a github repo. real time multiplayer editing on CRDTs, link graph, self updating.'
+                  : 'local first markdown workspace, shipped and self updating on desktop. plain markdown on your disk, your vault is a github repo so sync is free. real time multiplayer editing built on CRDTs, presence, panes, canvas and a link graph. electron, codemirror 6, yjs.'
+                }
+              </span>
+              <span className={styles.projectMeta}>solo built</span>
             </div>
             <div className={styles.project}>
               <span className={styles.projectName}>aarttsii</span>
@@ -98,19 +121,27 @@ export default function ResumePage() {
         </div>
 
         <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>internal tools</h2>
+          <h2 className={styles.sectionTitle}>engines i built</h2>
           <div className={styles.projectGrid}>
             <div className={styles.project}>
-              <span className={styles.projectName}>TweetBrain</span>
-              <span className={styles.projectDesc}>personality learning tweet generator. signal based personality model, layered generation, content intelligence.</span>
+              <span className={styles.projectName}>The Lead Engine</span>
+              <span className={styles.projectDesc}>self tuning engine that finds a client&rsquo;s buyers, qualifies them on real intent, and drafts outreach in their voice. derives its own per source weighting from the ICP and reweights toward whatever converts. two gates (mentality, feasibility) before any enrichment.</span>
+            </div>
+            <div className={styles.project}>
+              <span className={styles.projectName}>Lead Sourcer</span>
+              <span className={styles.projectDesc}>the discovery layer. rotates a large free proxy pool plus search engine and fingerprint to pull clean lead lists at scale, resilient to blocks. source patterns regenerate per client instead of a fixed list that goes stale.</span>
+            </div>
+            <div className={styles.project}>
+              <span className={styles.projectName}>Content and Outreach Engines</span>
+              <span className={styles.projectDesc}>bulk campaign copy, statics and short video in the client&rsquo;s voice, then multi channel outreach across email, x and linkedin with cadence tuned per profile, controlled from telegram.</span>
+            </div>
+            <div className={styles.project}>
+              <span className={styles.projectName}>WhoFits, blue collar</span>
+              <span className={styles.projectDesc}>turns free public building permit records into a weekly feed of ready to pitch leads plus a competitor tracker for contractors across california, washington and oregon.</span>
             </div>
             <div className={styles.project}>
               <span className={styles.projectName}>ImageToPattern</span>
               <span className={styles.projectDesc}>upload any image, CLIP finds the closest matching crochet pattern from 92,000 indexed patterns. pgvector similarity search.</span>
-            </div>
-            <div className={styles.project}>
-              <span className={styles.projectName}>Blue Collar Dashboard</span>
-              <span className={styles.projectDesc}>lead gen scraper for local businesses. finds prospects, scores them, builds outreach lists automatically.</span>
             </div>
           </div>
         </div>
