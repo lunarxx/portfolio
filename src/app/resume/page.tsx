@@ -7,13 +7,13 @@ import styles from './resume.module.css'
 export default function ResumePage() {
   const [compact, setCompact] = useState(false)
 
-  // always hand over the one-page version, whatever is on screen
+  // print the full-text version: the print stylesheet sizes it to fill exactly one page
   const printResume = () => {
     const wasCompact = compact
-    setCompact(true)
+    setCompact(false)
     setTimeout(() => {
       window.print()
-      if (!wasCompact) setCompact(false)
+      if (wasCompact) setCompact(true)
     }, 150)
   }
 

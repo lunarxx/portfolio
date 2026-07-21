@@ -493,21 +493,21 @@
   /* tighten everything to fit a single page.
      !important because the .compact rules out-specify these. */
   .section { margin-bottom: 5px !important; }
-  .expItem { margin-bottom: 3px !important; }
-  .expList li { font-size: 0.61rem !important; line-height: 1.26 !important; margin-bottom: 0 !important; }
-  .projectGrid { gap: 2px !important; }
-  .projectName { font-size: 0.64rem !important; }
-  .projectDesc { font-size: 0.61rem !important; line-height: 1.26 !important; }
-  .skillGroup, .skillGroup strong, .skillGroup span { font-size: 0.61rem !important; line-height: 1.26 !important; }
-  .skillGrid { gap: 1px 16px !important; }
+  .expItem { margin-bottom: 2px !important; }
+  .expList li { font-size: 0.62rem !important; line-height: 1.32 !important; margin-bottom: 0 !important; }
+  .projectGrid { gap: 3px !important; }
+  .projectName { font-size: 0.65rem !important; }
+  .projectDesc { font-size: 0.62rem !important; line-height: 1.32 !important; }
+  .skillGroup, .skillGroup strong, .skillGroup span { font-size: 0.62rem !important; line-height: 1.32 !important; }
+  .skillGrid { gap: 2px 16px !important; }
   .header { margin-bottom: 7px !important; padding-bottom: 5px !important; }
-  .name { font-size: 1.2rem !important; }
-  .headline { font-size: 0.68rem !important; }
-  .contactItem { font-size: 0.61rem !important; }
-  .sectionTitle { font-size: 0.66rem !important; margin-bottom: 3px !important; }
-  .lorLink { font-size: 0.58rem !important; padding: 2px 6px !important; margin-top: 2px !important; }
-  .thinkListCompact li { font-size: 0.6rem !important; line-height: 1.26 !important; margin-bottom: 0 !important; }
-  .compactOnly { margin-bottom: 5px !important; }
+  .name { font-size: 1.28rem !important; }
+  .headline { font-size: 0.71rem !important; }
+  .contactItem { font-size: 0.635rem !important; }
+  .sectionTitle { font-size: 0.68rem !important; margin-bottom: 4px !important; }
+  .lorLink { font-size: 0.6rem !important; padding: 2px 7px !important; margin-top: 3px !important; }
+  .thinkListCompact li { font-size: 0.625rem !important; line-height: 1.36 !important; margin-bottom: 1px !important; }
+  .compactOnly { margin-bottom: 7px !important; }
 
   /* skills read as one flowing line each instead of label-on-its-own-row */
   .skillGroup strong { display: inline; margin-bottom: 0; }
