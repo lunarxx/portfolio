@@ -461,21 +461,66 @@
 
 .lorLink:hover { color: #333; border-color: #333; }
 
-/* Print */
+/* Print — always emit the one-page version, whatever is on screen */
+@page { margin: 9mm; }
+
 @media print {
-  .page { padding: 0; background: #fff; }
-  .resume { box-shadow: none; border: none; border-radius: 0; padding: 32px 40px; }
-  .compact.resume { padding: 24px 32px; }
-  .backLink, .printBtn, .modeToggle { display: none; }
+  /* min-height is viewport based on screen; in print it forces a full A4 of height
+     and spills past the printable area into a second page */
+  .page { padding: 0 !important; background: #fff; min-height: 0 !important; height: auto !important; }
+  .resume, .compact.resume {
+    box-shadow: none; border: none; border-radius: 0;
+    padding: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+  }
+  .backLink, .printBtn, .modeToggle { display: none !important; }
 
-  .compact .section { margin-bottom: 12px; }
-  .compact .expItem { margin-bottom: 8px; }
-  .compact .projectGrid { gap: 6px; }
-  .compact .header { margin-bottom: 16px; padding-bottom: 10px; }
+  /* the long-form blocks never print */
+  .fullOnly { display: none !important; }
 
-  .compact .fullOnly { display: none; }
-  .fullOnly { max-height: none; }
-  .compactOnly { max-height: none; }
+  /* the compact one-liners always print, and must not reserve dead space */
+  .compactOnly {
+    display: block !important;
+    max-height: none !important;
+    opacity: 1 !important;
+    overflow: visible !important;
+    pointer-events: auto !important;
+    margin-bottom: 10px !important;
+    transition: none !important;
+  }
+
+  /* tighten everything to fit a single page.
+     !important because the .compact rules out-specify these. */
+  .section { margin-bottom: 5px !important; }
+  .expItem { margin-bottom: 3px !important; }
+  .expList li { font-size: 0.61rem !important; line-height: 1.26 !important; margin-bottom: 0 !important; }
+  .projectGrid { gap: 2px !important; }
+  .projectName { font-size: 0.64rem !important; }
+  .projectDesc { font-size: 0.61rem !important; line-height: 1.26 !important; }
+  .skillGroup, .skillGroup strong, .skillGroup span { font-size: 0.61rem !important; line-height: 1.26 !important; }
+  .skillGrid { gap: 1px 16px !important; }
+  .header { margin-bottom: 7px !important; padding-bottom: 5px !important; }
+  .name { font-size: 1.2rem !important; }
+  .headline { font-size: 0.68rem !important; }
+  .contactItem { font-size: 0.61rem !important; }
+  .sectionTitle { font-size: 0.66rem !important; margin-bottom: 3px !important; }
+  .lorLink { font-size: 0.58rem !important; padding: 2px 6px !important; margin-top: 2px !important; }
+  .thinkListCompact li { font-size: 0.6rem !important; line-height: 1.26 !important; margin-bottom: 0 !important; }
+  .compactOnly { margin-bottom: 5px !important; }
+
+  /* skills read as one flowing line each instead of label-on-its-own-row */
+  .skillGroup strong { display: inline; margin-bottom: 0; }
+  .skillGroup strong::after { content: ' — '; color: #999; }
+  .skillGroup, .skillGroup span { display: inline; }
+  .skillGrid { gap: 2px 16px; }
+
+  /* give descriptions more room so they wrap less */
+  .projectName { min-width: 82px; }
+  .project { gap: 8px; }
+
+  /* don't split a block across pages */
+  .expItem, .project, .skillGroup, .thinkListCompact li { break-inside: avoid; }
 }
 
 @media (max-width: 768px) {

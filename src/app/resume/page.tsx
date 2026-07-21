@@ -7,11 +7,21 @@ import styles from './resume.module.css'
 export default function ResumePage() {
   const [compact, setCompact] = useState(false)
 
+  // always hand over the one-page version, whatever is on screen
+  const printResume = () => {
+    const wasCompact = compact
+    setCompact(true)
+    setTimeout(() => {
+      window.print()
+      if (!wasCompact) setCompact(false)
+    }, 150)
+  }
+
   return (
     <div className={styles.page}>
       <div className={`${styles.resume} ${compact ? styles.compact : ''}`}>
         <Link href="/" className={styles.backLink}>back</Link>
-        <button className={styles.printBtn} onClick={() => window.print()}>print / save pdf</button>
+        <button className={styles.printBtn} onClick={printResume}>print / save pdf</button>
 
         <button
           className={styles.modeToggle}
@@ -47,7 +57,7 @@ export default function ResumePage() {
               <li>one of the earliest team members. prototyped digital mascot characters, in-game assets, and the visual language that still defines the brand</li>
               <li>designed the yokai mask NFT collection: 2,000 unique pieces, phase 1 sold out in 3 days</li>
               <li>sculpted characters and environments in blender, zbrush, substance painter</li>
-              <li>remote collaboration with international team</li>
+              {!compact && <li>remote collaboration with international team</li>}
             </ul>
             <a href="/sanshu-lor.pdf" target="_blank" rel="noopener noreferrer" className={styles.lorLink}>
               letter of recommendation from CEO ↗
@@ -74,7 +84,9 @@ export default function ResumePage() {
               <li>product studio behind mooney, inkling and whofits. product, design and engineering across everything we ship</li>
               <li>mooney is live on google play production. inkling ships to desktop on a tagged, self updating release pipeline</li>
               <li>built the internal engines the products and client work run on: lead sourcing, qualification, content and multi channel outreach</li>
-              <li>set up the infrastructure. self hosted VPS with coolify, supabase backends, deploy on push CI</li>
+              {!compact && (
+                <li>set up the infrastructure. self hosted VPS with coolify, supabase backends, deploy on push CI</li>
+              )}
             </ul>
           </div>
         </div>
@@ -125,23 +137,48 @@ export default function ResumePage() {
           <div className={styles.projectGrid}>
             <div className={styles.project}>
               <span className={styles.projectName}>The Lead Engine</span>
-              <span className={styles.projectDesc}>self tuning engine that finds a client&rsquo;s buyers, qualifies them on real intent, and drafts outreach in their voice. derives its own per source weighting from the ICP and reweights toward whatever converts. two gates (mentality, feasibility) before any enrichment.</span>
+              <span className={styles.projectDesc}>
+                {compact
+                  ? 'self tuning engine that finds a client’s buyers, qualifies them on real intent, and drafts outreach in their voice. reweights every source toward whatever converts.'
+                  : 'self tuning engine that finds a client’s buyers, qualifies them on real intent, and drafts outreach in their voice. derives its own per source weighting from the ICP and reweights toward whatever converts. two gates (mentality, feasibility) before any enrichment.'
+                }
+              </span>
             </div>
             <div className={styles.project}>
               <span className={styles.projectName}>Lead Sourcer</span>
-              <span className={styles.projectDesc}>the discovery layer. rotates a large free proxy pool plus search engine and fingerprint to pull clean lead lists at scale, resilient to blocks. source patterns regenerate per client instead of a fixed list that goes stale.</span>
+              <span className={styles.projectDesc}>
+                {compact
+                  ? 'the discovery layer. rotates a large proxy pool, search engines and fingerprints to pull clean lead lists at scale, resilient to blocks.'
+                  : 'the discovery layer. rotates a large free proxy pool plus search engine and fingerprint to pull clean lead lists at scale, resilient to blocks. source patterns regenerate per client instead of a fixed list that goes stale.'
+                }
+              </span>
             </div>
             <div className={styles.project}>
-              <span className={styles.projectName}>Content and Outreach Engines</span>
-              <span className={styles.projectDesc}>bulk campaign copy, statics and short video in the client&rsquo;s voice, then multi channel outreach across email, x and linkedin with cadence tuned per profile, controlled from telegram.</span>
+              <span className={styles.projectName}>Content and Outreach</span>
+              <span className={styles.projectDesc}>
+                {compact
+                  ? 'bulk campaign copy, statics and short video in the client’s voice, then multi channel outreach across email, x and linkedin.'
+                  : 'bulk campaign copy, statics and short video in the client’s voice, then multi channel outreach across email, x and linkedin with cadence tuned per profile, controlled from telegram.'
+                }
+              </span>
             </div>
             <div className={styles.project}>
               <span className={styles.projectName}>WhoFits, blue collar</span>
-              <span className={styles.projectDesc}>turns free public building permit records into a weekly feed of ready to pitch leads plus a competitor tracker for contractors across california, washington and oregon.</span>
+              <span className={styles.projectDesc}>
+                {compact
+                  ? 'turns public building permit records into a weekly feed of ready to pitch leads for contractors.'
+                  : 'turns free public building permit records into a weekly feed of ready to pitch leads plus a competitor tracker for contractors across california, washington and oregon.'
+                }
+              </span>
             </div>
             <div className={styles.project}>
               <span className={styles.projectName}>ImageToPattern</span>
-              <span className={styles.projectDesc}>upload any image, CLIP finds the closest matching crochet pattern from 92,000 indexed patterns. pgvector similarity search.</span>
+              <span className={styles.projectDesc}>
+                {compact
+                  ? 'CLIP matches any image to the closest crochet pattern from 92,000 indexed. pgvector search.'
+                  : 'upload any image, CLIP finds the closest matching crochet pattern from 92,000 indexed patterns. pgvector similarity search.'
+                }
+              </span>
             </div>
           </div>
         </div>
@@ -214,8 +251,15 @@ export default function ResumePage() {
               <span className={styles.expDate}>2023 – 2026</span>
             </div>
             <ul className={styles.expList}>
-              <li>extensive research, cross referencing sources, understanding how multiple factors shape outcomes, and breaking down complex situations into clear arguments</li>
-              <li>final year project, palimpse: a source analysis engine that scores historical texts for author and reader bias across 6 parameters (voice, framing, causality, power relations, evidence selection, assumptions). comparative dashboard lets users see how different authors shape the same event and where their own reading bias sits</li>
+              {!compact && (
+                <li>extensive research, cross referencing sources, understanding how multiple factors shape outcomes, and breaking down complex situations into clear arguments</li>
+              )}
+              <li>
+                {compact
+                  ? 'final year project, palimpse: a source analysis engine that scores historical texts for author and reader bias across 6 parameters, with a comparative dashboard.'
+                  : 'final year project, palimpse: a source analysis engine that scores historical texts for author and reader bias across 6 parameters (voice, framing, causality, power relations, evidence selection, assumptions). comparative dashboard lets users see how different authors shape the same event and where their own reading bias sits'
+                }
+              </li>
             </ul>
           </div>
         </div>
