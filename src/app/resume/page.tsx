@@ -71,10 +71,11 @@ export default function ResumePage() {
               <span className={styles.expDate}>2025 – present</span>
             </div>
             <ul className={styles.expList}>
-              <li>product studio behind mooney, inkling and whofits. i own the whole stack: product, design, engineering, brand and go to market</li>
-              <li>shipped mooney to google play production and inkling to desktop with a tagged, self updating release pipeline</li>
+              <li>product studio behind mooney, inkling and whofits. mooney and whofits are co founded and built with my cofounder, inkling and aarttsii i built solo</li>
+              <li>work across product, design, engineering, brand and go to market rather than sitting in one lane</li>
+              <li>mooney is live on google play production, inkling ships to desktop on a tagged, self updating release pipeline</li>
               <li>built the internal engines the products and client work run on: lead sourcing, qualification, content and multi channel outreach</li>
-              <li>run the infrastructure end to end. self hosted VPS with coolify, supabase backends, deploy on push CI</li>
+              <li>set up the infrastructure. self hosted VPS with coolify, supabase backends, deploy on push CI</li>
             </ul>
           </div>
         </div>
