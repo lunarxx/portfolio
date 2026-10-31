@@ -511,7 +511,7 @@
 
   /* skills read as one flowing line each instead of label-on-its-own-row */
   .skillGroup strong { display: inline; margin-bottom: 0; }
-  .skillGroup strong::after { content: ' — '; color: #999; }
+  .skillGroup strong::after { content: ': '; color: #999; }
   .skillGroup, .skillGroup span { display: inline; }
   .skillGrid { gap: 2px 16px; }
 

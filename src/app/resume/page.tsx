@@ -35,13 +35,14 @@ export default function ResumePage() {
         <div className={styles.header}>
           <h1 className={styles.name}>Ashwini Tiwari</h1>
           <p className={styles.headline}>
-            generalist. product designer, 3D artist, and AI system designer who builds end to end.
+            i build AI systems that run parts of a business on their own. product designer and 3D artist before that.
           </p>
           <div className={styles.contact}>
             <span className={styles.contactItem}><a href="mailto:ashwinitiwari8888@gmail.com">ashwinitiwari8888@gmail.com</a></span>
-            <span className={styles.contactItem}><a href="https://x.com/ashwtiw">x.com/ashwtiw</a></span>
+            <span className={styles.contactItem}><a href="https://github.com/lunarxx">github.com/lunarxx</a></span>
             <span className={styles.contactItem}><a href="https://linkedin.com/in/ashwtiw">linkedin.com/in/ashwtiw</a></span>
             <span className={styles.contactItem}><a href="https://artstation.com/ashwtiw">artstation.com/ashwtiw</a></span>
+            <span className={styles.contactItem}>open to full time, remote · india, IST</span>
           </div>
         </div>
 
@@ -50,18 +51,18 @@ export default function ResumePage() {
 
           <div className={styles.expItem}>
             <div className={styles.expTop}>
-              <span className={styles.expRole}>Lead 3D Artist <span className={styles.expCompany}>at SANSHU!</span></span>
-              <span className={styles.expDate}>2021 – 2023</span>
+              <span className={styles.expRole}>Co-Founder <span className={styles.expCompany}>at Octyn (Core Octyn Operations LLP)</span></span>
+              <span className={styles.expDate}>2025 – present</span>
             </div>
             <ul className={styles.expList}>
-              <li>one of the earliest team members. prototyped digital mascot characters, in-game assets, and the visual language that still defines the brand</li>
-              <li>designed the yokai mask NFT collection: 2,000 unique pieces, phase 1 sold out in 3 days</li>
-              <li>sculpted characters and environments in blender, zbrush, substance painter</li>
-              {!compact && <li>remote collaboration with international team</li>}
+              <li>an intelligent systems firm: each system is custom built for one company, then run and kept current. the same people do the consult, the build and the run</li>
+              <li>client systems end to end, from the paid consult to the running system, like a guided product demo for a health-tech company. every client gets a private proposal site served from our own servers</li>
+              <li>sales that runs itself: outreach written from each prospect’s own work, then a sample HQ built for every agency from one link (their name, teams, colours) to click through before the call</li>
+              <li>octyn.co built like a product: live demos of our systems you can click through, instead of screenshots</li>
+              {!compact && (
+                <li>run our own infrastructure: a self hosted VPS and home servers, deploy on push, and one control panel for every service, scheduled job and agent session</li>
+              )}
             </ul>
-            <a href="/sanshu-lor.pdf" target="_blank" rel="noopener noreferrer" className={styles.lorLink}>
-              letter of recommendation from CEO ↗
-            </a>
           </div>
 
           <div className={styles.expItem}>
@@ -70,24 +71,24 @@ export default function ResumePage() {
               <span className={styles.expDate}>2023 – 2024</span>
             </div>
             <ul className={styles.expList}>
-              <li>3D marketing agency doing character design, product renders, brand visuals, and video editing for clients</li>
-              <li>handled the full creative pipeline from concept to final delivery: modeling, texturing, lighting, compositing, editing</li>
+              <li>my own 3D studio, three of us, making personalized mascot animations for brands. ran the full pipeline: modeling, texturing, lighting, compositing, editing</li>
+              {!compact && <li>closed it without landing a client. the lesson behind everything since: sell before you build</li>}
             </ul>
           </div>
 
           <div className={styles.expItem}>
             <div className={styles.expTop}>
-              <span className={styles.expRole}>Co-Founder <span className={styles.expCompany}>at Octyn</span></span>
-              <span className={styles.expDate}>2025 – present</span>
+              <span className={styles.expRole}>Lead 3D Artist <span className={styles.expCompany}>at SANSHU!</span></span>
+              <span className={styles.expDate}>2021 – 2023</span>
             </div>
             <ul className={styles.expList}>
-              <li>product studio behind mooney, inkling and whofits. product, design and engineering across everything we ship</li>
-              <li>mooney is live on google play production. inkling ships to desktop on a tagged, self updating release pipeline</li>
-              <li>built the internal engines the products and client work run on: lead sourcing, qualification, content and multi channel outreach</li>
-              {!compact && (
-                <li>set up the infrastructure. self hosted VPS with coolify, supabase backends, deploy on push CI</li>
-              )}
+              <li>one of the earliest team members. prototyped the mascot characters, in-game assets and the visual language of the brand</li>
+              <li>designed the yokai mask NFT collection: 2,000 unique pieces from 8 animated artworks, with a remote team across time zones</li>
+              {!compact && <li>sculpted characters and environments in blender, zbrush and substance painter</li>}
             </ul>
+            <a href="/sanshu-lor.pdf" target="_blank" rel="noopener noreferrer" className={styles.lorLink}>
+              letter of recommendation from CEO ↗
+            </a>
           </div>
         </div>
 
@@ -95,39 +96,44 @@ export default function ResumePage() {
           <h2 className={styles.sectionTitle}>shipped products <span className={styles.expDate}>2025 – present</span></h2>
           <div className={styles.projectGrid}>
             <div className={styles.project}>
+              <span className={styles.projectName}>cookie</span>
+              <span className={styles.projectDesc}>
+                {compact
+                  ? 'a front desk agent for made-to-order businesses: quotes from their own costs, sends the proposal, collects the advance, chases the balance. ships her own small features behind gradual rollouts.'
+                  : 'a front desk agent for made-to-order businesses: prices orders from their own costs, sends a branded proposal, collects the advance and chases the balance over whatsapp, instagram and email. client portal with teams and API keys, and an autobuild loop that ships her own small features as partial rollouts that pull back on failure.'
+                }
+              </span>
+              <span className={styles.projectMeta}>live oct 2026</span>
+            </div>
+            <div className={styles.project}>
               <span className={styles.projectName}>mooney</span>
               <span className={styles.projectDesc}>
                 {compact
-                  ? 'voice first expense tracker, live on google play. 4 layer voice pipeline (deepgram, groq, cerebras, openrouter), receipt scanning, overlay widget.'
-                  : 'voice first expense tracker, live on google play. hold a button, say what you spent, done. 4 layer voice pipeline (deepgram, groq, cerebras, openrouter), receipt scanning, overlay widget.'
+                  ? 'voice first expense tracker, live on google play. speech to saved row in under 5 s, receipt scanning, overlay widget, 60+ countries.'
+                  : 'voice first expense tracker, live on google play. hold a button, say what you spent, done: under 5 s from speech to saved row. layered voice pipeline with fallbacks, 3 tier receipt scanning, overlay widget, 60+ countries.'
                 }
               </span>
               <span className={styles.projectMeta}>co founded</span>
+            </div>
+            <div className={styles.project}>
+              <span className={styles.projectName}>aarttsii</span>
+              <span className={styles.projectDesc}>
+                {compact
+                  ? 'all the tech behind a crochet brand: a code drawn storefront, an ops portal, courier booking from telegram, and a price estimator that reads a photo.'
+                  : 'all the tech behind a crochet brand: a storefront drawn in code, an ops portal with CRM and shareable invoices, courier booking from telegram, and a photo price estimator whose model was picked on measured error.'
+                }
+              </span>
+              <span className={styles.projectMeta}>solo built</span>
             </div>
             <div className={styles.project}>
               <span className={styles.projectName}>inkling</span>
               <span className={styles.projectDesc}>
                 {compact
                   ? 'local first markdown workspace, shipped on desktop. your vault is a github repo. real time multiplayer editing on CRDTs, link graph, self updating.'
-                  : 'local first markdown workspace, shipped and self updating on desktop. plain markdown on your disk, your vault is a github repo so sync is free. real time multiplayer editing built on CRDTs, presence, panes, canvas and a link graph. electron, codemirror 6, yjs.'
+                  : 'local first markdown workspace, shipped and self updating on desktop. plain markdown on your disk, your vault is a github repo so sync is free. real time multiplayer editing built on CRDTs, presence, panes, canvas and a link graph.'
                 }
               </span>
               <span className={styles.projectMeta}>solo built</span>
-            </div>
-            <div className={styles.project}>
-              <span className={styles.projectName}>aarttsii</span>
-              <span className={styles.projectDesc}>
-                {compact
-                  ? 'crochet e-commerce with AI pricing. scores complexity across 8 axes, returns transparent price breakdown. groq vision, razorpay payments.'
-                  : 'crochet e-commerce with AI pricing. upload a photo, AI scores complexity across 8 axes, returns a transparent price breakdown. groq vision, power curve pricing engine, razorpay payments.'
-                }
-              </span>
-              <span className={styles.projectMeta}>solo built</span>
-            </div>
-            <div className={styles.project}>
-              <span className={styles.projectName}>whofits</span>
-              <span className={styles.projectDesc}>creator discovery platform for agencies. crawled 25,000+ profiles, 7 signal ranking formula (engagement velocity, audience overlap, brand safety, consistency, growth, niche relevance, response rate).</span>
-              <span className={styles.projectMeta}>co founded</span>
             </div>
           </div>
         </div>
@@ -136,47 +142,47 @@ export default function ResumePage() {
           <h2 className={styles.sectionTitle}>engines i built</h2>
           <div className={styles.projectGrid}>
             <div className={styles.project}>
-              <span className={styles.projectName}>The Lead Engine</span>
+              <span className={styles.projectName}>AI streamer</span>
               <span className={styles.projectDesc}>
                 {compact
-                  ? 'self tuning engine that finds a client’s buyers, qualifies them on real intent, and drafts outreach in their voice. reweights every source toward whatever converts.'
-                  : 'self tuning engine that finds a client’s buyers, qualifies them on real intent, and drafts outreach in their voice. derives its own per source weighting from the ICP and reweights toward whatever converts. two gates (mentality, feasibility) before any enrichment.'
+                  ? 'a character that streams on its own: codes real projects live, talks to chat and plays the games it builds. a webcam rig gives it a body, and it draws and posts its own reels.'
+                  : 'a character that streams on its own: codes real projects live, talks to chat and plays the games it builds, in a local voice tuned to human pitch and pace. a webcam rig gives it a body, and a pipeline draws and posts a reel every morning.'
                 }
               </span>
             </div>
             <div className={styles.project}>
-              <span className={styles.projectName}>Lead Sourcer</span>
+              <span className={styles.projectName}>RAG + memory</span>
               <span className={styles.projectDesc}>
                 {compact
-                  ? 'the discovery layer. rotates a large proxy pool, search engines and fingerprints to pull clean lead lists at scale, resilient to blocks.'
-                  : 'the discovery layer. rotates a large free proxy pool plus search engine and fingerprint to pull clean lead lists at scale, resilient to blocks. source patterns regenerate per client instead of a fixed list that goes stale.'
+                  ? 'a RAG engine every agent shares: keyword and meaning search, reranking, answers that cite their sources and say when they don’t know, plus memory that retires a fact when it changes.'
+                  : 'a RAG engine every agent shares: keyword and meaning search fused and reranked, answers that cite their sources and say when they don’t know, plus long term memory that retires a fact when it changes. on this portfolio it puts the right note first 81% of the time, up from 38%.'
                 }
               </span>
             </div>
             <div className={styles.project}>
-              <span className={styles.projectName}>Content and Outreach</span>
+              <span className={styles.projectName}>outbound</span>
               <span className={styles.projectDesc}>
                 {compact
-                  ? 'bulk campaign copy, statics and short video in the client’s voice, then multi channel outreach across email, x and linkedin.'
-                  : 'bulk campaign copy, statics and short video in the client’s voice, then multi channel outreach across email, x and linkedin with cadence tuned per profile, controlled from telegram.'
+                  ? 'omnichannel outbound for octyn and aarttsii: email, linkedin and instagram and x through cloud browsers, every message researched from the prospect’s own work.'
+                  : 'omnichannel outbound for octyn and aarttsii: email, linkedin through its official API with a daily warm-up, instagram and x through cloud browser setups, every message written from the prospect’s own work and approved or skipped from telegram. 16 of 99 indian brands replied to aarttsii’s.'
                 }
               </span>
             </div>
             <div className={styles.project}>
-              <span className={styles.projectName}>WhoFits, blue collar</span>
+              <span className={styles.projectName}>email delivery</span>
               <span className={styles.projectDesc}>
                 {compact
-                  ? 'turns public building permit records into a weekly feed of ready to pitch leads for contractors.'
-                  : 'turns free public building permit records into a weekly feed of ready to pitch leads plus a competitor tracker for contractors across california, washington and oregon.'
+                  ? 'homegrown: our own sender on our VPS, 12 inboxes across 6 domains, every bounce and reply read back in, addresses verified before anything sends.'
+                  : 'homegrown: our own sending service on our VPS, 12 inboxes across 6 domains, every bounce and reply read back in, and addresses verified before anything sends. deliverability measured, not guessed: a domain inbox landed 3.3x better than gmail.'
                 }
               </span>
             </div>
             <div className={styles.project}>
-              <span className={styles.projectName}>ImageToPattern</span>
+              <span className={styles.projectName}>hq</span>
               <span className={styles.projectDesc}>
                 {compact
-                  ? 'CLIP matches any image to the closest crochet pattern from 92,000 indexed. pgvector search.'
-                  : 'upload any image, CLIP finds the closest matching crochet pattern from 92,000 indexed patterns. pgvector similarity search.'
+                  ? 'one control panel for every timer, service, agent session and alert across my laptop and VPS, on a fixed action list with no shell.'
+                  : 'one control panel for every timer, service, agent session and alert across my laptop and VPS, on a fixed action list with no shell.'
                 }
               </span>
             </div>
@@ -197,19 +203,19 @@ export default function ResumePage() {
             </div>
             <div className={styles.skillGroup}>
               <strong>AI system design</strong>
-              <span>LLM pipelines, vision AI, speech to text, embedding search, multi-provider fallback architecture</span>
+              <span>agents, RAG and long term memory, real time tracking, voice, vision, eval sets, fallbacks that keep it running</span>
             </div>
             <div className={styles.skillGroup}>
               <strong>research and strategy</strong>
-              <span>pricing psychology, creator economy analysis, competitive audits, 40,000+ word research docs</span>
+              <span>pricing psychology, cold outreach, competitive audits, 40,000+ word research docs</span>
             </div>
             <div className={styles.skillGroup}>
               <strong>brand and identity</strong>
               <span>visual identity, site design, tone of voice, full product personality</span>
             </div>
             <div className={styles.skillGroup}>
-              <strong>data and automation</strong>
-              <span>web crawlers, scrapers, ranking formulas, data pipelines, playwright automation</span>
+              <strong>ops and automation</strong>
+              <span>self healing scheduled jobs, telegram control surfaces, browser automation, lead pipelines</span>
             </div>
           </div>
         </div>
@@ -224,11 +230,11 @@ export default function ResumePage() {
             </div>
             <div className={styles.thinkItem}>
               <strong>built around real problems</strong>
-              <span>mooney exists because expense tracking apps assume you want to type. aarttsii exists because crochet artists were getting lowballed in dms with no pricing framework. whofits exists because agencies waste days scrolling feeds manually. every product here started with someone being annoyed.</span>
+              <span>mooney exists because expense tracking apps assume you want to type. aarttsii’s estimator exists because crochet artists were getting lowballed in dms with no pricing framework. the call copilot exists because 12 of 12 first calls went dark. every product here started with someone being annoyed.</span>
             </div>
             <div className={styles.thinkItem}>
-              <strong>product led, ai assisted</strong>
-              <span>ai is part of the entire workflow. but the hard problems are never about code. mooney's voice pipeline took weeks to design because unifying 4 speech providers into one seamless experience is a product architecture problem, not an engineering one.</span>
+              <strong>ai does the typing, i do the thinking</strong>
+              <span>i direct, review and test. what keeps it honest is measurement: every system has a fixed eval set, rules become tests so a later change can’t quietly undo them, and a change ships only when the numbers agree.</span>
             </div>
           </div>
         </div>
@@ -239,7 +245,7 @@ export default function ResumePage() {
           <ul className={styles.thinkListCompact}>
             <li><strong>research first, then build</strong> every project starts with a question, not a codebase. aarttsii had a 40,000 word research doc before a single screen.</li>
             <li><strong>built around real problems</strong> every product here exists because someone was annoyed enough that it needed to exist.</li>
-            <li><strong>product led, ai assisted</strong> ai is part of the entire workflow. but the hard problems are always product architecture, not code.</li>
+            <li><strong>ai does the typing, i do the thinking</strong> every system has a fixed eval set, and a change ships only when the numbers agree.</li>
           </ul>
         </div>
 
@@ -251,9 +257,6 @@ export default function ResumePage() {
               <span className={styles.expDate}>2023 – 2026</span>
             </div>
             <ul className={styles.expList}>
-              {!compact && (
-                <li>extensive research, cross referencing sources, understanding how multiple factors shape outcomes, and breaking down complex situations into clear arguments</li>
-              )}
               <li>
                 {compact
                   ? 'final year project, palimpse: a source analysis engine that scores historical texts for author and reader bias across 6 parameters, with a comparative dashboard.'
@@ -270,15 +273,15 @@ export default function ResumePage() {
           <div className={styles.skillGrid}>
             <div className={styles.skillGroup}>
               <strong>frontend / mobile</strong>
-              <span>next.js, react, typescript, flutter, framer motion, three.js</span>
+              <span>next.js, react, typescript, flutter, three.js, framer motion, electron</span>
             </div>
             <div className={styles.skillGroup}>
-              <strong>backend / data</strong>
-              <span>supabase, postgres, edge functions, pgvector</span>
+              <strong>backend / infra</strong>
+              <span>postgres, pgvector, supabase, python, job queues, self hosted servers, telegram bots</span>
             </div>
             <div className={styles.skillGroup}>
-              <strong>AI / ML</strong>
-              <span>groq, deepgram, openai, cerebras, CLIP, ollama, prompt engineering</span>
+              <strong>AI</strong>
+              <span>agents, retrieval and memory, local and on-device models, speech, vision, real time tracking</span>
             </div>
             <div className={styles.skillGroup}>
               <strong>3D / creative / video</strong>
@@ -296,16 +299,16 @@ export default function ResumePage() {
               <span>zero to one thinking, user research, competitive analysis, GTM strategy, brand identity</span>
             </div>
             <div className={styles.skillGroup}>
-              <strong>AI / ML</strong>
-              <span>LLM pipelines, vision AI, speech to text, embedding search, groq, deepgram, openai, cerebras, CLIP, ollama</span>
+              <strong>AI</strong>
+              <span>agents, retrieval and memory, eval sets, local and on-device models, speech, vision, real time tracking</span>
             </div>
             <div className={styles.skillGroup}>
               <strong>frontend / mobile</strong>
-              <span>next.js, react, typescript, flutter, framer motion, three.js</span>
+              <span>next.js, react, typescript, flutter, three.js, framer motion, electron</span>
             </div>
             <div className={styles.skillGroup}>
-              <strong>backend / data</strong>
-              <span>supabase, postgres, edge functions, pgvector, web crawlers, playwright automation</span>
+              <strong>backend / infra</strong>
+              <span>postgres, pgvector, supabase, python, job queues, self hosted servers, telegram bots</span>
             </div>
             <div className={styles.skillGroup}>
               <strong>3D / creative</strong>
