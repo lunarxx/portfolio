@@ -40,3 +40,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .env.local
+
+# brainstorm mockups
+.superpowers/
+world/refs/
+
+# octyn-rag eval runs (local history)
+evals-runs/

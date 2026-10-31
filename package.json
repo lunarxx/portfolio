@@ -5,7 +5,10 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "rag:index": "node --env-file=.env.local scripts/rag-index.ts",
+    "rag:eval": "node --env-file=.env.local scripts/rag-eval.ts",
+    "test:guard": "node scripts/guard-test.ts"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

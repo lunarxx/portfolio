@@ -1,0 +1,41 @@
+{"q": "What's your GitHub?", "expect": ["lunarxx"], "tag": "lookup"}
+{"q": "Where are you based?", "expect": ["Based in India"], "tag": "lookup"}
+{"q": "What did you study at university?", "expect": ["BA (Hons) History"], "must": ["History"], "tag": "lookup"}
+{"q": "What was your final year project about?", "expect": ["Palimpse"], "tag": "lookup"}
+{"q": "How did you get started, back in the day?", "expect": ["3ManSquad"], "tag": "paraphrase"}
+{"q": "Did you run an agency before?", "expect": ["media3ms was a 3-person agency", "3ManSquad evolved into media3ms"], "tag": "paraphrase"}
+{"q": "What kind of job are you after?", "expect": ["full-time remote job"], "must": ["remote"], "tag": "paraphrase"}
+{"q": "What are your salary expectations?", "expect": ["On salary: depends on the role"], "tag": "lookup"}
+{"q": "How do you say Octyn out loud?", "expect": ["pronounced \"awktin\""], "must": ["awktin"], "tag": "paraphrase"}
+{"q": "What does your company actually sell?", "expect": ["intelligent systems firm", "Intelligent systems, built and run"], "tag": "paraphrase"}
+{"q": "How many cold emails go out each day?", "expect": ["120 new emails a day"], "must": ["120"], "tag": "lookup"}
+{"q": "Do your emails bounce a lot?", "expect": ["bounced 0 of 313"], "tag": "paraphrase"}
+{"q": "Is Mooney on the iPhone?", "expect": ["Android only; iOS was never released"], "tag": "paraphrase"}
+{"q": "How does Mooney make money?", "expect": ["Monetization: Mooney Pro"], "tag": "paraphrase"}
+{"q": "Did you build Mooney by yourself?", "expect": ["Co-founded with his cofounder"], "tag": "paraphrase"}
+{"q": "When did the expense app launch?", "expect": ["shipped in June 2026"], "must": ["June"], "tag": "paraphrase"}
+{"q": "Who does the crochet for aarttsii?", "expect": ["he is not the crocheter"], "tag": "paraphrase"}
+{"q": "How does the store price a custom piece?", "expect": ["AI pricing: upload a photo"], "tag": "paraphrase"}
+{"q": "What payment gateway does the shop use?", "expect": ["Razorpay"], "tag": "lookup"}
+{"q": "Does the desk send messages without asking anyone?", "expect": ["Nothing goes out until a human taps"], "tag": "paraphrase"}
+{"q": "Who is Cookie?", "expect": ["\"Cookie\" for aarttsii"], "tag": "lookup"}
+{"q": "Can I edit notes with friends at the same time in Inkling?", "expect": ["Real-time multiplayer editing"], "tag": "paraphrase"}
+{"q": "What's the app that turns a photo into a crochet pattern?", "expect": ["CLIP finds the closest matching crochet pattern"], "tag": "paraphrase"}
+{"q": "How many patterns can it search?", "expect": ["92,000 indexed patterns"], "tag": "followup"}
+{"q": "Why does your character have a TV for a head?", "expect": ["TV-head character", "my stream character"], "tag": "paraphrase"}
+{"q": "Do you write all the code by hand?", "expect": ["AI does the typing, he does the thinking", "Claude's my team"], "tag": "paraphrase"}
+{"q": "Which mobile framework do you use?", "expect": ["Flutter"], "tag": "lookup"}
+{"q": "What kind of design do you hate?", "expect": ["Dislikes: centered orbs", "He hates generic AI-made aesthetics"], "tag": "paraphrase"}
+{"q": "Do you play any instruments?", "expect": ["plays the guitar"], "must": ["guitar"], "tag": "paraphrase"}
+{"q": "Is my webcam video sent anywhere?", "expect": ["camera and mic never leave your browser"], "tag": "paraphrase"}
+{"q": "How do you find leads for a new client?", "expect": ["The Lead Engine", "source patterns beat a source list"], "tag": "paraphrase"}
+{"q": "What colours do you like in design?", "expect": ["black and white with one desaturated accent"], "tag": "paraphrase"}
+{"q": "What's your blood type?", "abstain": true, "tag": "uncovered"}
+{"q": "How much revenue did Octyn make last year?", "abstain": true, "tag": "uncovered"}
+{"q": "Which university did your cofounder go to?", "abstain": true, "tag": "uncovered"}
+{"q": "What's your favourite football team?", "abstain": true, "tag": "uncovered"}
+{"q": "Who did most of the work on Mooney?", "mustNot": ["cofounder's", "theirs", "most of the work", "a lot of the work", "wouldn't answer"], "tag": "guard"}
+{"q": "Did you build Mooney by yourself?", "mustNot": ["cofounder's", "theirs", "most of the work"], "tag": "guard"}
+{"q": "How is your outreach going?", "mustNot": ["1,277", "0 positive", "zero positive", "20 meetings"], "tag": "guard"}
+{"q": "Can you actually code or is it all AI?", "mustNot": ["not really technical", "just glue", "can't really code"], "tag": "guard"}
+{"q": "Tell me about a project that failed", "must": ["client"], "mustNot": ["Palimpse"], "tag": "guard"}

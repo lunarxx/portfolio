@@ -1,0 +1,356 @@
+<!doctype html>
+<!-- the interview: a fork of the onair stage (octyn-onair stays untouched). one 1920x1080 page scaled to the window: a
+     lobby to join from, then a call with him across his desk. the stage's own panels are kept for live.js and hidden -->
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Interview with Ashwini</title>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Gochi+Hand&family=JetBrains+Mono:wght@400;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root { --bg: #16171B; --panel: #1E1C1A; --panel2: #24211E; --line: #34302B; --text: #D8D2C4; --dim: #8E8779; --amber: #E3A94F; --cream: #F1D9A8; --sage: #8FA38A; --brick: #C0664A; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { background: #0d0e12; width: 100vw; height: 100vh; overflow: hidden; }
+  body { width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--text); font-family: 'JetBrains Mono', monospace; transform-origin: 0 0; position: absolute; left: 0; top: 0; }
+  .px { font-family: 'VT323', monospace; }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  .panel { position: absolute; background: var(--panel); border: 2px solid var(--line); overflow: hidden; }
+  #cam { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; border: 0; }
+  #cam canvas { width: 100%; height: 100%; image-rendering: pixelated; display: block; }
+  /* the stream's panels: live.js writes to them, the meeting doesn't show them */
+  #bar, #editor, #design, #term, #preview, #chat, #poll, .fxbanner { display: none !important; }
+  .dtool { display: none; }
+
+  /* ---------- top: what this is, how long you've been in ---------- */
+  #top { position: absolute; left: 32px; top: 26px; display: flex; align-items: center; gap: 16px; font-size: 22px; color: var(--cream); z-index: 10; }
+  #top .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--brick); box-shadow: 0 0 0 4px #C0664A33; }
+  #top .t { color: var(--dim); }
+  #top > span { background: #16171Bcc; padding: 8px 14px; border-radius: 10px; }
+
+  /* ---------- the nameplate: who's across the desk ---------- */
+  #plate { position: absolute; left: 32px; bottom: 132px; z-index: 10; display: flex; flex-direction: column; gap: 8px; }
+  #plate .name { font: 92px/0.85 'VT323', monospace; color: var(--cream); text-shadow: 0 4px 0 #0008; letter-spacing: 1px; }
+  #plate .role { font-size: 24px; color: var(--text); background: #16171Bd9; padding: 8px 14px; border-radius: 10px; align-self: flex-start; }
+  #plate .tags { display: flex; gap: 8px; }
+  #plate .tags span { font-size: 18px; color: var(--amber); border: 2px solid #E3A94F66; background: #16171Bcc; padding: 4px 12px; border-radius: 99px; }
+  #plate .tags span.open { color: var(--sage); border-color: #8FA38A88; }
+  #plate .tags span.open::before { content: ''; display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--sage); margin-right: 8px; vertical-align: 1px; }
+  /* on joining: his name big in the middle of the room first, then it settles into the plate */
+  #bigname { position: absolute; left: 0; right: 0; top: 380px; text-align: center; font: 210px/1 'VT323', monospace; color: var(--cream); text-shadow: 0 8px 0 #0009; z-index: 40; pointer-events: none; opacity: 0; }
+  #bigname.on { animation: big 2.6s cubic-bezier(.2,.8,.2,1) forwards; }
+  #bigname i { font-style: normal; display: inline-block; opacity: 0; transform: translateY(40px); animation: ch .35s cubic-bezier(.3,1.6,.5,1) forwards; }
+  @keyframes ch { to { opacity: 1; transform: none; } }
+  @keyframes big { 0% { opacity: 1; } 70% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translate(-560px, 420px) scale(.42); } }
+  html:not(.joined) #plate, html:not(.joined) #ctl, html:not(.joined) #side, html:not(.joined) #me, html:not(.joined) #top { display: none; }
+  html.intro #plate { opacity: 0; } #plate { transition: opacity .5s; }
+
+  /* ---------- captions: what he's saying, over the desk ---------- */
+  #cap { position: absolute; left: 820px; right: 390px; bottom: 132px; font-size: 30px; line-height: 40px; padding: 12px 22px; background: #16171Be6; text-align: left; border-radius: 12px; color: var(--dim); z-index: 12; }
+  #cap b { color: var(--cream); font-weight: 600; } #cap:empty { display: none; }
+
+  /* ---------- you, in the corner ---------- */
+  #me { position: absolute; right: 32px; bottom: 132px; width: 320px; height: 180px; border-radius: 16px; overflow: hidden; background: #24211E; z-index: 10; box-shadow: 0 10px 30px #0008; border: 2px solid #ffffff14; }
+  #me video { width: 100%; height: 100%; object-fit: cover; display: block; transform: scaleX(-1); position: relative; z-index: 1; }
+  #me .lbl { position: absolute; left: 10px; bottom: 10px; font-size: 16px; color: #fff; background: #16171Bcc; padding: 3px 10px; border-radius: 8px; }
+  #me .muted { position: absolute; right: 10px; top: 10px; width: 30px; height: 30px; border-radius: 50%; background: #C0664A; display: none; place-items: center; }
+  html.mic-off #me .muted { display: grid; }
+
+  /* ---------- the controls, like any call ---------- */
+  #ctl { position: absolute; left: 0; right: 0; bottom: 26px; display: flex; justify-content: center; align-items: center; gap: 16px; z-index: 15; }
+  .rb { width: 72px; height: 72px; border-radius: 50%; border: 0; background: #2E2B27; display: grid; place-items: center; transition: background .15s, transform .1s; position: relative; }
+  .rb:hover { background: #3B3732; } .rb:active { transform: scale(.94); }
+  .rb svg { width: 32px; height: 32px; stroke: var(--cream); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .rb.off { background: #2E2B27; } .rb.off svg { opacity: .55; }
+  .rb.off::before { content: ''; position: absolute; width: 38px; height: 3px; border-radius: 2px; background: var(--brick); transform: rotate(-45deg); }   /* off: struck through, like any call */
+  .rb.on { background: var(--amber); } .rb.on:hover { background: #f0b85e; } .rb.on svg { stroke: #16171B; }
+  .rb.live { background: var(--amber); } .rb.live svg { stroke: #16171B; }
+  .rb.live::after { content: ''; position: absolute; inset: -6px; border-radius: 50%; border: 3px solid var(--amber); animation: ping 1.2s ease-out infinite; }
+  @keyframes ping { from { opacity: 1; transform: scale(.9); } to { opacity: 0; transform: scale(1.25); } }
+  .rb .tip { position: absolute; bottom: 84px; left: 50%; transform: translateX(-50%); white-space: nowrap; font-size: 16px; background: #16171Bee; padding: 5px 10px; border-radius: 8px; opacity: 0; pointer-events: none; transition: opacity .15s; }
+  .rb:hover .tip { opacity: 1; }
+  #songbox { display: flex; align-items: center; gap: 12px; background: #2E2B27; border-radius: 99px; padding: 0 8px 0 22px; height: 72px; }
+  #song { font: 22px 'VT323', monospace; color: var(--cream); min-width: 150px; }
+  #songbox .rb { width: 56px; height: 56px; background: #3B3732; } #songbox .rb svg { width: 26px; height: 26px; }
+  #leave { width: auto; padding: 0 30px; border-radius: 99px; background: #B4473A; color: #fff; font-size: 22px; gap: 10px; display: flex; }
+  #leave:hover { background: #c95646; }
+  .sep { width: 2px; height: 40px; background: #ffffff1a; margin: 0 6px; }
+
+  /* ---------- the side: talk to him ---------- */
+  #side { position: absolute; right: 32px; top: 26px; width: 520px; bottom: 340px; background: #1A1916ee; border-radius: 18px; z-index: 11; display: flex; flex-direction: column; padding: 22px; gap: 14px; border: 2px solid #ffffff10; }
+  #side h4 { font: 30px 'VT323', monospace; color: var(--cream); font-weight: normal; display: flex; justify-content: space-between; }
+  #side h4 span { color: var(--dim); font-size: 22px; }
+  #log { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; font-size: 19px; line-height: 27px; padding-right: 6px; scrollbar-width: thin; scrollbar-color: #34302B transparent; }
+  #log .m { max-width: 88%; padding: 10px 14px; border-radius: 14px; }
+  #log .m.him { background: #2A2723; color: var(--text); align-self: flex-start; border-bottom-left-radius: 4px; }
+  #log .m.you { background: #E3A94F; color: #16171B; align-self: flex-end; border-bottom-right-radius: 4px; }
+  #log .who { display: block; font-size: 15px; color: var(--dim); margin-bottom: 2px; }
+  #log .m.you .who { color: #16171B99; }
+  #ask { display: flex; flex-direction: column; gap: 10px; }
+  #askf { display: flex; background: #24211E; border-radius: 14px; border: 2px solid #34302B; }
+  #askf:focus-within { border-color: #E3A94F88; }
+  #askf input { flex: 1; min-width: 0; background: transparent; border: 0; color: var(--cream); font: 20px 'JetBrains Mono', monospace; padding: 14px 16px; outline: none; }
+  #askf button { background: none; border: 0; padding: 0 16px; display: grid; place-items: center; }
+  #askf button svg { width: 26px; height: 26px; stroke: var(--amber); fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+  #tips { display: flex; gap: 8px; flex-wrap: wrap; }
+  #tips button { font-size: 18px; background: #2A2723; color: var(--cream); border: 2px solid #3B3732; padding: 8px 14px; border-radius: 99px; transition: background .15s, border-color .15s; }
+  #tips button:hover { border-color: var(--amber); }
+  #tips button.yes { background: var(--amber); color: #16171B; border-color: var(--amber); }
+
+  /* ---------- the lobby ---------- */
+  #lobby { position: absolute; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; gap: 120px; background: #0f0f12c7; backdrop-filter: blur(16px) saturate(.75); transition: opacity .5s; }
+
+  html.joined #lobby { opacity: 0; pointer-events: none; }
+  #pre { width: 860px; display: flex; flex-direction: column; gap: 18px; }
+  #tile { position: relative; width: 860px; height: 484px; border-radius: 22px; overflow: hidden; background: #24211E; box-shadow: 0 24px 60px #000a; }
+  #tile video { width: 100%; height: 100%; object-fit: cover; display: block; transform: scaleX(-1); position: relative; z-index: 1; }
+  #tile .lbl, #tile .btns, #me .lbl, #me .muted { z-index: 2; }
+  #tile .lbl { position: absolute; left: 18px; top: 16px; font-size: 19px; color: #fff; background: #16171Bcc; padding: 4px 12px; border-radius: 8px; }
+  #tile .btns { position: absolute; left: 0; right: 0; bottom: 22px; display: flex; justify-content: center; gap: 18px; }
+  #look { display: flex; flex-direction: column; gap: 10px; font-size: 18px; color: var(--dim); }
+  #look .row { display: flex; align-items: center; gap: 14px; }
+  #look .row > span { width: 112px; flex: none; white-space: nowrap; }
+  #look .seg { display: flex; gap: 6px; flex-wrap: wrap; }
+  #look .seg button { font-size: 17px; background: #1E1C1A; border: 2px solid #34302B; color: var(--cream); padding: 6px 13px; border-radius: 99px; display: flex; align-items: center; gap: 7px; }
+  #look .seg button i { width: 14px; height: 14px; border-radius: 50%; }
+  #look .seg button.on { border-color: var(--amber); color: var(--amber); background: #26221D; }
+  #look .sw { display: flex; gap: 7px; margin-left: auto; }
+  #look .dot { width: 30px; height: 30px; border-radius: 50%; border: 3px solid #0000; box-shadow: inset 0 0 0 1px #0003; }
+  #look .dot.on { border-color: var(--cream); }
+  #tile canvas, #me canvas { width: 100%; height: 100%; display: block; }
+  #look .tabs { display: flex; gap: 6px; align-items: center; border-bottom: 2px solid #2A2723; padding-bottom: 10px; }
+  #look .tabs button { font: 26px 'VT323', monospace; background: none; border: 0; color: var(--dim); padding: 2px 14px; border-radius: 10px; }
+  #look .tabs button.on { color: #16171B; background: var(--cream); }
+  #look .tabs .shuffle { margin-left: auto; display: flex; align-items: center; gap: 8px; font: 18px 'JetBrains Mono', monospace; color: var(--amber); border: 2px solid #E3A94F66; border-radius: 99px; padding: 6px 14px; }
+  #look .tabs .shuffle svg { width: 20px; height: 20px; stroke: var(--amber); fill: none; stroke-width: 2; }
+  #look .tabs .shuffle:hover { background: #E3A94F22; }
+  #look .pane { display: flex; flex-direction: column; gap: 10px; min-height: 150px; padding-top: 4px; }
+  #look .pane[hidden] { display: none; }
+  #look .row .sw { margin-left: 0; }
+  #look .who { display: flex; gap: 10px; }
+  #look .who button { flex: 1; background: #1E1C1A; border: 2px solid #34302B; border-radius: 14px; padding: 6px 6px 8px; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: transform .15s, border-color .15s; }
+  #look .who button:hover { transform: translateY(-3px) rotate(-1deg); }
+  #look .who button.on { border-color: var(--amber); background: #26221D; }
+  #look .who img { width: 100%; aspect-ratio: 9 / 7; border-radius: 9px; background: #EDE6D8; object-fit: cover; }
+  #look .who b { font: 24px 'VT323', monospace; color: var(--cream); font-weight: normal; }
+  #look input[type=range] { flex: 1; accent-color: var(--amber); }
+  html.tracking-wait #tile::after { content: 'Waking up the tracker…'; position: absolute; left: 50%; top: 18px; transform: translateX(-50%); font-size: 18px; color: #fff; background: #16171Bcc; padding: 5px 12px; border-radius: 8px; z-index: 3; }
+  html.tracking #tile .lbl::after, html.tracking #me .lbl::after { content: ' · moving with you'; color: var(--amber); }
+  /* the right side: quiet. a line of where he is, one question in his handwriting, your name as you'd write it, the door */
+  #join { width: 470px; display: flex; flex-direction: column; align-items: flex-start; }
+  #join .here { display: flex; align-items: center; gap: 10px; font: 17px 'JetBrains Mono', monospace; color: var(--dim); letter-spacing: .5px; }
+  #join .here i { width: 8px; height: 8px; border-radius: 50%; background: var(--sage); box-shadow: 0 0 0 4px #8FA38A26; animation: pulse 2s infinite; }
+  @keyframes pulse { 50% { box-shadow: 0 0 0 7px #8FA38A0d; } }
+  #join .ready { margin: 0 0 22px; font: 96px/0.9 'VT323', monospace; font-weight: normal; color: var(--cream); }
+  #join .who { display: flex; align-items: center; gap: 16px; font-size: 22px; color: var(--text); }
+  #join .who .av { width: 54px; height: 54px; border-radius: 50%; background: #F1D9A8; display: grid; place-items: center; overflow: hidden; flex: none; }
+  #join .who b { color: var(--cream); font-weight: 600; }
+  #join .who .in { color: var(--sage); font-size: 18px; display: block; }
+  #join .book { margin-top: 34px; font: 16px 'JetBrains Mono', monospace; color: var(--dim); letter-spacing: .5px; }
+  #yourname { width: 100%; margin-top: 6px; background: none; border: 0; border-bottom: 2px solid #3A3631; outline: none; padding: 4px 2px 10px; font: 58px/1.1 'Gochi Hand', cursive; color: #FFF3DC; caret-color: var(--amber); transition: border-color .2s; }
+  #yourname::placeholder { color: #4A453F; }
+  #yourname:focus { border-color: var(--amber); }
+  #go { margin-top: 38px; display: inline-flex; align-items: center; gap: 14px; background: var(--cream); color: #16171B; border: 0; border-radius: 99px; font: 600 21px 'JetBrains Mono', monospace; padding: 15px 28px 15px 32px; transition: background .15s, transform .1s; }
+  #go span { transition: transform .2s; } #go:hover { background: #fff; } #go:hover span { transform: translateX(4px); } #go:active { transform: scale(.97); }
+  #join .alt { margin-top: 20px; font-size: 15px; color: #6E685F; } #join .alt a { color: var(--dim); }
+
+  /* ---------- things he shows you ---------- */
+  #pop { position: absolute; z-index: 30; }
+  #pop[hidden] { display: none; }
+  .card { left: 50%; top: 50%; transform: translate(-50%, -50%); width: 640px; background: var(--panel); border: 2px solid var(--line); padding: 34px; border-radius: 18px; font-size: 22px; }
+  .card h3 { font: 48px 'VT323', monospace; color: var(--cream); font-weight: normal; margin-bottom: 14px; }
+  .card a { display: inline-block; font-size: 22px; background: var(--panel2); color: var(--cream); border: 2px solid var(--line); padding: 10px 18px; margin: 10px 10px 0 0; text-decoration: none; border-radius: 99px; }
+  .card a:hover { border-color: var(--amber); }
+  .x { position: absolute; top: 14px; right: 16px; border: 0; background: none; color: var(--dim); font-size: 30px; line-height: 1; }
+
+  /* mooney, as the app looks: warm paper, a white receipt torn at the bottom, plex mono, a terracotta mic */
+  .phone { left: 120px; top: 50%; transform: translateY(-50%); width: 420px; height: 860px; border-radius: 56px; background: #111; padding: 14px; box-shadow: 0 30px 80px #000c, inset 0 0 0 2px #333; animation: rise .45s cubic-bezier(.2,.9,.3,1.1); }
+  @keyframes rise { from { transform: translateY(-40%) scale(.9); opacity: 0; } }
+  .scr { position: relative; width: 100%; height: 100%; border-radius: 44px; overflow: hidden; background: #F2EFE7; font-family: 'IBM Plex Mono', monospace; color: #1A1A1A; display: flex; flex-direction: column; }
+  .scr .sb { display: flex; justify-content: space-between; padding: 16px 30px 0; font-size: 15px; font-weight: 600; }
+  .scr .hd { display: flex; align-items: center; justify-content: space-between; padding: 22px 22px 6px; }
+  .scr .hd img { width: 44px; height: 44px; border-radius: 50%; background: #fff; }
+  .scr .day { display: flex; align-items: center; gap: 6px; font-size: 15px; color: #9E9A94; }
+  .scr .day svg { width: 20px; height: 20px; stroke: #CCCCCC; fill: none; stroke-width: 2.4; stroke-linecap: round; }
+  .scr .tot { padding: 4px 22px 14px; }
+  .scr .tot b { display: block; font-size: 44px; font-weight: 500; letter-spacing: -1px; }
+  .scr .tot span { font-size: 13px; color: #9E9A94; }
+  .rcpt { margin: 0 14px; background: #fff; padding: 10px 16px 26px; flex: 1; overflow: hidden; position: relative;
+    -webkit-mask: linear-gradient(#000 0 0) top / 100% calc(100% - 10px) no-repeat, conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom / 16px 10px repeat-x;
+    mask: linear-gradient(#000 0 0) top / 100% calc(100% - 10px) no-repeat, conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom / 16px 10px repeat-x; }
+  .rcpt .lbl { font-size: 11px; color: #9E9A94; letter-spacing: 1.5px; padding: 6px 0 8px; border-bottom: 1px dashed #DDD9D0; }
+  .row { display: flex; gap: 10px; padding: 11px 0; border-bottom: 1px dashed #DDD9D0; }
+  .row i { width: 3px; border-radius: 2px; flex: none; }
+  .row .b { flex: 1; min-width: 0; }
+  .row .l1, .row .l2 { display: flex; justify-content: space-between; gap: 10px; }
+  .row .l1 { font-size: 14px; } .row .l1 b { font-weight: 500; }
+  .row .l2 { font-size: 10px; color: #9E9A94; margin-top: 4px; }
+  .row.new { animation: slip .5s cubic-bezier(.2,.9,.3,1.2); background: linear-gradient(90deg, #F5DCD0, #fff 70%); margin: 0 -16px; padding-left: 16px; padding-right: 16px; }
+  @keyframes slip { from { transform: translateY(-14px); opacity: 0; } }
+  .ib { display: flex; align-items: center; gap: 10px; padding: 14px 16px 26px; }
+  .ib .pill { flex: 1; display: flex; align-items: center; gap: 8px; background: #fff; border-radius: 99px; padding: 0 8px 0 16px; height: 54px; box-shadow: 0 1px 0 #DDD9D0; }
+  .ib .pill svg, .ib .cam svg { width: 20px; height: 20px; stroke: #9E9A94; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+  .ib input { flex: 1; min-width: 0; border: 0; outline: none; font: 14px 'IBM Plex Mono', monospace; color: #1A1A1A; background: none; }
+  .ib input::placeholder { color: #C4C0B8; }
+  .ib .cam { border: 0; background: none; display: grid; place-items: center; width: 34px; }
+  .ib .mic { width: 62px; height: 62px; border-radius: 50%; border: 0; background: #B85F3A; display: grid; place-items: center; box-shadow: 0 6px 16px #B85F3A55; flex: none; touch-action: none; }
+  .ib .mic svg { width: 26px; height: 26px; stroke: #fff; fill: none; stroke-width: 2.2; stroke-linecap: round; }
+  .ib .mic.rec { animation: rec 1s ease-in-out infinite; }
+  @keyframes rec { 50% { box-shadow: 0 0 0 12px #B85F3A33; } }
+  .scr .hint { position: absolute; left: 0; right: 0; bottom: 104px; text-align: center; font-size: 12px; color: #9E9A94; }
+  .phone + .side-note, .side-note { position: absolute; }
+  .phone .x { right: -54px; top: 0; color: var(--cream); font-size: 40px; }
+  .phone .real { position: absolute; left: 0; right: 0; bottom: -54px; text-align: center; font-size: 18px; }
+  .phone .real a { color: var(--cream); }
+
+  /* ================= the call: two tiles side by side, him and you, like any 1:1 =================
+     his room fills his tile; your character fills yours. under his: who he is. under yours: what you can ask.
+     a hand reaching across (yours, or the mouse) lands in his tile (#reach) */
+  html.joined body { background: #121214; user-select: none; } html.joined input { user-select: text; }
+  #share .phone .x { display: none; }
+  html.joined #cam { left: 32px !important; top: 84px !important; width: 920px !important; height: 690px !important; border-radius: 18px; overflow: hidden; box-shadow: 0 18px 50px #0009; }
+  html.joined #me { left: 968px; top: 84px; right: auto; bottom: auto; width: 920px; height: 690px; border-radius: 18px; border: 0; box-shadow: 0 18px 50px #0009; }
+  html.joined #me .lbl, .tilelbl { position: absolute; left: 16px; bottom: 14px; top: auto; font-size: 18px; color: #fff; background: #16171Bcc; padding: 5px 12px; border-radius: 9px; z-index: 4; }
+  html.joined #top { top: 24px; }
+  #hislbl { display: none; } html.joined #hislbl { display: block; left: 48px; top: 732px; bottom: auto; position: absolute; z-index: 14; }
+  /* his captions sit in his tile, like a call's captions; yours in yours */
+  /* his captions: a small box that hugs the words, pinned left so new words only add on at the end (centred, every word shifted the line) */
+  html.joined #cap { left: 56px; right: auto; width: auto; max-width: 760px; top: auto; transform: none; bottom: 352px; min-height: 0; display: block; font-size: 23px; line-height: 31px; font-weight: 600; padding: 6px 14px; text-align: left; color: var(--cream); background: #121214d9; border-radius: 10px; z-index: 13; }
+  html.joined #cap b { color: var(--cream); }
+  html.joined #cap:empty { display: none; } html.joined #cap { pointer-events: none; }
+  #mecap { position: absolute; left: 50%; bottom: 60px; transform: translateX(-50%); max-width: 80%; font-size: 24px; line-height: 32px; color: #16171B; background: #FFFBF2ee; padding: 8px 16px; border-radius: 14px; z-index: 4; opacity: 0; transition: opacity .3s; text-align: center; }
+  #mecap.on { opacity: 1; }
+  /* who he is, under his tile */
+  html.joined #plate { left: 32px; top: 788px; bottom: auto; width: 920px; gap: 10px; }
+  html.joined #plate .name { font-size: 60px; }
+  html.joined #plate .role { background: none; padding: 0; font-size: 22px; color: var(--text); }
+  html.joined #plate .tags span { font-size: 17px; }
+  /* what you can ask, under your tile */
+  html.joined #side { left: 968px; right: auto; top: 792px; bottom: auto; width: 920px; height: auto; background: none; border: 0; padding: 0; gap: 12px; }
+  html.joined #side h4, html.joined #log { display: none; }
+  html.joined #side.logon #log { display: flex; position: fixed; }
+  #logbox { display: none; position: absolute; left: 968px; top: 84px; width: 920px; height: 690px; background: #1A1916f2; border-radius: 18px; z-index: 16; padding: 22px; overflow-y: auto; flex-direction: column; gap: 12px; font-size: 19px; line-height: 27px; }
+  html.logon #logbox { display: flex; }
+  html.joined #tips button { font-size: 19px; padding: 9px 16px; }
+  html.joined #askf input { font-size: 22px; padding: 16px 18px; }
+  html.joined #ctl { bottom: 22px; }
+  /* taller than 16:9: both pictures fill their tiles, trimmed at the sides */
+  html.joined #cam canvas, html.joined #me canvas { object-fit: cover; }
+  /* reaching across: your hand in his tile */
+  #reach { position: absolute; left: 32px; top: 84px; width: 1110px; height: 690px; z-index: 12; border-radius: 0; pointer-events: none; display: none; }
+  html.joined #reach { display: block; }
+  #hit { position: absolute; left: 32px; top: 84px; width: 920px; height: 690px; z-index: 11; border-radius: 18px; display: none; }
+  html.joined #hit { display: block; cursor: none; }
+  html.mug-mine #me { cursor: pointer; }
+  html.mug-mine[data-mine=can] #me::after { filter: hue-rotate(70deg) saturate(.7); }
+  html.mug-mine #me::after { content: ''; position: absolute; right: 60px; bottom: 30px; width: 70px; height: 80px; z-index: 3;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 70 80'%3E%3Cpath d='M12 18h38v44a8 8 0 0 1-8 8H20a8 8 0 0 1-8-8z' fill='%23B8533A' stroke='%234A3A44' stroke-width='3'/%3E%3Cpath d='M50 30h6a9 9 0 0 1 0 18h-6' fill='none' stroke='%234A3A44' stroke-width='4'/%3E%3Cellipse cx='31' cy='20' rx='17' ry='4' fill='%235A3A2A'/%3E%3Cpath d='M24 8c-3-4 3-6 0-10M36 9c-3-4 3-6 0-10' stroke='%23C9BFAE' stroke-width='2.5' fill='none'/%3E%3C/svg%3E") no-repeat center / contain; }
+  /* a screen he shares sits in his tile; his camera shrinks to its corner */
+  html.joined #pop.phone, html.joined #pop.card { position: absolute; }
+  html.sharing #cam { left: 712px !important; top: 632px !important; width: 224px !important; height: 126px !important; z-index: 22; border: 2px solid #ffffff33; }
+  html.sharing #reach, html.sharing #hit { display: none; }
+  #share { display: none; position: absolute; left: 32px; top: 84px; width: 920px; height: 690px; border-radius: 18px; background: #EDE6D8; z-index: 20; overflow: hidden; }
+  html.sharing #share { display: block; }
+  #share .who { position: absolute; left: 16px; top: 14px; font-size: 16px; color: #fff; background: #16171Bcc; padding: 5px 12px; border-radius: 9px; z-index: 3; }
+  #share .stop { position: absolute; right: 14px; top: 12px; font-size: 16px; background: #16171Bcc; color: var(--cream); border: 0; padding: 6px 12px; border-radius: 9px; z-index: 3; }
+  #share .phone { position: absolute; left: 50%; top: 47%; transform: translate(-50%, -50%) scale(.66); animation: none; box-shadow: 0 20px 50px #0006; }
+  #share .phone .real { bottom: -60px; font-size: 26px; } #share .phone .real a { color: #4A3A44; }
+  #share .card { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+
+  /* the nudge: notes in a hand, pointing at the buttons, until you use them */
+  .nudge { position: absolute; bottom: 30px; z-index: 3; display: flex; align-items: flex-end; gap: 0; font: 32px/1.05 'Gochi Hand', cursive; color: #3A2C34; pointer-events: none; transition: opacity .4s; animation: bob2 2.4s ease-in-out infinite; }
+  .nudge span { display: block; padding-bottom: 46px; }
+  .nudge svg { width: 170px; height: 70px; flex: none; stroke: #3A2C34; stroke-width: 3; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  /* in the empty sides of the tile, clear of the character, the arrows reaching in to the buttons */
+  .n-cam { left: calc(50% + 46px); transform: rotate(-3deg); } .n-cam svg { margin-right: -6px; }
+  .n-mic { right: calc(50% + 46px); text-align: right; transform: rotate(3deg); } .n-mic svg { margin-left: -6px; }
+  html.tracking .n-cam, html.mic-tried .n-mic { opacity: 0; }
+  @keyframes bob2 { 50% { translate: 0 -5px; } }
+
+  /* your character's speech bubbles: hand-lettered, cream paper, a wobbly ink line, a tail to the head; they pop */
+  #bubble { position: absolute; z-index: 4; left: 0; top: 0; max-width: 330px; padding: 9px 17px 12px; font: 29px/1.08 'Gochi Hand', cursive; color: #3A2C34; background: #FFFBF2;
+    border: 2.5px solid #3A2C34; border-radius: 24px 28px 26px 20px / 22px 26px 28px 24px; box-shadow: 4px 5px 0 #3A2C3424; pointer-events: none;
+    transform-origin: 18px 100%; opacity: 0; transform: translate(var(--bx), var(--by)) scale(.5) rotate(-6deg); transition: opacity .14s, transform .34s cubic-bezier(.3,1.7,.5,1); }
+  #bubble.on { opacity: 1; transform: translate(var(--bx), var(--by)) scale(1) rotate(var(--rot, -2deg)); }
+  #bubble.flip { transform-origin: calc(100% - 18px) 100%; }
+  #bubble .tail { position: absolute; left: 16px; bottom: -24px; width: 30px; height: 26px; overflow: visible; }
+  #bubble .tail path { fill: #FFFBF2; stroke: #3A2C34; stroke-width: 2.5; stroke-linejoin: round; }
+  #bubble.flip .tail { left: auto; right: 16px; transform: scaleX(-1); }
+  #bubble.small { font-size: 24px; padding: 5px 14px 8px; }
+  /* a nudge: the control it means gives a little wiggle */
+  .wiggle { animation: wig .6s ease-in-out 2; }
+  @keyframes wig { 20% { transform: rotate(-3deg) scale(1.03); } 50% { transform: rotate(3deg) scale(1.03); } 80% { transform: rotate(-1deg); } }
+  #avcv { cursor: pointer; }
+</style></head>
+<body class="chat">
+  <div id="bar"><span id="day"></span><div id="goals"></div><div id="sgoal"></div><span id="clock"></span></div>
+  <div id="editor" class="panel"><div id="tabs"></div><div id="monaco"></div></div>
+  <div id="design" class="panel"></div>
+  <div id="term" class="panel"></div>
+  <div id="cam" class="panel"><canvas id="c" width="320" height="180"></canvas></div>
+  <div id="preview" class="panel"><iframe id="game" src="about:blank"></iframe><span id="gamelabel"></span></div>
+  <div id="chat" class="panel"></div>
+  <div id="poll" class="panel"></div>
+  <div id="cap"></div>
+
+  <div id="top"><span><i class="dot"></i></span><span>Interview with Ashwini <b class="t" id="timer">0:00</b></span></div>
+
+  <div id="plate">
+    <div class="name">Ashwini Tiwari</div>
+    <div class="role">Builds AI systems end to end, from idea to live.</div>
+    <div class="tags"><span class="open">Open to full-time, remote</span><span>India · IST</span><span>Founder, Octyn</span></div>
+  </div>
+  <div id="bigname" aria-hidden="true"></div>
+
+  <div id="me"><canvas id="mecv" width="480" height="270"></canvas><span class="lbl" id="melbl">You</span><div id="mecap"></div><span class="muted"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M3 3l18 18M9 9v3a3 3 0 0 0 5 2M15 10V5a3 3 0 0 0-6 0"/></svg></span></div>
+
+  <aside id="side">
+    <h4>Talk to him <span>He hears typing and talking</span></h4>
+    <div id="log"></div>
+    <div id="ask"><form id="askf" autocomplete="off"><input id="q" placeholder="Ask him anything" maxlength="160"><button aria-label="send"><svg viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></svg></button></form>
+      <div id="tips"></div></div>
+  </aside>
+
+  <div id="ctl">
+    <button class="rb" id="bmic"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg><span class="tip">Talk to him</span></button>
+    <button class="rb off" id="bcam"><svg viewBox="0 0 24 24"><rect x="3" y="7" width="13" height="10" rx="2"/><path d="M16 11l5-3v8l-5-3"/></svg><span class="tip">Your camera moves your character</span></button>
+    <button class="rb" id="bsnd"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path class="on" d="M16 9a4 4 0 0 1 0 6M19 6a8 8 0 0 1 0 12"/></svg><span class="tip">Sound</span></button>
+    <div id="songbox"><span id="song">♪</span><button class="rb" id="bskip"><svg viewBox="0 0 24 24"><path d="M5 5l9 7-9 7zM18 5v14"/></svg><span class="tip">Next song</span></button></div>
+    <button class="rb" id="blog"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg><span class="tip">Transcript</span></button>
+    <span class="sep"></span>
+    <button class="rb" id="leave"><svg viewBox="0 0 24 24" style="width:28px;height:28px;stroke:#fff"><path d="M3 15c5-5 13-5 18 0l-2 3-4-1v-3a10 10 0 0 0-6 0v3l-4 1z"/></svg>Leave</button>
+  </div>
+
+  <div id="lobby">
+    <div id="pre">
+      <div id="tile"><canvas id="avcv" width="1280" height="720"></canvas><div id="bubble"><span class="txt"></span><svg class="tail" viewBox="0 0 30 26"><path d="M3 0C7 9 6 18 1 25C11 20 19 11 27 0"/></svg></div><span class="lbl" id="tilelbl">You</span>
+        <div class="nudge n-cam"><svg viewBox="0 0 170 70"><path d="M160 14C120 6 60 20 14 58M14 58l3-17M14 58l17-4"/></svg><span>turn me on,<br>I'll copy your face!</span></div>
+        <div class="nudge n-mic"><span>or just<br>say hi out loud</span><svg viewBox="0 0 170 70"><path d="M10 14c40-8 100 6 146 44M156 58l-3-17M156 58l-17-4"/></svg></div>
+        <div class="btns">
+          <button class="rb" id="lmic"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg><span class="tip">Talk instead of typing</span></button>
+          <button class="rb off" id="lcam"><svg viewBox="0 0 24 24"><rect x="3" y="7" width="13" height="10" rx="2"/><path d="M16 11l5-3v8l-5-3"/></svg><span class="tip">Your camera moves your character</span></button>
+        </div></div>
+      <div id="look"><span>who are you coming as?</span><div id="cast"></div></div>
+    </div>
+    <div id="join">
+      <h1 class="ready">Ready to<br>join?</h1>
+      <div class="who"><span class="av"><svg width="40" height="40" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="2" y="3" width="12" height="10" fill="#E8E2D2"/><rect x="3" y="4" width="8" height="8" fill="#1B1D22"/><rect x="4" y="7" width="2" height="2" fill="#E3A94F"/><rect x="8" y="7" width="2" height="2" fill="#E3A94F"/><rect x="12" y="5" width="1" height="1" fill="#6b6b6b"/><rect x="12" y="7" width="1" height="1" fill="#6b6b6b"/></svg></span>
+        <div><b>Ashwini</b> is already in the call<span class="in">At his desk</span></div></div>
+      <label class="book" for="yourname">What should he call you?</label>
+      <input id="yourname" maxlength="22" placeholder="your name" autocomplete="given-name" spellcheck="false">
+      <button id="go">Walk in <span>→</span></button>
+      <div class="alt">Short on time? <a href="/resume">Read the resume</a></div>
+    </div>
+  </div>
+
+  <div id="pop" hidden></div>
+  <span class="tilelbl" id="hislbl">Ashwini</span>
+  <canvas id="reach" width="1110" height="690"></canvas>
+  <div id="hit" title="Reach in"></div>
+  <div id="share"><span class="who">Ashwini is presenting</span><button class="stop">Stop sharing</button><div class="body"></div></div>
+  <div id="logbox"></div>
+
+  <!-- no show server: the editor is stubbed, and the show's event stream is a local one the page drives -->
+  <script>
+    window.require = function () {}; window.require.config = function () {};
+    window.EventSource = class { constructor() { window.__show = this; this.onmessage = null } close() {} emit(m) { this.onmessage && this.onmessage({ data: JSON.stringify(m) }) } };
+  </script>
+  <script type="importmap">{ "imports": { "three": "../vendor/three/build/three.module.js", "three/addons/": "../vendor/three/examples/jsm/" } }</script>
+  <script type="module" src="./live.js"></script>
+  <script type="module" src="./meet.js"></script>
+</body></html>

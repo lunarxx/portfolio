@@ -1,0 +1,118 @@
+<!doctype html>
+<!-- the stream: one page at 1920x1080, captured as it plays. the layouts (part 1 spec section 3, live build spec): code
+     (his editor large, the terminal, his cam, captions, the game, chat), design (the whiteboard, sprite or level tool where
+     the editor was), play (his game up big) and chat (his cam full frame, chat over it, big captions) -->
+<html><head><meta charset="utf-8"><title>octyn onair</title>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Gochi+Hand&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/node_modules/monaco-editor/min/vs/editor/editor.main.css">
+<style>
+  :root { --bg: #16171B; --panel: #1E1C1A; --panel2: #24211E; --line: #34302B; --text: #D8D2C4; --dim: #8E8779; --amber: #E3A94F; --cream: #F1D9A8; --sage: #8FA38A; --brick: #C0664A; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--text); font-family: 'JetBrains Mono', monospace; }
+  .px { font-family: 'VT323', monospace; }
+  .panel { position: absolute; background: var(--panel); border: 2px solid var(--line); overflow: hidden; }
+  #bar { position: absolute; left: 24px; right: 24px; top: 16px; height: 58px; display: flex; align-items: center; gap: 28px; padding: 0 16px; z-index: 5; }
+  .brand { font-size: 40px; color: var(--cream); }
+  .live { display: inline-flex; align-items: center; gap: 8px; font-size: 26px; color: var(--brick); } .live i { width: 12px; height: 12px; background: var(--brick); display: inline-block; }
+  #day { font-size: 28px; color: var(--dim); } #day b { color: var(--amber); font-weight: normal; }
+  #goals { display: flex; gap: 22px; font-size: 26px; margin-left: auto; } #goals span { color: var(--dim); } #goals .done { color: var(--sage); } #goals .now { color: var(--cream); }
+  #clock { font-size: 26px; color: var(--dim); }
+  #song { font-size: 22px; color: var(--dim); opacity: .8; } #song:empty { display: none; }
+  /* the stream goal: what it is, how far, a thin bar under it */
+  #sgoal { display: none; flex-direction: column; gap: 3px; font-size: 22px; color: var(--cream); min-width: 260px; }
+  #sgoal.on { display: flex; } #sgoal .v { color: var(--amber); } #sgoal .b { height: 4px; background: var(--panel2); } #sgoal .b i { display: block; height: 100%; background: var(--amber); transition: width .5s; }
+  #sgoal.hit { color: var(--sage); } #sgoal.hit .b i { background: var(--sage); }
+  #cam canvas { width: 100%; height: 100%; image-rendering: pixelated; display: block; }
+  #cap { font-size: 25px; line-height: 34px; color: var(--dim); padding: 12px 18px; }
+  #cap b { color: var(--cream); font-weight: 600; }
+  #tabs { display: flex; height: 40px; border-bottom: 2px solid var(--line); font-size: 17px; }
+  #tabs div { padding: 9px 20px; color: var(--dim); border-right: 2px solid var(--line); white-space: nowrap; }
+  #tabs .on { color: var(--cream); background: var(--panel2); }
+  #monaco { position: absolute; top: 42px; left: 0; right: 0; bottom: 0; }
+  #term div { white-space: pre; } #term .ok { color: var(--sage); } #term .bad { color: var(--brick); }
+  #preview .label { position: absolute; top: 8px; left: 10px; font-size: 22px; color: var(--cream); background: #16171Bcc; padding: 0 8px; }
+  #preview iframe { background: #16171B; }
+  #term { font-size: 19px; line-height: 30px; padding: 12px 20px; color: var(--dim); }
+  #preview iframe { width: 100%; height: 100%; border: 0; }
+  #chat { padding: 10px 16px; font-size: 19px; line-height: 27px; display: flex; flex-direction: column; justify-content: flex-end; }
+  .msg { padding: 5px 0; } .who { font-weight: 600; margin-right: 8px; }
+  .msg.reading { background: var(--panel2); border-left: 4px solid var(--amber); padding-left: 10px; margin-left: -14px; }
+  /* the code layout */
+  body.code #bar { background: none; }
+  body.code #editor { left: 24px; top: 88px; width: 1240px; height: 804px; }
+  body.code #term { left: 24px; top: 904px; width: 1240px; height: 112px; }
+  body.code #cam { left: 1288px; top: 88px; width: 608px; height: 342px; }
+  body.code #cap { left: 1288px; top: 430px; width: 608px; height: 86px; }
+  body.code #preview { left: 1288px; top: 528px; width: 608px; height: 228px; }
+  body.code #chat { left: 1288px; top: 768px; width: 608px; height: 248px; }
+  /* the chat layout */
+  body.chat #bar { background: #16171Bd9; }
+  body.chat #cam { left: 0; top: 0; width: 1920px; height: 1080px; border: 0; }
+  body.chat #chat { right: 24px; top: 96px; width: 540px; height: 470px; background: #16171Bd9; }
+  body.chat #cap { left: 50%; transform: translateX(-50%); bottom: 70px; top: auto; font-size: 40px; line-height: 52px; padding: 14px 28px; background: #16171Be6; max-width: 1500px; width: auto; }
+  body.chat #editor, body.chat #term, body.chat #preview { display: none; }
+  /* the play layout: his game up big, him, his words and chat down the side */
+  body.play #bar { background: none; }
+  body.play #preview { left: 24px; top: 88px; width: 1240px; height: 928px; }
+  body.play #cam { left: 1288px; top: 88px; width: 608px; height: 342px; }
+  body.play #cap { left: 1288px; top: 430px; width: 608px; height: 86px; }
+  body.play #chat { left: 1288px; top: 528px; width: 608px; height: 488px; }
+  body.play #editor, body.play #term { display: none; }
+  /* the design layout: what he's making by hand (the whiteboard, the sprite, the level) where the editor was */
+  .dtabs { display: flex; height: 40px; border-bottom: 2px solid var(--line); font-size: 17px; }
+  .dtabs div { padding: 9px 20px; color: var(--dim); border-right: 2px solid var(--line); white-space: nowrap; }
+  .dtabs div.on { color: var(--cream); background: var(--panel2); }
+  .dtool { position: absolute; top: 42px; left: 0; display: none; } .dtool.on { display: block; }
+  .dtool canvas, .dtool svg { display: block; }
+  body.design #bar { background: none; }
+  body.design #design { left: 24px; top: 88px; width: 1240px; height: 804px; }
+  body.design #term { left: 24px; top: 904px; width: 1240px; height: 112px; }
+  body.design #cam { left: 1288px; top: 88px; width: 608px; height: 342px; }
+  body.design #cap { left: 1288px; top: 430px; width: 608px; height: 86px; }
+  body.design #preview { left: 1288px; top: 528px; width: 608px; height: 228px; }
+  body.design #chat { left: 1288px; top: 768px; width: 608px; height: 248px; }
+  body.design #editor { display: none; }
+  body:not(.design) #design { display: none; }
+  #cap:empty { display: none; }
+  /* an ability's banner across the top of the stream */
+  .fxbanner { position: absolute; left: 50%; top: 92px; transform: translate(-50%, -24px); opacity: 0; font-size: 64px; line-height: 64px; padding: 8px 34px 10px; background: #16171Bee; border: 2px solid var(--line); z-index: 7; transition: opacity .2s, transform .25s; white-space: nowrap; pointer-events: none; }
+  .fxbanner.on { opacity: 1; transform: translate(-50%, 0); }
+  #cam { position: absolute; }
+  /* the game while he codes: stopped, dimmed, until he launches it to play */
+  #preview.stopped iframe { filter: brightness(.45) saturate(.6); }
+  #preview.stopped::after { content: "■ stopped"; position: absolute; right: 12px; bottom: 10px; font: 22px 'VT323', monospace; color: var(--dim); background: #16171Bcc; padding: 0 8px; }
+  /* the keys he's pressing, on the game's corner */
+  .keycaps { position: absolute; right: 14px; bottom: 12px; display: none; gap: 8px; z-index: 2; }
+  .keycaps i { font-style: normal; font-size: 22px; min-width: 38px; padding: 2px 10px; text-align: center; color: var(--dim); background: #16171Bcc; border: 2px solid var(--line); border-bottom-width: 5px; }
+  .keycaps i.down { color: #16171B; background: var(--amber); border-color: var(--cream); border-bottom-width: 2px; transform: translateY(3px); }
+  /* banner mode: his room only, full frame, and the channel flip between shots */
+  html.banner #bar, html.banner #editor, html.banner #design, html.banner #term, html.banner #preview, html.banner #chat, html.banner #cap, html.banner #poll, html.banner .fxbanner { display: none !important; }
+  html.banner #cam { left: 0 !important; top: 0 !important; width: 1920px !important; height: 1080px !important; border: 0 !important; transform: none !important; }
+  #flip { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; image-rendering: pixelated; opacity: 0; pointer-events: none; z-index: 9; }
+  /* a chat poll: two options, the bars fill as chat votes, a countdown; the winner stays up a moment */
+  #poll { display: none; z-index: 6; background: #16171Bf2; border-color: var(--amber); padding: 14px 18px; }
+  #poll.on { display: block; }
+  #poll .q { font-size: 26px; color: var(--cream); margin-bottom: 8px; } #poll .q span { color: var(--dim); font-size: 22px; margin-left: 10px; }
+  #poll .row { display: flex; align-items: center; gap: 12px; font-size: 25px; margin: 6px 0; }
+  #poll .n { color: var(--amber); width: 20px; } #poll .name { width: 250px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #poll .bar { flex: 1; height: 14px; background: var(--panel2); } #poll .bar i { display: block; height: 100%; background: var(--sage); transition: width .4s; }
+  #poll .row.win .bar i { background: var(--amber); } #poll .row.win .name { color: var(--cream); }
+  #poll .c { width: 34px; text-align: right; color: var(--dim); } #poll .t { height: 3px; background: var(--amber); margin-top: 10px; width: 100%; }
+  body.code #poll, body.design #poll, body.play #poll { left: 1288px; top: 528px; width: 608px; }
+  body.chat #poll { right: 24px; top: 590px; width: 540px; }
+</style></head>
+<body class="chat">
+  <div id="bar" class="px"><span class="brand">octyn</span><span class="live"><i></i>ONAIR</span><span id="day"></span><div id="goals"></div><div id="sgoal"></div><span id="song"></span><span id="clock"></span></div>
+  <div id="editor" class="panel"><div id="tabs"></div><div id="monaco"></div></div>
+  <div id="design" class="panel"></div>
+  <div id="term" class="panel"></div>
+  <div id="cam" class="panel"><canvas id="c" width="320" height="180"></canvas></div>
+  <div id="preview" class="panel"><iframe id="game" src="about:blank"></iframe><span class="label px" id="gamelabel"></span></div>
+  <div id="chat" class="panel"></div>
+  <div id="poll" class="panel"></div>
+  <div id="cap" class="panel"></div>
+  <script>window.MonacoEnvironment = { getWorker: () => new Worker(URL.createObjectURL(new Blob(['self.onmessage = () => {}'], { type: 'text/javascript' }))) };</script>
+  <script src="/node_modules/monaco-editor/min/vs/loader.js"></script>
+  <script type="importmap">{ "imports": { "three": "/node_modules/three/build/three.module.js", "three/addons/": "/node_modules/three/examples/jsm/" } }</script>
+  <script type="module" src="./live.js"></script>
+</body></html>
