@@ -66,7 +66,7 @@ function HisPreview({ heard }: { heard: string | null }) {
   }
   return (
     <motion.button className={s.preview} onClick={wave} whileHover={{ scale: 1.01 }} whileTap={{ scale: .99 }} title="Say hi">
-      <canvas ref={cv} width={640} height={360} />
+      <canvas ref={cv} width={320} height={180} />
       {heard && <span className={s.previewCap}>{heard}</span>}
       <span className={s.previewName}>Ashwini <i>in the call</i></span>
     </motion.button>

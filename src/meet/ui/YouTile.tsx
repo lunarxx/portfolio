@@ -7,13 +7,18 @@ import { attach, head, poke, gazeAnchor } from '../you.js'
 import { useMeet } from '../store.js'
 import s from './meet.module.css'
 
+// a phone's tile is a third the size of a laptop's: its canvas holds half the pixels (the character is drawn at that
+// size there too), so nothing is drawn only to be shrunk away
+const PHONE = typeof matchMedia !== 'undefined' && matchMedia('(pointer: coarse)').matches
+const CW = PHONE ? 640 : 1280, CH = PHONE ? 360 : 720
+
 export function YouTile({ lobby = false, children }: { lobby?: boolean; children?: React.ReactNode }) {
   const cv = useRef<HTMLCanvasElement>(null), box = useRef<HTMLDivElement>(null)
   useEffect(() => { const off = attach(cv.current); return () => { off() } }, [])
   useEffect(() => { gazeAnchor(box.current) }, [])   // the newest tile on screen is the one it looks out of
   return (
     <div ref={box} className={s.youTile}>
-      <canvas ref={cv} width={1280} height={720} onPointerDown={poke} className={s.pokeable} />
+      <canvas ref={cv} width={CW} height={CH} onPointerDown={poke} className={s.pokeable} />
       {lobby && <Bubble box={box} />}
       {children}
     </div>
@@ -40,8 +45,19 @@ function Bubble({ box }: { box: React.RefObject<HTMLDivElement | null> }) {
       const h = head(), b = el.current, tile = box.current
       if (h && b && tile && bubble) {
         const k = tile.clientWidth / h.w, hx = h.x * k, hy = h.y * k, r = h.r * k, bw = b.offsetWidth, bh = b.offsetHeight
-        if (!side.current || side.current.id !== bubble.id) { side.current = { id: bubble.id, flip: hx + r * .55 + bw > tile.clientWidth - 16 }; pos.current = null }
-        const flip = side.current.flip, want = { x: Math.max(8, Math.min(tile.clientWidth - bw - 8, flip ? hx - r * .55 - bw : hx + r * .55)), y: Math.max(12, hy - r * 1.05 - bh) }   // never off the tile's edge (a phone's tile is narrow)
+        const narrow = tile.clientWidth < 520, tw = tile.clientWidth
+        if (!side.current || side.current.id !== bubble.id) {
+          // up to the edge of the face (the eyes and mouth sit inside about 0.6 of the head); on a phone the left side by
+          // choice, since the camera and mic buttons hold the bottom right
+          const roomL = hx - r * .7 - 8, roomR = tw - (hx + r * .7) - 8
+          side.current = { id: bubble.id, flip: narrow ? roomL >= roomR - 24 : hx + r * .55 + bw > tw - 16 }; pos.current = null
+          if (narrow) b.style.maxWidth = `${Math.max(104, Math.round(side.current.flip ? roomL : roomR))}px`   // beside the head, as wide as the room there
+          else b.style.maxWidth = ''
+          b.style.visibility = 'hidden'; raf = requestAnimationFrame(place); return   // placed next frame, at its new size
+        }
+        b.style.visibility = ''
+        const flip = side.current.flip, gap = narrow ? r * .7 : r * .55
+        const want = { x: Math.max(8, Math.min(tw - bw - 8, flip ? hx - gap - bw : hx + gap)), y: Math.max(narrow ? 8 : 12, hy - r * (narrow ? .7 : 1.05) - bh) }   // never off the tile's edge
         const p = pos.current = pos.current || { x: Math.round(want.x), y: Math.round(want.y) }   // pinned where it first appears
         b.dataset.flip = flip ? '1' : ''
         b.style.transform = `translate(${p.x}px, ${p.y}px)`

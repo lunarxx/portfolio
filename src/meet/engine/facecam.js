@@ -9,6 +9,14 @@ if (typeof console !== 'undefined' && !console.error.__meet) {
   quiet.__meet = true; console.error = quiet
 }
 const MODELS = 'https://storage.googleapis.com/mediapipe-models'
+const PHONE = typeof matchMedia !== 'undefined' && matchMedia('(pointer: coarse)').matches
+// how the tracker is keeping up (shown with /meet?debug): ms from a frame sent to its result back, results a second
+export const stats = { ms: 0, fps: 0 }
+let statN = 0, statAt = 0
+function tally(sentAt) {
+  const t = performance.now(); stats.ms = Math.round(stats.ms ? stats.ms * .9 + (t - sentAt) * .1 : t - sentAt); statN++
+  if (t - statAt > 1000) { stats.fps = Math.round(statN * 1000 / (t - statAt || 1)); statN = 0; statAt = t }
+}
 const clamp = (x, a = -1, b = 1) => Math.max(a, Math.min(b, x))
 const avg = (...v) => v.reduce((s, x) => s + (x || 0), 0) / v.length
 
@@ -73,10 +81,11 @@ export async function createFaceCam() {
   const v = (x, y, z) => { const n = Math.hypot(x, y, z) || 1; return [x / n, y / n, z / n] }
   const smooth = { left: null, right: null }   // one-euro filters per hand: still when you're still, quick when you move
   const seen = { left: 0, right: 0 }   // how many frames running each arm's hand has been found (on and off, with a lag)
-  let lastBody = null
+  let lastBody = null, lastHands = null
   // the trackers' plain results into { face, arms, hands, faceLm, body, aspect }, the same wherever they ran
   function shape(rf, h, b, aspect, now) {
     if (b !== undefined) lastBody = b
+    if (h === undefined) h = lastHands; else lastHands = h   // a frame the hands skipped: the last ones stand
     const f = rf ? rawPose({ m: rf.m, bs: Object.fromEntries(rf.bs), lm: rf.lm }) : null
     const lm = lastBody?.landmarks?.[0], wl = lastBody?.worldLandmarks?.[0]
     const arms = {}, used = new Set()
@@ -118,19 +127,19 @@ export async function createFaceCam() {
       const w = new Worker('/meet/facecam-worker.js'), t = setTimeout(() => { w.terminate(); resolve(null) }, 20000)
       w.onmessage = (e) => { if (e.data.type === 'ready') { clearTimeout(t); if (e.data.ok) resolve(w); else { console.warn('[facecam] worker failed, tracking on the page:', e.data.error); w.terminate(); resolve(null) } } }
       w.onerror = (e) => { console.warn('[facecam] worker error, tracking on the page:', e.message); clearTimeout(t); resolve(null) }
-      w.postMessage({ type: 'init', vision: VISION, face: FACE })
+      w.postMessage({ type: 'init', vision: VISION, face: FACE, handsEvery: PHONE ? 2 : 1, bodyEvery: PHONE ? 3 : 2 })
     } catch { resolve(null) }
   })
   if (worker) {
-    let busy = false, last = -1, ready = null, extras = false
-    worker.onmessage = (e) => { if (e.data.type === 'result') { busy = false; if (!e.data.error) ready = e.data } }
+    let busy = false, last = -1, ready = null, extras = false, sentAt = 0
+    worker.onmessage = (e) => { if (e.data.type === 'result') { busy = false; tally(sentAt); if (!e.data.error) ready = e.data } }
     return {
       // the newest { face, arms, ... } (undefined: nothing new yet). face is null when none is in view
       read(video, now) {
         if (!video.videoWidth) return undefined
         if (!extras) { extras = true; worker.postMessage({ type: 'extras', hands: HANDS, body: BODY }) }
         if (!busy && video.currentTime !== last) {
-          last = video.currentTime; busy = true
+          last = video.currentTime; busy = true; sentAt = performance.now()
           createImageBitmap(video).then((bitmap) => worker.postMessage({ type: 'frame', bitmap, t: now }, [bitmap]), () => { busy = false })
         }
         if (!ready) return undefined

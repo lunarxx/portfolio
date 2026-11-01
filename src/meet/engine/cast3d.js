@@ -129,11 +129,14 @@ export const DEFAULT_LOOK = { pattern: 'plain', accent: '#F2EEE6', hat: 'none', 
 const PATTERN = { plain: 0, stripes: 1, spots: 2, yoke: 3 }
 
 export async function createCast() {
+  // a phone draws it at half the size: a quarter of the pixels, and the phone's GPU is also running the camera's trackers.
+  // the post pass works in a fixed 1280x720 space (res, below), so the lines and the paper look the same either way
+  const S = typeof matchMedia !== 'undefined' && matchMedia('(pointer: coarse)').matches ? 1 : 2
   const renderer = new THREE.WebGLRenderer({ antialias: false, preserveDrawingBuffer: true, alpha: false })
-  renderer.setSize(W * 2, H * 2, false); renderer.outputColorSpace = THREE.LinearSRGBColorSpace
-  const rt = new THREE.WebGLRenderTarget(W * 2, H * 2, { count: 2, minFilter: THREE.NearestFilter, magFilter: THREE.NearestFilter, type: THREE.HalfFloatType })
+  renderer.setSize(W * S, H * S, false); renderer.outputColorSpace = THREE.LinearSRGBColorSpace
+  const rt = new THREE.WebGLRenderTarget(W * S, H * S, { count: 2, minFilter: THREE.NearestFilter, magFilter: THREE.NearestFilter, type: THREE.HalfFloatType })
   const scene = new THREE.Scene(), cam = new THREE.OrthographicCamera(-1, 1, 1, -1, .1, 2000)
-  const face = document.createElement('canvas'); face.width = W * 2; face.height = H * 2
+  const face = document.createElement('canvas'); face.width = W * S; face.height = H * S
   const fg = face.getContext('2d'), faceTex = new THREE.CanvasTexture(face)
   const post = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMaterial({
     vertexShader: 'varying vec2 vUv; void main() { vUv = uv; gl_Position = vec4(position.xy, 0., 1.); }', fragmentShader: POST,

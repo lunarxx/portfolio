@@ -607,12 +607,15 @@ function drawEditor() {
   }
   g.restore(); monitor.needsUpdate = true;
 }
+// a phone draws his room at 15 fps: the scene walk is most of the page's work, and the camera's trackers share the phone
+// with it (a pixel room on twos still reads as his room)
+const ROOM_FPS = typeof matchMedia !== 'undefined' && matchMedia('(pointer: coarse)').matches ? 15.5 : 31;
 const frameTimes = [];
 let last = 0, cam = 'A', perfAt = now() + 5;
 function frame() {
   requestAnimationFrame(frame);
   const t = now();
-  if (t - last < 1 / 31) return;   // 30 fps
+  if (t - last < 1 / ROOM_FPS) return;   // 30 fps, 15 on a phone
   last = t;
   const t0 = performance.now(), l = state.line, speaking = !!l && t >= l.start && t <= l.start + l.dur + .1;
   abilities.step();

@@ -3,6 +3,7 @@
 // it only waits this worker. the page sends a frame when the last one is done (a busy worker skips frames instead of
 // queueing them, so the lag never grows) and turns the plain results into his face, arms and gestures itself
 let face = null, hands = null, body = null, frame = 0, extrasAsked = false, files = null, mp = null, why = []
+let handsEvery = 1, bodyEvery = 2   // a phone sends 2 and 3: hands every other frame, the body every third
 
 async function make(Kind, path, extra) {
   for (const delegate of ['GPU', 'CPU']) {
@@ -14,6 +15,7 @@ async function make(Kind, path, extra) {
 self.onmessage = async (e) => {
   const m = e.data
   if (m.type === 'init') {
+    handsEvery = m.handsEvery || 1; bodyEvery = m.bodyEvery || 2
     try {
       mp = await import(`${m.vision}/vision_bundle.mjs`)
       files = await mp.FilesetResolver.forVisionTasks(`${m.vision}/wasm`)
@@ -32,13 +34,14 @@ self.onmessage = async (e) => {
     const img = m.bitmap, t = m.t
     try {
       const r = face.detectForVideo(img, t)
-      const h = hands ? hands.detectForVideo(img, t + .5) : null
-      const b = body && ++frame % 2 === 0 ? body.detectForVideo(img, t + .25) : null   // the body every other frame
+      frame++
+      const h = !hands ? null : frame % handsEvery === 0 ? hands.detectForVideo(img, t + .5) : undefined   // undefined: skipped, the page keeps the last
+      const b = body && frame % bodyEvery === 1 % bodyEvery ? body.detectForVideo(img, t + .25) : null   // the body every other frame (every third on a phone)
       self.postMessage({
         type: 'result', t, w: img.width, h: img.height,
         face: r.faceLandmarks?.length && r.facialTransformationMatrixes?.length
           ? { lm: r.faceLandmarks[0], m: Array.from(r.facialTransformationMatrixes[0].data), bs: (r.faceBlendshapes[0]?.categories || []).map((c) => [c.categoryName, c.score]) } : null,
-        hands: h ? { landmarks: h.landmarks || [], worldLandmarks: h.worldLandmarks || [] } : null,
+        hands: h ? { landmarks: h.landmarks || [], worldLandmarks: h.worldLandmarks || [] } : h,
         body: b ? { landmarks: b.landmarks || [], worldLandmarks: b.worldLandmarks || [] } : undefined,
       })
     } catch (err) { self.postMessage({ type: 'result', t, error: String(err) }) }

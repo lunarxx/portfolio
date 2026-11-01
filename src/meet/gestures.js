@@ -6,6 +6,7 @@ import { get, set, live, note } from './store.js'
 import { say, fx, pick } from './show.js'
 import { ask } from './brain.js'
 import { pacify } from './behaviour.js'
+import { stats } from './engine/facecam.js'
 
 // ---------------------------------------------------------------- reading a hand (21 points, mirrored, image space)
 const D = (a, b, k = 1) => Math.hypot((a.x - b.x) * k, a.y - b.y)
@@ -88,7 +89,7 @@ export function feed({ pose, faceSeen, hands, faceLm, aspect }) {
     live.lean = Math.max(0, Math.min(1, ((pose.z || 1) - 1.06) / .14))
   }
   // what it sees, for /meet?debug
-  if (debug) set({ debugSees: `${faceSeen ? 'face' : 'no face'} · nod ${nod} shake ${shake} · hands: ${H.map((h) => h.shape + (aboveShoulder(h) ? '↑' : '↓')).join(', ') || 'none'}${asked() ? ' · he asked' : ''}` })
+  if (debug) set({ debugSees: `${stats.ms} ms · ${stats.fps} fps · ${faceSeen ? 'face' : 'no face'} · nod ${nod} shake ${shake} · hands: ${H.map((h) => h.shape + (aboveShoulder(h) ? '↑' : '↓')).join(', ') || 'none'}${asked() ? ' · he asked' : ''}` })
 }
 const debug = typeof location !== 'undefined' && new URLSearchParams(location.search).has('debug')
 if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'production') window.__meetGest = { feed, set, get }   // dev only: replaying a take through the gestures
