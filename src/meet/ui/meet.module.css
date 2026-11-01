@@ -211,33 +211,126 @@
 @keyframes recp { 50% { box-shadow: 0 0 0 10px #B85F3A33; } }
 .real { position: absolute; left: 0; right: 0; bottom: -30px; text-align: center; font-size: 14px; color: #4A3A44; }
 
-/* ---------------- phones (his S23 and everyone else's) ---------------- */
+/* ---------------- phones (his S23 and everyone else's) ----------------
+   the lobby is one column that scrolls, with "walk in" always under your thumb. the call is one screen that never
+   scrolls: who he is up top, his room filling the middle with you as a little window over it (drag it anywhere), the
+   chips in a row you swipe, the ask box, the controls. what he shares takes his whole room. the keyboard shrinks the
+   call (the page's viewport says so) instead of covering the ask box */
+.topWho, .sheetClose { display: none; }
+.sheetEmpty { margin: auto; font: 22px var(--f-hand), cursive; color: var(--dim); }
+.presenting i, .stopShare i { font-style: normal; }
 @media (max-width: 860px) {
-  .root { overflow-y: auto; position: absolute; min-height: 100%; }
-  .lobby { position: fixed; flex-direction: column; justify-content: flex-start; align-items: stretch; gap: 22px; padding: 18px 16px 40px; }
-  .pre, .join { width: 100%; }
-  .join { order: -1; }
-  .ready { font-size: 56px; margin-bottom: 14px; }
-  .name { font-size: 42px; }
-  .book { margin-top: 18px; }
-  .go { margin-top: 18px; }
-  .nudge { display: none; }   /* no room beside the character on a phone; its bubbles nudge instead */
+  .root { position: fixed; inset: 0; height: 100dvh; overflow: hidden; -webkit-tap-highlight-color: transparent; }
+
+  /* the lobby */
+  .lobby { flex-direction: column; justify-content: flex-start; align-items: stretch; gap: 14px; overscroll-behavior: contain;
+    padding: calc(14px + env(safe-area-inset-top)) 16px calc(14px + env(safe-area-inset-bottom)); }
+  .pre, .join { display: contents; }
+  .preview { order: 1; flex: none; border-radius: 14px; }
+  .previewName { font-size: 13px; left: 10px; bottom: 10px; }
+  .previewCap { font-size: 13px; }
+  .ready { order: 2; font-size: 50px; margin: 6px 0 0; }
+  .book { order: 3; margin-top: 2px; font-size: 11px; }
+  .name { order: 4; font-size: 40px; margin-top: -6px; }
+  .pre > .youTile { order: 5; flex: none; border-radius: 16px; }
+  .custom { order: 6; }
+  .alt { order: 7; margin-top: 0; text-align: center; }
+  .go { order: 8; position: sticky; bottom: 0; z-index: 6; flex: none; align-self: stretch; justify-content: center; margin-top: 2px; padding: 15px 24px;
+    box-shadow: 0 0 0 6px #121214, 0 16px 40px 18px #121214; }
+  .nudge { display: none; }   /* no room beside the character; its bubbles nudge instead */
+  .tileBtns { left: auto; right: 12px; bottom: 12px; gap: 10px; }
+  .lbl, .tileName { left: 12px; bottom: 12px; font-size: 14px; padding: 4px 10px; border-radius: 8px; }
+  .lbl i, .tileName i { display: none; }
+  .waking { top: 10px; font-size: 12px; padding: 4px 10px; max-width: 88%; text-align: center; }
+  .rb { width: 50px; height: 50px; } .rb svg { width: 22px; height: 22px; } .struck::before { width: 28px; }
+  .bubble { font-size: 21px; padding: 6px 12px 9px; } .bubbleAt { max-width: 220px; }
+  .bubbleTyped { left: 12px; top: 6px; right: 12px; }
   .tabs > .shuffle { font-size: 0; gap: 0; padding: 7px 10px; } .tabs > button { font-size: 22px; padding: 2px 10px; }
-  .rb { width: 52px; height: 52px; } .rb svg { width: 23px; height: 23px; }
-  .bubble { font-size: 21px; padding: 6px 12px 9px; } .bubbleAt { max-width: 230px; }
-  .who { flex-wrap: wrap; } .who button { flex: 1 1 28%; }
-  .row > span { width: 64px; }
-  .call { position: relative; inset: auto; min-height: 100%; padding: 12px 12px 100px; }
-  .tiles { grid-template-columns: 1fr; flex: none; }
-  .hisTile { aspect-ratio: 4 / 3; }
-  .meTile { aspect-ratio: 16 / 9; width: 62%; justify-self: end; margin-top: -60px; z-index: 2; border: 3px solid var(--bg); }
-  .under { grid-template-columns: 1fr; }
-  .plateName { font-size: 44px; }
-  .controls { position: fixed; left: 0; right: 0; bottom: 0; padding: 12px; gap: 10px; background: linear-gradient(#12121400, #121214 40%); }
+  .who { overflow-x: auto; scrollbar-width: none; margin: 0 -16px; padding: 2px 16px; scroll-snap-type: x proximity; }
+  .who button { flex: 0 0 96px; scroll-snap-align: start; } .who b { font-size: 21px; }
+  .row > span { width: 60px; }
+  .dots button { width: 34px; height: 34px; }
+  .seg button { padding: 7px 13px; }
+
+  /* the call */
+  .call { padding: calc(10px + env(safe-area-inset-top)) 12px calc(10px + env(safe-area-inset-bottom)); gap: 10px; }
+  .topline { align-self: stretch; display: flex; align-items: center; gap: 10px; background: none; padding: 0 2px; font-size: 14px; }
+  .topTitle { display: none; }
+  .topWho { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0; }
+  .topName { font: 32px/.85 var(--f-vt), monospace; color: var(--cream); }
+  .topSub { font-size: 11.5px; color: var(--sage); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .topSub::before { content: ''; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--sage); margin-right: 6px; vertical-align: 1px; }
+  .topline b { margin: 0; flex: none; font-size: 13px; background: #1E1C1A; padding: 5px 10px; border-radius: 99px; }
+
+  .tiles { display: block; position: relative; flex: 1; min-height: 0; }
+  .hisTile { position: absolute; inset: 0; border-radius: 20px; }
+  .meTile { position: absolute; top: 10px; right: 10px; width: 29%; max-width: 150px; aspect-ratio: 3 / 4; z-index: 30; border-radius: 16px;
+    box-shadow: 0 0 0 2px #ffffff30, 0 12px 30px #000b; touch-action: none; cursor: grab; }
+  .meTile .youTile { border-radius: 16px; }
+  .meTile .tileName { left: 6px; bottom: 6px; font-size: 11px; padding: 2px 7px; border-radius: 7px; max-width: calc(100% - 12px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .meTile .muted { width: 22px; height: 22px; right: 6px; top: 6px; } .meTile .muted svg { width: 12px; height: 12px; } .meTile .muted::after { width: 15px; height: 2px; }
+  .meTile .waking { font-size: 10px; top: auto; bottom: 28px; padding: 3px 6px; }
+  .meTile .gestureTag { top: 6px; font-size: 11px; padding: 3px 9px; white-space: nowrap; }
+  .meTile .mine { right: 6px; bottom: 26px; width: 30px; height: 36px; }
+  .meTile .myCap, .meTile .debugSees { display: none; }   /* your words show in the ask box as you say them */
+  .sharing .meTile { visibility: hidden; }   /* what he shares gets all of his room */
+  .transcript { visibility: visible; position: fixed; inset: auto 0 0 0; height: 66dvh; z-index: 80; border-radius: 22px 22px 0 0; gap: 10px;
+    padding: 0 16px calc(18px + env(safe-area-inset-bottom)); font-size: 15px; line-height: 22px; box-shadow: 0 -24px 60px #000d, 0 0 0 1px #ffffff14; }
+  .sheetClose { display: block; position: sticky; top: 0; flex: none; align-self: stretch; height: 34px; margin: 0 -16px; z-index: 1; background: #1A1916 !important; border-radius: 22px 22px 0 0; }
+  .sheetClose i { display: block; width: 44px; height: 5px; border-radius: 9px; background: #4A453F; margin: 0 auto; }
+
+  .tileName { font-size: 13px; }
+  .cap { left: 10px; right: 10px; bottom: 46px; max-width: none; width: fit-content; font-size: 16px; line-height: 22px; padding: 5px 11px; border-radius: 9px; }
+  .stagePip { right: 8px; bottom: 8px; width: 36%; border-radius: 10px; }
+  .stagePipTop { left: 8px; right: auto; top: 8px; width: 64px; min-width: 0; border-radius: 8px; }
+  .hisTile .presenting, .hisTile .stopShare { top: 10px; font-size: 12px; padding: 5px 10px; border-radius: 8px; }
+  .share { padding: 46px 0 8px; }
+  .phone { height: 80%; margin-bottom: 9%; }
+  .real { bottom: -24px; font-size: 12px; }
+  .presenting { left: 10px; } .stopShare { right: 10px; }
+  .presenting i, .stopShare i { display: none; }
+  .presenting::before { content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--brick); margin-right: 6px; vertical-align: 1px; }
+  .hisTile:has(.stagePipTop) .presenting { left: 80px; }
+  .card { padding: 20px; gap: 10px; font-size: 15px; width: 90%; } .card h3 { font-size: 36px; }
+  .card a, .again { font-size: 14px; padding: 8px 13px; }
+  .pill input { font-size: 16px; }   /* under 16px, a phone zooms the page into the box */
+  .notesWrap { padding: 52px 14px 20px; }
+  .notesFoot { padding-right: 0; font-size: 19px; }
+  .page { padding-left: 60px; } .page::before { left: 46px; } .entry { margin-left: -52px; padding-left: 52px; } .entryAt { width: 40px; }
+  .entryText { font-size: 19px; }
+
+  .under { display: flex; flex-direction: column; gap: 8px; }
+  .plate { display: none; }
+  .ask { gap: 8px; }
+  .chips { order: -1; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin: 0 -12px; padding: 0 12px;
+    mask: linear-gradient(90deg, transparent, #000 12px, #000 calc(100% - 24px), transparent); }
+  .chips::-webkit-scrollbar { display: none; }
+  .chips button { flex: none; white-space: nowrap; font-size: 14px; padding: 7px 13px; }
+  .guide { order: -1; }
+  .askf { border-radius: 99px; }
+  .askf input { font-size: 16px; padding: 12px 16px; }
+  .controls { justify-content: space-between; gap: 0; padding: 0 2px; }
+  .controls .rb { width: 48px; height: 48px; }
+  .controls .leave { width: 68px; height: 48px; padding: 0; justify-content: center; gap: 0; font-size: 0; }
+  .leave svg { width: 24px; height: 24px; }
   .songbox, .sep { display: none; }
-  .leave { height: 52px; padding: 0 18px; font-size: 17px; }
-  .cap { left: 12px; bottom: 44px; font-size: 17px; line-height: 23px; }
-  .myCap { font-size: 15px; bottom: 40px; }
+}
+/* a phone on its side: his room on the left, the rest in a column beside it */
+@media (max-width: 960px) and (max-height: 520px) and (orientation: landscape) {
+  .call { display: grid; grid-template-columns: 1fr minmax(250px, 36%); grid-template-rows: auto minmax(0, 1fr) auto; column-gap: 12px; row-gap: 8px;
+    grid-template-areas: 'tiles top' 'tiles under' 'tiles controls'; padding: 8px max(10px, env(safe-area-inset-right)) 8px max(10px, env(safe-area-inset-left)); }
+  .topline { grid-area: top; } .tiles { grid-area: tiles; } .under { grid-area: under; justify-content: flex-end; min-height: 0; overflow-y: auto; } .controls { grid-area: controls; }
+  .meTile { width: 22%; aspect-ratio: 4 / 3; }
+  .chips { flex-wrap: wrap; overflow: visible; margin: 0; padding: 0; mask: none; }
+  .transcript { inset: 0 0 0 auto; width: min(420px, 60vw); height: auto; border-radius: 22px 0 0 22px; }
+  /* the lobby goes back to two columns: you on the left, the door on the right */
+  .lobby { flex-direction: row; align-items: flex-start; gap: 18px; padding: 14px max(14px, env(safe-area-inset-right)) 14px max(14px, env(safe-area-inset-left)); }
+  .pre, .join { display: flex; flex-direction: column; }
+  .pre { width: 56%; gap: 12px; } .join { width: 44%; gap: 10px; }
+  .preview { width: 100%; }
+  .ready { font-size: 40px; }
+  .name { font-size: 34px; }
+  .go { position: static; box-shadow: none; }
 }
 
 /* talking with your body: the chips' numbers and the fill as you hold fingers up, what he can see, the gesture he

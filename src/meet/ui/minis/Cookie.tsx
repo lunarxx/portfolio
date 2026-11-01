@@ -47,6 +47,12 @@ export function Cookie() {
   const end = useRef<HTMLDivElement>(null), timers = useRef<ReturnType<typeof setTimeout>[]>([])
   useEffect(() => { end.current?.scrollIntoView({ block: 'end', behavior: 'smooth' }) }, [msgs.length])
   useEffect(() => () => timers.current.forEach(clearTimeout), [])
+  // on a phone her steps are a strip you swipe: it keeps the one she's on in the middle (a column on a computer: no-op)
+  const strip = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const el = strip.current, on = el?.querySelectorAll('[data-step]')[step] as HTMLElement | undefined
+    if (el && on && el.scrollWidth > el.clientWidth) el.scrollTo({ left: on.offsetLeft - (el.clientWidth - on.offsetWidth) / 2, behavior: 'smooth' })
+  }, [step])
   const later = (ms: number, f: () => void) => { timers.current.push(setTimeout(f, ms)) }
   const push = (x: Omit<Msg, 'id'>) => setMsgs((a) => [...a, { ...x, id: nid++ }])
 
@@ -98,10 +104,10 @@ export function Cookie() {
           <input value={v} onChange={(e) => setV(e.target.value)} placeholder="Text Cookie an order" maxLength={120} /><button>Send</button>
         </form>
       </div>
-      <div className={m.behind}>
+      <div className={m.behind} ref={strip}>
         <div className={m.behindTtl}>what she&apos;s doing</div>
         {STEPS.map(([t, d], i) => (
-          <motion.div key={t} className={`${m.step} ${i <= step ? m.stepOn : ''}`} animate={{ scale: i === step ? [1, 1.02, 1] : 1 }} transition={{ duration: .35 }}>
+          <motion.div key={t} data-step className={`${m.step} ${i <= step ? m.stepOn : ''}`} animate={{ scale: i === step ? [1, 1.02, 1] : 1 }} transition={{ duration: .35 }}>
             <span>{i < step || (i === step && i !== 4) ? '✓' : i + 1}</span><div><b>{t}</b>{i === step && <small>{d}</small>}</div>
           </motion.div>
         ))}

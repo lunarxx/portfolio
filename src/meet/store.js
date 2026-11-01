@@ -8,7 +8,7 @@ let S = {
   phase: 'lobby',            // lobby | call
   name: '',
   look: { ...DEFAULT_LOOK, ...CAST.Rory },
-  cam: false, camWaking: false, mic: false, listening: false, muted: false,
+  cam: false, camWaking: false, camNote: '', mic: false, listening: false, muted: false,
   log: [],                   // [{ who: 'him' | 'you', text }]
   chips: [], offer: null,
   share: null,               // null | 'mooney' | 'contact' | 'bye'

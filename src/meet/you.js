@@ -146,16 +146,49 @@ function tick() {
 let trackerP = null
 const warmTracker = () => (trackerP ||= createFaceCam())
 export const warm = () => { warmTracker().catch(() => { trackerP = null }) }
+// a phone: the front camera, a smaller, slower stream (the trackers read every frame, and a phone's GPU is the same
+// one drawing the page), whichever way up it's held (a portrait phone gives a tall frame; the tracker takes either)
+const coarse = () => typeof matchMedia !== 'undefined' && matchMedia('(pointer: coarse)').matches
+async function openCam() {
+  const md = navigator.mediaDevices
+  if (!md?.getUserMedia) { set({ camNote: 'This browser has no camera access here' }); return null }
+  const phone = coarse()
+  const want = { facingMode: 'user', width: { ideal: phone ? 480 : 640 }, height: { ideal: phone ? 360 : 480 }, frameRate: { ideal: phone ? 24 : 30, max: 30 } }
+  try { return await md.getUserMedia({ video: want, audio: false }) } catch (e) {
+    if (e?.name === 'NotAllowedError' || e?.name === 'SecurityError') { set({ camNote: 'Camera blocked. Allow it in the site settings, then tap again' }); return null }
+    try { return await md.getUserMedia({ video: true, audio: false }) } catch { set({ camNote: 'No camera found' }); return null }   // an odd camera that refuses the asks: any frames will do
+  }
+}
+// the video is never shown, but it sits in the page: Safari on a phone stops a video's frames when it isn't in one
+function videoFor(stream) {
+  const v = document.createElement('video')
+  v.muted = true; v.playsInline = true; v.autoplay = true; v.setAttribute('playsinline', ''); v.setAttribute('aria-hidden', 'true')
+  v.style.cssText = 'position:fixed;left:0;top:0;width:2px;height:2px;opacity:0;pointer-events:none;z-index:-1'
+  v.srcObject = stream; document.body.appendChild(v)
+  return v
+}
+// a phone takes the camera back when it locks or another app wants it: the character goes still, and when you're
+// back on the page, the camera comes back on its own
+let camWanted = false
+if (typeof document !== 'undefined') document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && camWanted && !camStream) camera(true)
+})
 export async function camera(on) {
+  if (on) camWanted = true
   if (on && !camStream) {
-    try { camStream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 }, audio: false }) } catch { camStream = null }
+    set({ camNote: '' })
+    camStream = await openCam()
     if (camStream) {
-      video = document.createElement('video'); video.muted = true; video.playsInline = true; video.srcObject = camStream; await video.play()
+      video = videoFor(camStream); await video.play().catch(() => {})
+      camStream.getVideoTracks()[0]?.addEventListener('ended', () => {
+        if (!camStream) return
+        camStream.getTracks().forEach((t) => t.stop()); camStream = null; video?.remove(); video = null; set({ cam: false })   // camWanted stays: it comes back
+      })
       set({ cam: true, camWaking: true }); retarget.calibrate(); note(inLobby() ? 'turned their camera on before joining' : 'turned their camera on', 'cam')
       try { tracker = tracker || await warmTracker() } catch (e) { console.warn('tracker failed', e); trackerP = null }
       set({ camWaking: false }); if (inLobby()) setTimeout(() => speak('Ooh, I can move! Wave at him. Thumbs up when you want to go in.', { force: true }), 400)
     }
-  } else if (!on && camStream) { camStream.getTracks().forEach((t) => t.stop()); camStream = null; video = null; set({ cam: false }) }
+  } else if (!on) { camWanted = false; if (camStream) { camStream.getTracks().forEach((t) => t.stop()); camStream = null; video?.remove(); video = null; set({ cam: false }) } }
   live.dozy = 0; acted()
 }
 

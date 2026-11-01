@@ -41,7 +41,7 @@ function Bubble({ box }: { box: React.RefObject<HTMLDivElement | null> }) {
       if (h && b && tile && bubble) {
         const k = tile.clientWidth / h.w, hx = h.x * k, hy = h.y * k, r = h.r * k, bw = b.offsetWidth, bh = b.offsetHeight
         if (!side.current || side.current.id !== bubble.id) { side.current = { id: bubble.id, flip: hx + r * .55 + bw > tile.clientWidth - 16 }; pos.current = null }
-        const flip = side.current.flip, want = { x: flip ? hx - r * .55 - bw : hx + r * .55, y: Math.max(12, hy - r * 1.05 - bh) }
+        const flip = side.current.flip, want = { x: Math.max(8, Math.min(tile.clientWidth - bw - 8, flip ? hx - r * .55 - bw : hx + r * .55)), y: Math.max(12, hy - r * 1.05 - bh) }   // never off the tile's edge (a phone's tile is narrow)
         const p = pos.current = pos.current || { x: Math.round(want.x), y: Math.round(want.y) }   // pinned where it first appears
         b.dataset.flip = flip ? '1' : ''
         b.style.transform = `translate(${p.x}px, ${p.y}px)`

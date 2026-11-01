@@ -1,7 +1,7 @@
 'use client'
 // the call: two tiles side by side. his room in his (poke anything in it; what he shows you is shared there), your
 // character in yours. under his, who he is; under yours, what you can ask. the controls below
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { get, set, useMeet } from '../store.js'
 import { ask } from '../brain.js'
@@ -18,14 +18,19 @@ import s from './meet.module.css'
 
 export function Call({ live, onLeave }: { live: boolean; onLeave: () => void }) {
   const m = useMeet()
-  const sharing = !!m.share
+  const sharing = !!m.share, phone = usePhone(), tiles = useRef<HTMLDivElement>(null)
   return (
-    <div className={`${s.call} ${live ? s.callLive : ''}`}>
-      <div className={s.topline}>Interview with Ashwini <Timer /></div>
-      <div className={s.tiles}>
+    <div className={`${s.call} ${live ? s.callLive : ''} ${sharing ? s.sharing : ''}`}>
+      <div className={s.topline}>
+        <span className={s.topTitle}>Interview with Ashwini</span>
+        {/* a phone has no room for the plate under his tile: who he is sits up here instead */}
+        <span className={s.topWho}><span className={s.topName}>Ashwini Tiwari</span><span className={s.topSub}>Open to remote · Founder, Octyn</span></span>
+        <Timer />
+      </div>
+      <div className={s.tiles} ref={tiles}>
         <div className={s.hisTile} data-his-tile>
           <motion.div layout transition={{ type: 'spring', stiffness: 260, damping: 30 }}
-            className={!live ? s.stageFull : sharing ? (m.share === 'shelf' || String(m.share).startsWith('mini:') ? s.stagePipTop : s.stagePip) : s.stageTile}>
+            className={!live ? s.stageFull : sharing ? (phone || m.share === 'shelf' || String(m.share).startsWith('mini:') ? s.stagePipTop : s.stagePip) : s.stageTile}>
             <StageView className={s.stageBox} />
           </motion.div>
           {live && !sharing && <TapLayer />}
@@ -33,17 +38,19 @@ export function Call({ live, onLeave }: { live: boolean; onLeave: () => void }) 
           <AnimatePresence>
             {live && sharing && (
               <motion.div className={s.share} initial={{ opacity: 0, scale: .97 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: .97 }}>
-                <span className={s.presenting}>Ashwini is presenting</span>
-                <button className={s.stopShare} onClick={() => set({ share: null })}>Stop sharing</button>
+                <span className={s.presenting}><i>Ashwini is </i>presenting</span>
+                <button className={s.stopShare} onClick={() => set({ share: null })}>Stop<i> sharing</i></button>
                 {m.share === 'mooney' ? <Mooney /> : m.share === 'sources' ? <Sources /> : m.share === 'notebook' ? <Notebook /> : m.share === 'shelf' || String(m.share).startsWith('mini:') ? <Shared /> : <Contact bye={m.share === 'bye'} />}
               </motion.div>
             )}
           </AnimatePresence>
         </div>
-        <div className={s.meTile}>
+        {/* yours: beside his on a computer; on a phone, a little window over his room you can drag out of the way */}
+        <motion.div key={phone ? 'pip' : 'tile'} className={s.meTile} drag={phone && live} dragConstraints={tiles} dragElastic={.12} dragMomentum={false} whileDrag={{ scale: 1.04 }}>
           {live && <YouTile>
             <span className={s.tileName}>{m.name || 'You'}{m.cam && <i> · moving with you</i>}</span>
             {!m.mic && <span className={s.muted}><Mic /></span>}
+            {!m.cam && m.camNote && <span className={s.waking}>{m.camNote}</span>}
             <AnimatePresence>{m.gesture && m.cam && <GestureTag key={m.gesture.id} label={m.gesture.label} />}</AnimatePresence>
             {m.debugSees && <span className={s.debugSees}>{m.debugSees}</span>}
             <AnimatePresence>{m.myCap && <motion.div key={m.myCap} className={s.myCap} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>{m.myCap}</motion.div>}</AnimatePresence>
@@ -51,7 +58,7 @@ export function Call({ live, onLeave }: { live: boolean; onLeave: () => void }) 
               initial={{ scale: 0, rotate: -20 }} animate={{ scale: 1, rotate: 0 }} exit={{ scale: 0 }} transition={{ type: 'spring', stiffness: 400, damping: 15 }} />}</AnimatePresence>
           </YouTile>}
           <AnimatePresence>{m.transcript && <Transcript />}</AnimatePresence>
-        </div>
+        </motion.div>
       </div>
       <motion.div className={s.under} initial={false} animate={{ opacity: live ? 1 : 0 }}>
         <div className={s.plate}>
@@ -72,6 +79,12 @@ export function Call({ live, onLeave }: { live: boolean; onLeave: () => void }) 
       </motion.div>
     </div>
   )
+}
+
+// a phone-sized screen (the call's layout switches with the CSS at the same width)
+const PHONE = '(max-width: 860px)'
+function usePhone() {
+  return useSyncExternalStore((f) => { const q = matchMedia(PHONE); q.addEventListener('change', f); return () => q.removeEventListener('change', f) }, () => matchMedia(PHONE).matches, () => false)
 }
 
 function Timer() {
@@ -116,7 +129,9 @@ function Transcript() {
   const end = useRef<HTMLDivElement>(null)
   useEffect(() => { end.current?.scrollIntoView({ block: 'end' }) }, [log.length])
   return (
-    <motion.div className={s.transcript} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 30 }}>
+    <motion.div className={s.transcript} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 30 }}>
+      <button className={s.sheetClose} onClick={() => set({ transcript: false })} aria-label="Close the transcript"><i /></button>
+      {!log.length && <div className={s.sheetEmpty}>Nothing said yet.</div>}
       {log.map((l: any, i: number) => <div key={i} className={l.who === 'him' ? s.msgHim : s.msgYou}><span>{l.who === 'him' ? 'Ashwini' : name || 'You'}</span>{l.text}</div>)}
       <div ref={end} />
     </motion.div>

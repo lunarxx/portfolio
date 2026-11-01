@@ -13,13 +13,13 @@ import s from './meet.module.css'
 
 let nameTimer: ReturnType<typeof setTimeout> | undefined
 export function Lobby({ onJoin }: { onJoin: () => void }) {
-  const { name, cam, camWaking, mic, heard, debugSees } = useMeet()
+  const { name, cam, camWaking, camNote, mic, heard, debugSees } = useMeet()
   return (
     <motion.div className={s.lobby} initial={{ opacity: 1 }} exit={{ opacity: 0, transition: { duration: .5 } }}>
       <div className={s.pre}>
         <YouTile lobby>
           <span className={s.lbl}>{name || 'You'}{cam && <i> · moving with you</i>}</span>
-          {camWaking && <span className={s.waking}>Waking up the tracker…</span>}
+          {camWaking ? <span className={s.waking}>Waking up the tracker…</span> : camNote && <span className={s.waking}>{camNote}</span>}
           {debugSees && <span className={s.debugSees}>{debugSees}</span>}
           {!mic && <div className={`${s.nudge} ${s.nMic}`}><span>or just<br />say hi out loud</span><svg viewBox="0 0 170 70"><path d="M10 14c40-8 100 6 146 44M156 58l-3-17M156 58l-17-4" /></svg></div>}
           {!cam && <div className={`${s.nudge} ${s.nCam}`}><svg viewBox="0 0 170 70"><path d="M160 14C120 6 60 20 14 58M14 58l3-17M14 58l17-4" /></svg><span>turn me on,<br />then just wave at him!</span></div>}
