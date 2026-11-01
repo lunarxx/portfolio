@@ -1,7 +1,7 @@
 'use client'
 // the interview: a call with ashwini at his desk. the call is always there underneath (his room has to keep its one
 // canvas); the lobby sits over it until you walk in, then the room settles into his tile
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { get, set, live, useMeet, note, spokenName } from '../store.js'
 import { say, wakeAudio } from '../show.js'
@@ -30,11 +30,27 @@ function leave() {
   setTimeout(() => set({ share: 'bye' }), 2600)
 }
 
+// a phone held on its side, read from the phone (not the page's size, which the keyboard changes as you type)
+function useSideways() {
+  const [on, setOn] = useState(false)
+  useEffect(() => {
+    if (!matchMedia('(pointer: coarse)').matches) return
+    const read = () => {
+      const t = screen.orientation?.type, land = t ? t.startsWith('landscape') : Math.abs(Number((window as any).orientation) || 0) === 90
+      setOn(land && Math.min(screen.width, screen.height) < 540)
+    }
+    read(); screen.orientation?.addEventListener?.('change', read); addEventListener('orientationchange', read)
+    return () => { screen.orientation?.removeEventListener?.('change', read); removeEventListener('orientationchange', read) }
+  }, [])
+  return on
+}
+
 export default function Meet({ fonts }: { fonts: string }) {
   const { phase } = useMeet()
+  const sideways = useSideways()
   useEffect(() => { startYou(); startRoom(); loadMatcher(); live.lastAction = performance.now(); (window as any).__meetJoin = join }, [])
   return (
-    <div className={`${s.root} ${fonts}`}>
+    <div className={`${s.root} ${fonts}`} data-land={sideways ? '1' : undefined}>
       <StageHidden />
       <Call live={phase === 'call'} onLeave={leave} />
       <AnimatePresence>{phase === 'lobby' && <Lobby onJoin={join} />}</AnimatePresence>

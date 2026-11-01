@@ -39,7 +39,7 @@ export function Call({ live, onLeave }: { live: boolean; onLeave: () => void }) 
             {live && sharing && (
               <motion.div className={s.share} initial={{ opacity: 0, scale: .97 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: .97 }}>
                 <span className={s.presenting}><i>Ashwini is </i>presenting</span>
-                <button className={s.stopShare} onClick={() => set({ share: null })}>Stop<i> sharing</i></button>
+                <button className={s.stopShare} onClick={() => set({ share: null })}><span className={s.stopWide}>Stop sharing</span><span className={s.stopNarrow}>Back to call</span></button>
                 {m.share === 'mooney' ? <Mooney /> : m.share === 'sources' ? <Sources /> : m.share === 'notebook' ? <Notebook /> : m.share === 'shelf' || String(m.share).startsWith('mini:') ? <Shared /> : <Contact bye={m.share === 'bye'} />}
               </motion.div>
             )}
