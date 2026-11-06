@@ -637,3 +637,15 @@
 
 /* a phone on its side: the chord's name clear of his little window */
 @media (max-width: 860px) and (max-height: 500px) { .gtrTop { padding-left: 76px; } }
+
+/* his captions during a share: out of the little video, along the bottom of what he's showing */
+.stagePipTop .cap, .stagePip .cap { display: none; }
+.shareCap { position: absolute; left: 50%; bottom: 10px; translate: -50% 0; z-index: 30; width: max-content; max-width: min(88%, 680px); padding: 5px 13px; border-radius: 10px; background: #121214e6; color: var(--cream); font: 600 17px/1.32 var(--f-mono), monospace; text-align: center; pointer-events: none; }
+.shareCap b { color: var(--cream); font-weight: 600; }
+.shareCap i { font-style: normal; visibility: hidden; }
+@media (max-width: 860px) { .shareCap { font-size: 14px; bottom: 6px; padding: 4px 10px; max-width: 94%; } }
+
+/* his captions get their own strip under the guitar */
+.gtr { bottom: 48px; }
+@media (max-width: 860px) { .gtr { bottom: 38px; } }
+@media (max-width: 860px) and (max-height: 500px) { .gtr { bottom: 30px; } }

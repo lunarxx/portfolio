@@ -2,7 +2,7 @@
 // own events (a 'say' with timed words, gestures on their words, a babble voice his mouth follows; acts and moves
 // from his library)
 import { get, set, live, spokenName } from './store.js'
-import { pieces } from './voicetext.js'
+import { pieces, pitchRate } from './voicetext.js'
 
 export const stage = () => (typeof window !== 'undefined' ? window.stage : null)
 export const emit = (m) => window.__show && window.__show.emit(m)
@@ -39,8 +39,9 @@ async function voice(text, wait = 4500, soft = false) {
     const res = await fetch('/api/voice', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text, soft }), signal: AbortSignal.timeout(wait) })
     if (!res.ok) return null
     const mp3 = await res.arrayBuffer(), ctx = stage()?.audio
-    const dur = ctx ? (await ctx.decodeAudioData(mp3.slice(0))).duration : null
-    return dur ? { url: URL.createObjectURL(new Blob([mp3], { type: 'audio/mpeg' })), dur } : null
+    const ab = ctx ? await ctx.decodeAudioData(mp3.slice(0)) : null; if (!ab) return null
+    const rate = pitchRate(ab.getChannelData(0), ab.sampleRate)   // every clip at his pitch
+    return { url: URL.createObjectURL(new Blob([mp3], { type: 'audio/mpeg' })), dur: ab.duration / rate, rate }
   } catch { return null }
 }
 const weight = (w) => .1 + syl(w) * .085 + (/[.,?!;:]$/.test(w) ? .28 : 0)
@@ -67,7 +68,7 @@ export function say(text, { mark = null, act = null, still = false, soft = false
       const dur = real ? real.dur : t + .2, url = real ? real.url : await babble(words, dur)
       // his own mark opens the line; after it, and on lines with none, a sentence of any length gets talking hands
       const m = mark && !i ? mark : !act && !still && ws.length >= 5 ? 'explain' : null
-      emit({ type: 'say', id: `p${++lineId}`, text: part, url, words, dur, marks: m ? [[0, m]] : [], act: i ? null : act })
+      emit({ type: 'say', id: `p${++lineId}`, text: part, url, words, dur, rate: real ? real.rate : 1, marks: m ? [[0, m]] : [], act: i ? null : act })
       live.lastSaid = performance.now() + dur * 1000
       await sleep(dur * 1000 + 140)
     }

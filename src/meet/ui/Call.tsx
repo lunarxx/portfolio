@@ -47,6 +47,7 @@ export function Call({ live, onLeave }: { live: boolean; onLeave: () => void }) 
           <AnimatePresence>
             {live && sharing && (
               <motion.div className={s.share} initial={{ opacity: 0, scale: .97 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: .97 }}>
+                <ShareCaption />
                 <span className={s.presenting}><i>Ashwini is </i>presenting</span>
                 <button className={s.stopShare} onClick={() => set({ share: null })}><span className={s.stopWide}>Stop sharing</span><span className={s.stopNarrow}>Back to call</span></button>
                 <ShareFit>{m.share === 'guitar' ? <Guitar /> : m.share === 'brief' ? <Brief /> : m.share === 'cases' ? <Cases /> : m.share === 'mooney' ? <Mooney /> : m.share === 'sources' ? <Sources /> : m.share === 'notebook' ? <Notebook /> : m.share === 'shelf' || String(m.share).startsWith('mini:') ? <Shared /> : <Contact bye={m.share === 'bye'} />}</ShareFit>
@@ -104,6 +105,18 @@ export function Call({ live, onLeave }: { live: boolean; onLeave: () => void }) 
 const PHONE = '(max-width: 860px)'
 function usePhone() {
   return useSyncExternalStore((f) => { const q = matchMedia(PHONE); q.addEventListener('change', f); return () => q.removeEventListener('change', f) }, () => matchMedia(PHONE).matches, () => false)
+}
+
+// his captions, while he's small in the corner: the same words the engine writes on his picture, down where you can read them
+function ShareCaption() {
+  const box = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const cap = document.getElementById('cap'), el = box.current; if (!cap || !el) return
+    const copy = () => { el.innerHTML = cap.innerHTML; el.style.display = cap.innerHTML ? '' : 'none' }
+    copy(); const mo = new MutationObserver(copy); mo.observe(cap, { childList: true, subtree: true, characterData: true, attributes: true })
+    return () => mo.disconnect()
+  }, [])
+  return <div ref={box} className={s.shareCap} aria-live="polite" />
 }
 
 // what he shares is drawn for a tile of about 860 x 520, and scales as one piece to the tile it's really in, so nothing in a

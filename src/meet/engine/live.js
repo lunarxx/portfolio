@@ -85,7 +85,7 @@ async function say(item) {
   try {
     const data = await (await fetch(item.url)).arrayBuffer(), ab = await audio.decodeAudioData(data);
     if (audio.state === 'suspended') await audio.resume();
-    src = audio.createBufferSource(); src.buffer = ab; src.connect(analyser); src.connect(sound.voiceIn); dur = ab.duration;
+    src = audio.createBufferSource(); src.buffer = ab; src.connect(analyser); src.connect(sound.voiceIn); src.playbackRate.value = item.rate || 1; dur = ab.duration / (item.rate || 1);
   } catch (e) { post('/stage/log', { kind: 'audio', message: String(e) }); }
   const start = now() + 0.05;
   state.line = { ...item, shown: captionWords(item.text, item.words || []), cat: CAT.test((item.words || []).map(w => w[0]).join(' ') || item.text || ''), start, dur, windows: gestureWindows({ start, words: item.words || [], dur, marks: item.marks || [] }) };

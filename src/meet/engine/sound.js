@@ -12,7 +12,7 @@ import { createTv } from './tv.js';
 import { createPlaylist } from './playlist.js';
 
 export function createMic({ rand = Math.random } = {}) {
-  let state = 'rest', until = 0, nextAt = 40 + rand() * 140, d = .42, last = null;
+  let state = 'rest', until = 0, nextAt = Infinity, d = .42, last = null;   // the stream had him drift off and on the mic every minute or so; on a call that reads as his voice randomly changing
   return {
     update(t, lean = 0) {
       const dt = last === null ? 0 : Math.min(.5, Math.max(0, t - last)); last = t;

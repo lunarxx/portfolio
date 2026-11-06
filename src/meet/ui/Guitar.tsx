@@ -12,7 +12,8 @@ import s from './meet.module.css'
 const OPEN = [82.41, 110, 146.83, 196, 246.94, 329.63]   // low E at the top, as it looks with it in your lap
 const CHORDS: Record<string, (number | null)[]> = { Am: [null, 0, 2, 2, 1, 0], C: [null, 3, 2, 0, 1, 0], G: [3, 2, 0, 0, 0, 3], Em: [0, 2, 2, 0, 0, 0], D: [null, null, 0, 2, 3, 2], F: [1, 3, 3, 2, 1, 1] }
 const NAMES = Object.keys(CHORDS)
-const BY_FINGERS: Record<string, string> = { one: 'Am', two: 'C', three: 'G', four: 'Em', open: 'Em' }
+// the tracker can't reliably tell four fingers from five (gestures.js, measured on his takes), so all six chords use shapes it can
+const BY_FINGERS: Record<string, string> = { one: 'Am', two: 'C', three: 'G', four: 'Em', open: 'Em', rock: 'D', fist: 'F' }
 const BAND = [.2, .8], FRETS = 4.4
 // what he says over it, the longer you keep playing: low and unhurried, like the narration on a quiet film. written, because a
 // model couldn't be both this soft and this true: every line comes from his notes. drafts, for him to correct
@@ -36,12 +37,13 @@ export function Guitar() {
   useEffect(() => {
     const cv = box.current!, g = cv.getContext('2d')!, amp = [0, 0, 0, 0, 0, 0], pointers = new Map<number, number>()
     // the longer you play, the more he talks. time spent actually playing, not time with it open; he stops when you stop
-    let playedFor = 0, lastPlay = 0, lastFrame = performance.now(), nextMuse = 9, beat = 0, musing = false
+    let playedFor = 0, lastPlay = 0, lastFrame = performance.now(), nextMuse = 4, beat = 0, musing = false
     const museOver = async () => {
       const line = OVER_THE_GUITAR[beat]; if (!line) return
       musing = true; beat++
+      const next = OVER_THE_GUITAR[beat]; if (next) fetch('/api/voice', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: next, soft: true }) }).catch(() => {})   // ready before he needs it
       await say(line, { still: true, soft: true }).catch(() => {})
-      nextMuse = playedFor + 8 + Math.random() * 5; musing = false
+      musing = false; nextMuse = playedFor + 2 + Math.random() * 2
     }
     let w = 1, h = 1, raf = 0, played = false, tracked: number | null = null, held = { name: '', at: 0 }, alive = true
     const size = () => { const r = cv.getBoundingClientRect(), d = Math.min(2, devicePixelRatio || 1); w = r.width; h = r.height; cv.width = w * d; cv.height = h * d; g.setTransform(d, 0, 0, d, 0, 0) }
@@ -93,9 +95,9 @@ export function Guitar() {
       } else tracked = null
       const name = v && now - v.at < 300 && v.shape ? BY_FINGERS[v.shape] : ''
       if (name && name !== held.name) held = { name, at: now }
-      if (name && name === held.name && now - held.at > 140 && name !== chordRef.current) pick(name)
+      if (name && name === held.name && now - held.at > (name === 'F' ? 260 : 140) && name !== chordRef.current) pick(name)
       const dt = (now - lastFrame) / 1000; lastFrame = now
-      if (now - lastPlay < 2500) { playedFor += dt; if (!musing && playedFor > nextMuse && moodTier() === 0) museOver() }
+      if (now - lastPlay < 6000) { playedFor += dt; if (!musing && playedFor > nextMuse && moodTier() === 0) museOver() }
       draw(t); raf = requestAnimationFrame(loop)
     }
     raf = requestAnimationFrame(loop)
@@ -117,7 +119,7 @@ export function Guitar() {
       <canvas ref={box} className={s.gtrCanvas} />
       <div className={s.gtrChords}>{NAMES.map((n) => <button key={n} className={n === chord ? s.gtrOn : ''} onClick={() => pick(n)}>{n}</button>)}</div>
       {cam
-        ? <div className={s.gtrLegend}>1 finger Am · 2 C · 3 G · 4 Em</div>
+        ? <div className={s.gtrLegend}>1 finger Am · 2 C · 3 G · 4 Em · rock sign D · fist F</div>
         : <button className={s.gtrCam} onPointerEnter={warm} onClick={() => camera(true)}>Turn your camera on and strum it in the air</button>}
     </div>
   )
