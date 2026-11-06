@@ -600,3 +600,6 @@
   .projectDesc { font-size: 0.74rem; }
   .modeToggle { right: 12px; bottom: 16px; padding: 8px 12px; }
 }
+
+/* links big enough for a thumb, on a screen only */
+@media screen and (max-width: 860px) { .contactItem a, .backLink { display: inline-block; padding: 7px 0; } }

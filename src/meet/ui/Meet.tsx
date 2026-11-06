@@ -48,7 +48,7 @@ function useSideways() {
 export default function Meet({ fonts }: { fonts: string }) {
   const { phase } = useMeet()
   const sideways = useSideways()
-  useEffect(() => { startYou(); startRoom(); loadMatcher(); live.lastAction = performance.now(); (window as any).__meetJoin = join }, [])
+  useEffect(() => { startYou(); startRoom(); loadMatcher(); live.lastAction = performance.now(); (window as any).__meetJoin = join; if (location.search.includes('debug')) (window as any).__meet = { set, get } }, [])
   return (
     <div className={`${s.root} ${fonts}`} data-land={sideways ? '1' : undefined}>
       <StageHidden />

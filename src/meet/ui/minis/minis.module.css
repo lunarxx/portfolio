@@ -285,3 +285,17 @@
   .tries { flex-wrap: wrap !important; overflow: visible !important; }
   .tries button { white-space: normal; text-align: left; }
 }
+
+/* the shelf's cards grow to fit their words, and it scrolls if it has to */
+.shelf { grid-auto-rows: max-content; }
+.glyph { flex: none; height: 104px; }
+/* a phone on its side: every bit of height for the miniature itself, and what's left over scrolls */
+@media (max-width: 860px) and (max-height: 500px) {
+  .wrap { padding: 44px 10px 6px; }
+  .top { margin-bottom: 4px; min-height: 26px; }
+  .note2 { display: none; }
+  .body { overflow-y: auto; }
+  .ob { display: block; height: auto; }
+  .glyph { height: 64px; }
+  .shelf { grid-template-columns: repeat(3, 1fr); }
+}

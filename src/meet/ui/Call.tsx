@@ -49,7 +49,7 @@ export function Call({ live, onLeave }: { live: boolean; onLeave: () => void }) 
               <motion.div className={s.share} initial={{ opacity: 0, scale: .97 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: .97 }}>
                 <span className={s.presenting}><i>Ashwini is </i>presenting</span>
                 <button className={s.stopShare} onClick={() => set({ share: null })}><span className={s.stopWide}>Stop sharing</span><span className={s.stopNarrow}>Back to call</span></button>
-                {m.share === 'guitar' ? <Guitar /> : m.share === 'brief' ? <Brief /> : m.share === 'cases' ? <Cases /> : m.share === 'mooney' ? <Mooney /> : m.share === 'sources' ? <Sources /> : m.share === 'notebook' ? <Notebook /> : m.share === 'shelf' || String(m.share).startsWith('mini:') ? <Shared /> : <Contact bye={m.share === 'bye'} />}
+                <ShareFit>{m.share === 'guitar' ? <Guitar /> : m.share === 'brief' ? <Brief /> : m.share === 'cases' ? <Cases /> : m.share === 'mooney' ? <Mooney /> : m.share === 'sources' ? <Sources /> : m.share === 'notebook' ? <Notebook /> : m.share === 'shelf' || String(m.share).startsWith('mini:') ? <Shared /> : <Contact bye={m.share === 'bye'} />}</ShareFit>
               </motion.div>
             )}
           </AnimatePresence>
@@ -80,7 +80,7 @@ export function Call({ live, onLeave }: { live: boolean; onLeave: () => void }) 
       <motion.div className={s.controls} initial={false} animate={{ opacity: live ? 1 : 0, y: live ? 0 : 20 }}>
         <button className={`${s.rb} ${m.mic ? (m.listening ? s.listening : '') : s.struck}`} onClick={micButton} title="Talk to him"><Mic /></button>
         <div className={s.camWrap}>
-          {live && !m.cam && <CamHint />}
+          {live && !m.cam && !sharing && <CamHint />}
           <button className={`${s.rb} ${m.cam ? s.lit : s.struck}`} onPointerEnter={warm} onClick={() => camera(!get().cam)} title="Your camera moves your character"><Cam /></button>
         </div>
         {/* two separate mutes: him, and the room (the music and his keyboard) */}
@@ -106,10 +106,28 @@ function usePhone() {
   return useSyncExternalStore((f) => { const q = matchMedia(PHONE); q.addEventListener('change', f); return () => q.removeEventListener('change', f) }, () => matchMedia(PHONE).matches, () => false)
 }
 
+// what he shares is drawn for a tile of about 860 x 520, and scales as one piece to the tile it's really in, so nothing in a
+// miniature gets clipped or crushed when the window changes. a phone held upright has its own layouts
+function ShareFit({ children }: { children: React.ReactNode }) {
+  const box = useRef<HTMLDivElement>(null), [f, setF] = useState<{ k: number; w: number; h: number } | null>(null)
+  useEffect(() => {
+    const el = box.current?.parentElement; if (!el) return
+    const read = () => {
+      const W = el.clientWidth, H = el.clientHeight, vw = innerWidth, vh = innerHeight
+      if (vw <= 860 && vh > 500) return setF(null)
+      const k = vw <= 860 ? Math.min(1, W / 640, H / 340) : Math.min(1.25, W / 860, H / 520)
+      setF({ k, w: W / k, h: H / k })
+    }
+    read(); const ro = new ResizeObserver(read); ro.observe(el); addEventListener('resize', read)
+    return () => { ro.disconnect(); removeEventListener('resize', read) }
+  }, [])
+  return <div ref={box} className={f ? s.shareFit : s.shareFitOff} style={f ? { zoom: f.k, width: f.w, height: f.h } : undefined}>{children}</div>
+}
+
 // what the camera does, said early: a note on the camera button itself, from the moment you're in
 function CamHint() {
   const [on, setOn] = useState(true)
-  useEffect(() => { const t = setTimeout(() => setOn(false), matchMedia(PHONE).matches ? 7000 : 30000); return () => clearTimeout(t) }, [])   // on a phone it sits over the ask box: a moment, then out of the way
+  useEffect(() => { const t = setTimeout(() => setOn(false), matchMedia('(max-width: 1240px)').matches ? 7000 : 30000); return () => clearTimeout(t) }, [])   // where there's no spare room it sits over the ask box: a moment, then out of the way
   if (!on) return null
   return <motion.div className={s.camHint} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1 }}>turn this on and your character copies your face and hands<small>your video stays in this tab</small></motion.div>
 }

@@ -22,7 +22,7 @@
 .stagePipTop { position: absolute; right: 158px; top: 6px; width: 11%; min-width: 96px; aspect-ratio: 16 / 9; z-index: 22; border-radius: 9px; overflow: hidden; box-shadow: 0 0 0 2px #ffffff55, 0 6px 18px #0007; }
 .stageBox, .stageBox > div, .stageBox :global(#stageroot) { width: 100%; height: 100%; position: relative; }
 .cam { position: absolute; inset: 0; }
-.cam canvas { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cam canvas { width: 100%; height: 100%; object-fit: cover; object-position: 50% 15%; display: block; }
 /* his captions: a small box hugging the words, pinned left so new words only add on at the end */
 .cap { position: absolute; left: 22px; bottom: 58px; max-width: min(760px, 80%); font: 600 23px/31px var(--f-mono), monospace; color: var(--cream); background: #121214d9; padding: 6px 14px; border-radius: 10px; z-index: 13; pointer-events: none; }
 .cap:empty, .stageFull .cap, .stagePip .cap { display: none; }
@@ -523,7 +523,7 @@
 
 /* the door on a phone held sideways: two columns, nothing stacked. your character and its options on the left and scrolling,
    his room, your name and the way in on the right, all in view without scrolling */
-@media (max-width: 960px) and (max-height: 500px) {
+@media (max-width: 860px) and (max-height: 500px) {
   .lobby { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: stretch; overflow: hidden;
     padding: calc(8px + env(safe-area-inset-top)) calc(14px + env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) calc(14px + env(safe-area-inset-left)); }
   .pre { display: flex; flex-direction: column; gap: 8px; width: auto; min-height: 0; overflow-y: auto; scrollbar-width: none; }
@@ -558,9 +558,82 @@
   .gtrTop { font-size: 17px; gap: 10px; } .gtrTop b { font-size: 36px; }
   .gtrChords button { min-height: 46px; font-size: 22px !important; padding: 0 !important; }
 }
-@media (max-width: 960px) and (max-height: 500px) {
+@media (max-width: 860px) and (max-height: 500px) {
   .gtr { inset: 44px 8px 6px; gap: 5px; }
   .gtrTop b { font-size: 26px; } .gtrTop { font-size: 14px; }
   .gtrChords button { min-height: 34px; font-size: 18px !important; }
   .gtrLegend, .gtrCam { display: none; }
 }
+
+/* scaling, on anything that isn't a phone: everything sizes from the window's height as well as its width, so resizing or
+   zooming the browser can't clip the door or crush the call. nothing here touches the phone layouts */
+.agenda button, .agenda a, .topTitle, .topline { white-space: nowrap; }
+.topline { flex: none; }
+@media (min-width: 861px) {
+  .lobby { padding: 60px 28px 14px; overflow: hidden; }
+}
+/* the call, when the window gets short: his tile keeps the room, the rest gives way */
+@media (min-width: 861px) and (max-height: 780px) {
+  .call { padding: 12px 24px; gap: 9px; }
+  .chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; mask: linear-gradient(90deg, #000 calc(100% - 24px), transparent); }
+  .chips::-webkit-scrollbar { display: none; }
+  .chips button { flex: none; white-space: nowrap; font-size: 14px; padding: 5px 11px; }
+  .ask { gap: 6px; }
+  .role { font-size: 20px; }
+  .controls { gap: 10px; }
+  .controls .rb { width: 50px; height: 50px; } .controls .rb svg { width: 22px; height: 22px; } .controls .struck::before { width: 28px; }
+  .songbox, .volbox { height: 50px; } .songbox .rb, .songbox .songMute { width: 40px; height: 40px; }
+  .controls .leave { height: 50px; font-size: 15px; }
+}
+@media (min-width: 861px) and (max-height: 600px) {
+  .call { padding: 8px 20px; gap: 6px; }
+  .topline { padding: 4px 10px; font-size: 15px; }
+  .facts { display: none; }
+  .role { font-size: 17px; }
+  .askf input { padding-top: 7px; padding-bottom: 7px; font-size: 15px; }
+  .controls .rb { width: 42px; height: 42px; } .controls .rb svg { width: 19px; height: 19px; } .controls .struck::before { width: 24px; }
+  .songbox, .volbox { height: 42px; } .songbox .rb, .songbox .songMute { width: 34px; height: 34px; }
+  .controls .leave { height: 42px; }
+  .camHint { display: none; }
+}
+/* narrower windows: the song's name goes before anything gets squeezed */
+@media (min-width: 861px) and (max-width: 1100px) { .song { display: none; } .volbox input { width: 64px; } .call { padding-left: 16px; padding-right: 16px; } .controls { gap: 8px; } }
+
+/* the tightest desktop windows */
+@media (min-width: 861px) and (max-width: 1100px) {
+  .topTitle { display: none; }
+  .facts { display: none; }
+  .role { font-size: 17px; }
+  .agenda button, .agenda a { padding: 5px 9px; font-size: 14px; }
+}
+
+/* the door, one picture scaled to the window */
+.door { display: contents; }
+@media (min-width: 861px) {
+  .door { display: flex; align-items: center; justify-content: center; gap: 90px; zoom: var(--door); flex: none; }
+  .pre { width: 800px; }
+  .join { width: 440px; }
+}
+
+/* a screen share gets the room, the way it does on a real call */
+.shareFit { position: absolute; left: 0; top: 0; display: flex; align-items: center; justify-content: center; }
+.shareFitOff { display: contents; }
+@media (min-width: 861px) {
+  .tiles { transition: grid-template-columns .35s cubic-bezier(.2, .8, .2, 1); }
+  .sharing .tiles { grid-template-columns: minmax(0, 2.4fr) minmax(0, 1fr); }
+}
+/* a phone on its side: what he shares takes the whole screen */
+@media (max-width: 860px) and (max-height: 500px) {
+  .sharing .hisTile { position: fixed; inset: 0; z-index: 70; border-radius: 0; }
+}
+
+/* the row under the tiles keeps their proportions, sharing or not, so it all lines up */
+@media (min-width: 861px) {
+  .under { transition: grid-template-columns .35s cubic-bezier(.2, .8, .2, 1); }
+  .sharing .under { grid-template-columns: minmax(0, 2.4fr) minmax(0, 1fr); }
+}
+/* mooney's receipt scrolls when it can't all fit, like a long receipt does */
+.rcpt { overflow-y: auto; scrollbar-width: none; min-height: 0; } .rcpt::-webkit-scrollbar { display: none; }
+
+/* a phone on its side: the chord's name clear of his little window */
+@media (max-width: 860px) and (max-height: 500px) { .gtrTop { padding-left: 76px; } }

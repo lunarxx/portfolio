@@ -137,7 +137,7 @@ const SPOTS = [
 ]
 const NAMES = { guitar: 'his guitar', cube: "rubik's cube", monitor: 'his monitor', head: 'Ashwini', him: 'Ashwini', mug: 'his coffee', can: 'his energy drink', phone: 'his phone', cat: 'the cat' }
 // his 16:9 picture covers the tile (w x h): where it lands
-const fit = (w, h) => { const k = Math.max(w / 16, h / 9), pw = 16 * k, ph = 9 * k; return { pw, ph, ox: (pw - w) / 2, oy: (ph - h) / 2 } }
+const fit = (w, h) => { const k = Math.max(w / 16, h / 9), pw = 16 * k, ph = 9 * k; return { pw, ph, ox: (pw - w) / 2, oy: (ph - h) * .15 } }
 const camNow = () => { const s = stage(); return s && s.CAMS[s.state.camHold || 'A'] }
 // what's under a point in his tile: him, his things, the cat (a ray into his room), else the nearest spot
 export function under(x, y, w, h) {

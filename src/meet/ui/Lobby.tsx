@@ -10,13 +10,24 @@ import { Agenda } from './Agenda'
 import { VoiceMute, MusicMute, Volume } from './SoundControls'
 import { PhoneMenu } from './PhoneMenu'
 import { Mic, Cam } from './icons'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { say, emit, wakeAudio } from '../show.js'
 import s from './meet.module.css'
 
 let nameTimer: ReturnType<typeof setTimeout> | undefined
+// the door is one composed picture, drawn at 1330 x 730: on a computer the whole of it scales to the window, so resizing or
+// zooming the browser changes its size and nothing else. a phone has its own layout
+function useDoorScale() {
+  const [k, setK] = useState(1)
+  useEffect(() => {
+    const read = () => setK(Math.max(.4, Math.min((innerWidth - 56) / 1330, (innerHeight - 74) / 730, 1.25)))
+    read(); addEventListener('resize', read); return () => removeEventListener('resize', read)
+  }, [])
+  return k
+}
 export function Lobby({ onJoin }: { onJoin: () => void }) {
   const { name, cam, camWaking, camNote, mic, heard, debugSees } = useMeet()
+  const door = useDoorScale()
   return (
     <motion.div className={s.lobby} initial={{ opacity: 1 }} exit={{ opacity: 0, transition: { duration: .5 } }}>
       <div className={s.lobbyTop}>
@@ -24,6 +35,7 @@ export function Lobby({ onJoin }: { onJoin: () => void }) {
         <div className={s.lobbySound}><VoiceMute /><MusicMute /><Volume /></div>
         <PhoneMenu onPick={onJoin} />
       </div>
+      <div className={s.door} style={{ '--door': door } as React.CSSProperties}>
       <div className={s.pre}>
         <YouTile lobby>
           <span className={s.lbl}>{name || 'You'}{cam && <i> · moving with you</i>}</span>
@@ -46,6 +58,7 @@ export function Lobby({ onJoin }: { onJoin: () => void }) {
           onChange={(e) => { const v = e.target.value; set({ name: v }); acted(); clearTimeout(nameTimer); nameTimer = setTimeout(() => noticed('name', v.trim()), 900) }}
           onKeyDown={(e) => { if (e.key === 'Enter') onJoin() }} />
         <button id="go" className={s.go} onClick={onJoin}>Walk in <span>→</span></button>
+      </div>
       </div>
     </motion.div>
   )
