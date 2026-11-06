@@ -8,14 +8,15 @@ let S = {
   phase: 'lobby',            // lobby | call
   name: '',
   look: { ...DEFAULT_LOOK, ...CAST.Rory },
-  cam: false, camWaking: false, camNote: '', mic: false, listening: false, muted: false,
+  cam: false, camWaking: false, camNote: '', mic: false, listening: false, voiceOff: false, roomOff: false,
   log: [],                   // [{ who: 'him' | 'you', text }]
   chips: [], offer: null,
-  share: null,               // null | 'mooney' | 'contact' | 'bye'
+  share: null,               // null | 'brief' | 'shelf' | 'mini:<id>' | 'mooney' | 'contact' | 'sources' | 'notebook' | 'bye'
   myCap: '',                 // your last words, shown in your tile for a moment
   bubble: null,              // your character's speech bubble in the lobby: { text, id, small }
   heard: null,               // what he called out when he heard you in the lobby
   transcript: false,
+  viewMoved: false,          // you've walked his camera away from where it starts
   mine: null,                // what you took off his desk
   joinedAt: 0,
   gesture: null,             // the last gesture he saw: { name, label, id }
@@ -57,4 +58,4 @@ export function spokenName(raw = '') {
   return first[0].toUpperCase() + first.slice(1).toLowerCase()
 }
 
-export const live = { talkUntil: 0, micLevel: 0, dozy: 0, lastAction: 0, lastSaid: 0, lean: 0, pinchSeen: 0 }
+export const live = { guitar: undefined, talkUntil: 0, micLevel: 0, dozy: 0, lastAction: 0, lastSaid: 0, lean: 0, pinchSeen: 0 }

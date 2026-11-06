@@ -4,7 +4,7 @@
    and tells the show when it is done. between lines he works: typing, glancing at chat, idle head life. the director
    picks the camera and the layout. everything the page does is also a small event back to the show (perf, said) */
 import * as THREE from 'three';
-import { W, H, scene, render, V3 } from './look.js';
+import { W, H, scene, render, markHim, V3 } from './look.js';
 import { buildRoom, ANCHOR } from './room.js';
 import { buildOctyn } from './octyn.js';
 import { makePerformer, G } from './perform.js';
@@ -34,7 +34,8 @@ import { drawFace } from './octyn.js';
 const { mouse, props, cat, monitor, lights } = buildRoom();   // props: the things he picks up, and the box
 const kitty = createCat();
 const O = buildOctyn(scene);
-const perform = makePerformer(O, mouse, { props, cat, away: () => !!state.away });
+markHim(O.root);   // he stays pixel; the room around him is painted
+const perform = makePerformer(O, mouse, { props, cat, away: () => !!state.away, keyTap: ch => sound.key(ch) });
 const offChair = createBody(O);
 function ortho(halfH, center, dir, layers) {
   const c = new THREE.OrthographicCamera(-halfH * W / H, halfH * W / H, halfH, -halfH, .1, 30);
@@ -71,7 +72,7 @@ const director = createDirector();
 const audio = new (window.AudioContext || window.webkitAudioContext)();
 const analyser = audio.createAnalyser(); analyser.fftSize = 1024;   // his mouth reads the dry voice; what you hear goes through the mic and the room
 { const tap = audio.createGain(); tap.gain.value = 0; analyser.connect(tap); tap.connect(audio.destination); }
-const sound = createSound(audio, { tv: new URLSearchParams(location.search).get('tv') || 'warm', onSong: s => { $('song').textContent = `♪ ${s.title}`; post('/stage/log', { kind: 'song', title: s.title, bpm: s.bpm }); } });
+const sound = createSound(audio, { tv: new URLSearchParams(location.search).get('tv') || 'warm', onSong: s => { $('song').textContent = s.title; post('/stage/log', { kind: 'song', title: s.title, bpm: s.bpm }); } });
 const buf = new Float32Array(analyser.fftSize);
 /* abilities: something happens on stream (chat, the game, the work, what he says), something happens in the room */
 const fx = createFx({ O, cat, kitty, lights, monitor, audio, camPanel: document.getElementById('cam'), page: PAGE, voiceOut: sound.voiceIn, move: name => startMove(name), box: () => dropBox(), cam: (c, d) => holdCam(c, d), hat: () => partyHat() });

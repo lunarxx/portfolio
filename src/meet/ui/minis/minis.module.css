@@ -263,3 +263,25 @@
   .lanes { height: 280px; overflow-y: hidden; }
   .dossier { max-height: none; overflow-y: auto; }
 }
+
+/* the outbound list, phones only */
+.obList { display: none; }
+@media (max-width: 860px) {
+  .lanes { display: none !important; }
+  .ob { grid-template-rows: auto minmax(0, 1fr) auto !important; }
+  .obList { display: flex; flex-direction: column; background: #F7F5F0; border-bottom: 2px solid #3A2C34; }
+  .obList button { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 42px; padding: 5px 12px !important; text-align: left; border-bottom: 1px solid #3A2C3422 !important; color: #2B2230 !important; }
+  .obList .obRowOn { background: #F2C46B66 !important; }
+  .obName { display: flex; flex-direction: column; min-width: 0; font: 600 13px var(--f-plex), monospace; }
+  .obName small { font: 11px var(--f-plex), monospace; color: #5C6670; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .obStage { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; flex: none; }
+  .obStage b { font: 600 11px var(--f-plex), monospace; color: #3A4650; }
+  .obStage i { display: flex; gap: 3px; }
+  .obStage u { width: 11px; height: 4px; border-radius: 2px; background: #3A465026; text-decoration: none; }
+  .obStage .obDone { background: #3A4650; }
+  .dossier { min-height: 0; overflow-y: auto; }
+  .obFoot { flex-wrap: wrap; white-space: normal !important; overflow: visible !important; gap: 2px 10px; }
+  /* the search's suggestions wrap instead of running off */
+  .tries { flex-wrap: wrap !important; overflow: visible !important; }
+  .tries button { white-space: normal; text-align: left; }
+}

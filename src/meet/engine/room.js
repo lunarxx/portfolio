@@ -5,7 +5,8 @@
    layers: 7 the pendant over him (out of the way of T, the chase camera, which looks down past it), 1 front wall, 2 back wall, 3 the wall at -x, 4 the wall at +x, 5 the desk's far side (hidden from camera A: it would
    stand in front of him), 6 his monitor (every camera sees it; camera A over its back). */
 import * as THREE from 'three';
-import { C, hex, scene, toon, soft, flat, tex, add, B, RB, CY, SP, CAP, plane, glowSpot, glows, V3 } from './look.js';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { C, hex, scene, toon, soft, flat, tex, add, B, RB, CY, SP, CAP, plane, glowSpot, glows, markCrisp, V3 } from './look.js';
 
 export const DESK = { top: .76, z0: .26, z1: 1.02, x0: -1.15, x1: 1.15 };
 const FRONT_Z = 1.1, BACK_Z = -1.9, SIDE_X = 2.6, CEIL = 2.8;
@@ -14,6 +15,8 @@ const onLayer = (o, n) => { o.traverse(c => c.layers.set(n)); return o; };
 const group = (n) => { const g = new THREE.Group(); scene.add(g); g.userData.layer = n; return g; };
 const paintedWall = (w, h, color, lines) => new THREE.MeshBasicMaterial({ map: (() => { const t = tex(32, 64, (g, W, H) => { g.fillStyle = color; g.fillRect(0, 0, W, H); g.fillStyle = lines; for (let x = 0; x < W; x += 8) g.fillRect(x, 0, 1, H); g.fillStyle = '#211B17'; g.fillRect(0, H - 5, W, 5); }); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(w / .55, 1); return t; })() });
 
+const rubiks = {};   // its top layer, so a tap can twist it
+const guitarStrings = [];   // his guitar's, so they can shake when it's strummed
 /* ---------- small builders ---------- */
 function book(parent, x, y, z, h, w, c, lean = 0, ry = 0) { const b = add(parent, RB(w, h, .15, .004), toon(c), x, y + h / 2, z); b.rotation.z = lean; b.rotation.y = ry; add(parent, B(w + .002, .01, .12), toon(C.paper), x, y + h * .7, z).rotation.z = lean; return b; }
 const BOOKS = [C.brick, C.denim, C.sage, C.paper, C.ember, C.olive, C.navy, C.maroon, C.fog, C.cream, C.moss, C.rose];
@@ -23,17 +26,33 @@ export function bookRow(parent, x0, x1, y, z, seed = 1) {
     book(parent, x + w / 2, y, z, h, w, BOOKS[(i * 5) % BOOKS.length], lean); x += w + .004 + (lean ? .03 : 0); i++; if (i % 11 === 0) x += .06; }
 }
 export function pot(parent, x, y, z, s, c = C.brick) { add(parent, CY(.055 * s, .07 * s, .1 * s, 12), toon(c), x, y + .05 * s, z); add(parent, CY(.064 * s, .064 * s, .015 * s, 12), toon(c), x, y + .1 * s, z); }
-export function succulent(parent, x, y, z, s = 1) { pot(parent, x, y, z, s * .8, C.paper); for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2, l = add(parent, CAP(.013 * s, .05 * s, 5), toon(i % 2 ? C.sage : C.moss), x + Math.cos(a) * .02 * s, y + .11 * s, z + Math.sin(a) * .02 * s); l.rotation.set(Math.sin(a) * .9, 0, -Math.cos(a) * .9); } }
+/* a real leaf: a blade along +z from its stem, widest a third of the way out, folded along the midrib, drooping to its tip
+   (these were squashed spheres; the pixel pass hid that, the watercolour doesn't). unit length and width, scaled per plant */
+const bladeGeo = (() => { const cache = {}; return (droop = .35, fold = .22, belly = .75) => { const key = droop + '|' + fold + '|' + belly; if (cache[key]) return cache[key];
+  const N = 8, pos = [], idx = []; for (let i = 0; i <= N; i++) { const t = i / N, w = Math.sin(Math.PI * t ** belly) * .5, y = -droop * t * t; pos.push(-w, y - fold * w * .6, t, 0, y, t, w, y - fold * w * .6, t); }
+  for (let i = 0; i < N; i++) { const a = i * 3; idx.push(a, a + 3, a + 1, a + 1, a + 3, a + 4, a + 1, a + 4, a + 2, a + 2, a + 4, a + 5); }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setIndex(idx); g.computeVertexNormals(); return cache[key] = g; }; })();
+const leafMat = (() => { const m = {}; return c => m[c] || (m[c] = toon(c, { side: THREE.DoubleSide })); })();
+function blade(parent, x, y, z, len, wid, yaw, lift, c, droop, belly) { const l = add(parent, bladeGeo(droop, .22, belly), leafMat(c), x, y, z); l.scale.set(wid, len, len); l.rotation.set(-lift, yaw, 0, 'YXZ'); return l; }
+const stem = (parent, x0, y0, z0, x1, y1, z1, r, c = C.moss) => { const a = V3(x0, y0, z0), b = V3(x1, y1, z1), s = add(parent, CY(r, r * .7, a.distanceTo(b), 5), toon(c), (x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2, false); s.quaternion.setFromUnitVectors(V3(0, 1, 0), b.clone().sub(a).normalize()); return s; };
+const soil = (parent, x, y, z, s) => add(parent, CY(.056 * s, .056 * s, .006 * s, 12), toon(C.cocoa), x, y + .096 * s, z, false);
+export function succulent(parent, x, y, z, s = 1) { pot(parent, x, y, z, s * .8, C.paper); soil(parent, x, y, z, s * .8);
+  for (let i = 0; i < 14; i++) { const a = i * 2.4, k = i / 14; blade(parent, x, y + .088 * s, z, (.05 + .035 * k) * s, .028 * s, a, 1.25 - k * .85, k > .5 ? C.moss : C.sage, .1, .55); } }
+/* stems up out of the pot, leaves spiralling up them, arching out low down and reaching up at the top. a big one (s > 2) is a floor plant */
 export function leafy(parent, x, y, z, s = 1, c = C.brick) {
-  pot(parent, x, y, z, s, c);
-  for (let i = 0; i < 9; i++) { const a = i / 9 * Math.PI * 2 + i, r = .03 + (i % 3) * .015, l = add(parent, SP(.045 * s, 7), toon([C.leaf, C.moss, C.sage][i % 3]), x + Math.cos(a) * r * s, y + (.16 + (i % 4) * .04) * s, z + Math.sin(a) * r * s);
-    l.scale.set(1, .35, .6); l.rotation.set(Math.cos(a) * .6, a, Math.sin(a) * .6); }
+  pot(parent, x, y, z, s, c); soil(parent, x, y, z, s);
+  const big = s > 2, stems = big ? 3 : 2, cols = [C.leaf, C.moss, C.sage, C.leaf];
+  for (let v = 0; v < stems; v++) { const a0 = v * 2.3 + x * 3, lean = (big ? .018 : .02) * s, tx = x + Math.cos(a0) * lean, tz = z + Math.sin(a0) * lean, y0 = y + .096 * s, h = (big ? .34 : .17) * s * (1 - v * .14), n = big ? 11 : 6;
+    stem(parent, x, y0, z, tx, y0 + h, tz, (big ? .006 : .0055) * Math.max(1, s * .5), C.bark);
+    for (let i = 0; i < n; i++) { const t = (i + 1) / n, a = i * 2.4 + v * 1.1; blade(parent, x + (tx - x) * t, y0 + h * t * .98, z + (tz - z) * t, (big ? .15 : .105) * s * (1 - t * .25), (big ? .058 : .05) * s * (1 - t * .2), a, .15 + t * .95, cols[(i + v) % 4], .32, .72); } }
 }
 /* pothos trailing off a shelf edge: leaves down a stem */
 export function pothos(parent, x, y, z, len = .5, seed = 1) {
-  pot(parent, x, y, z, .7, C.paper);
-  for (let v = 0; v < 3; v++) { const dx = (v - 1) * .05, n = Math.round(len / .05) - v;
-    for (let i = 0; i < n; i++) { const yy = y + .06 - i * .05, l = add(parent, SP(.022, 6), toon(i % 2 ? C.leaf : C.moss), x + dx + Math.sin(i * 1.3 + seed + v) * .02, yy, z + .07 + Math.cos(i + v) * .015); l.scale.set(1.2, .5, .9); l.rotation.z = Math.sin(i + v) * .8; } }
+  pot(parent, x, y, z, .7, C.paper); soil(parent, x, y, z, .7);
+  for (let i = 0; i < 6; i++) blade(parent, x, y + .07, z, .055, .045, i * 2.4 + seed, .5, i % 2 ? C.leaf : C.moss, .3, .6);   // the crown
+  for (let v = 0; v < 3; v++) { const dx = (v - 1) * .045, n = Math.round(len / .055) - v; let px = x + dx * .4, py = y + .075, pz = z + .05;
+    for (let i = 0; i < n; i++) { const qx = x + dx + Math.sin(i * 1.3 + seed + v) * .018, qy = y + .05 - i * .055, qz = z + .075 + Math.cos(i + v) * .01; stem(parent, px, py, pz, qx, qy, qz, .0022, C.moss); px = qx; py = qy; pz = qz;
+      const side = i % 2 ? 1 : -1; blade(parent, qx, qy, qz, .05 + .012 * Math.sin(i + v), .042, side * 1.05, -.5, i % 3 ? C.leaf : C.moss, .22, .6); } }
 }
 export function frame(parent, x, y, z, w, h, t, ry = 0, border = C.bark) { const g = new THREE.Group(); parent.add(g); g.position.set(x, y, z); g.rotation.y = ry;
   add(g, RB(w, h, .025, .004), toon(border), 0, 0, 0); plane(g, w - .05, h - .05, t, 0, 0, .014); return g; }
@@ -105,14 +124,13 @@ export function buildRoom() {
     for (let k = 0; k < 6; k++) add(bc, B(.9, .035, .34), w, 0, .05 + k * .39, 0);
     bookRow(bc, -.42, .1, .07, .0, 2); leafy(bc, .28, .07, 0, .9, C.sage);
     bookRow(bc, -.2, .42, .46, 0, 5); add(bc, RB(.14, .12, .12, .02), toon(C.cream), -.32, .52, 0);
-    bookRow(bc, -.42, .0, .85, 0, 9); pothos(bc, .22, .87, 0, .45, 2); add(bc, SP(.05, 10), toon(C.amber), .08, .92, 0);
+    bookRow(bc, -.42, .0, .85, 0, 9); succulent(bc, .28, .87, 0, 1.15); add(bc, SP(.05, 10), toon(C.amber), .08, .92, 0);
     frame(bc, -.2, 1.32, .02, .22, .16, tex(12, 9, (g) => { g.fillStyle = '#C9BFAE'; g.fillRect(0, 0, 12, 9); g.fillStyle = '#A9543F'; g.fillRect(3, 3, 6, 4); }), 0, C.coal); bookRow(bc, .05, .42, 1.24, 0, 3);
     bookRow(bc, -.42, .2, 1.63, 0, 7); succulent(bc, .32, 1.63, 0, 1.2);
     add(bc, RB(.18, .14, .14, .03), toon(C.denim), -.25, 2.09, 0); leafy(bc, .2, 2.02, 0, .8, C.paper); }
   /* framed sunset print (the studio sheet), the window with blinds, the posters, a clock */
   frame(back, -.68, 1.52, BACK_Z + .02, .5, .4, tex(31, 25, (g, w, h) => { g.fillStyle = '#E3A94F'; g.fillRect(0, 0, w, 11); g.fillStyle = '#F1D9A8'; g.fillRect(0, 4, w, 3);
     g.fillStyle = '#D06A3A'; g.beginPath(); g.arc(15, 12, 6, Math.PI, 0); g.fill(); g.fillStyle = '#7A4A2E'; g.fillRect(0, 12, w, 5); g.fillStyle = '#5A3F31'; for (let x = 0; x < w; x++) g.fillRect(x, 17 - Math.round(3 * Math.abs(Math.sin(x / 4))), 1, 8); g.fillStyle = '#3F5A4A'; g.fillRect(0, 21, w, 4); }), 0, C.paper);
-  blindsWindow(back, .72, 1.58, BACK_Z + .01, .8, .9);
   plane(back, .42, .36, tex(21, 18, (g, w, h) => { g.fillStyle = '#4D5E78'; g.fillRect(0, 0, w, h); g.fillStyle = '#E3A94F'; for (const x0 of [4, 12]) { g.fillRect(x0, 5, 5, 1); g.fillRect(x0, 5, 1, 8); g.fillRect(x0, 12, 5, 1); g.fillRect(x0 + 4, 9, 1, 4); g.fillRect(x0 + 3, 9, 2, 1); } }), -.95, 2.35, BACK_Z + .01);
   plane(back, .34, .3, tex(17, 15, (g, w, h) => { g.fillStyle = '#D8D2C4'; g.fillRect(0, 0, w, h); g.fillStyle = '#A9543F'; g.fillRect(4, 3, 1, 7); g.fillRect(7, 3, 4, 1); g.fillRect(10, 3, 1, 7); g.fillStyle = '#9A9D9F'; g.fillRect(3, 12, 11, 1); }), -.66, 1.08, BACK_Z + .01);
   { add(back, CY(.12, .12, .03, 20), toon(C.paper), .2, 2.4, BACK_Z + .03).rotation.x = Math.PI / 2; add(back, B(.012, .08, .01), toon(C.ink), .2, 2.42, BACK_Z + .05); add(back, B(.06, .012, .01), toon(C.ink), .22, 2.4, BACK_Z + .05); }
@@ -136,11 +154,26 @@ export function buildRoom() {
     frame(sb, -.05, .83, -.16, .3, .36, tex(15, 18, (g, W, H) => { g.fillStyle = '#3F5A4A'; g.fillRect(0, 0, W, H); g.fillStyle = '#F1D9A8'; g.beginPath(); g.arc(8, 7, 4, 0, Math.PI * 2); g.fill(); g.fillStyle = '#5B6B4E'; g.fillRect(0, 12, W, 6); }), 0, C.paper).rotation.x = -.12; }
   const saltLamp = new THREE.PointLight(hex('#D99A6A'), .5, 1.2, 1.8); saltLamp.position.set(.37, .85, BACK_Z + .45); scene.add(saltLamp);
   /* the guitar leaning on the wall, a big floor plant, a beanbag, the floor lamp */
-  { const gt = new THREE.Group(); back.add(gt); gt.position.set(1.05, .02, BACK_Z + .18); gt.rotation.z = -.12; gt.rotation.y = .2;
-    add(gt, SP(.2, 14), toon(C.oak), 0, .28, 0).scale.set(1, 1.1, .35); add(gt, SP(.15, 14), toon(C.oak), 0, .56, 0).scale.set(1, 1, .35);
-    add(gt, CY(.055, .055, .01, 14), flat(C.night), 0, .5, .058, false).rotation.x = Math.PI / 2; add(gt, B(.05, .62, .025), toon(C.bark), 0, 1.0, .02); add(gt, RB(.08, .14, .03, .01), toon(C.bark), 0, 1.36, .02); }
-  leafy(back, 2.1, 0, BACK_Z + .35, 3.2, C.bark);
-  add(room, SP(.4, 14), toon(C.olive), -1.55, .28, -1.2).scale.set(1.1, .6, 1);
+  { const gt = new THREE.Group(); back.add(gt); gt.position.set(1.05, .02, BACK_Z + .18); gt.rotation.z = -.12; gt.rotation.y = .2; rubiks.guitar = gt;
+    /* an acoustic, built like one: a dreadnought's outline, sides, a lighter top with a rosette and sound hole, a bridge, a long neck with frets, a headstock with its tuners, six strings */
+    const outline = new THREE.Shape(); outline.moveTo(0, 0); outline.bezierCurveTo(.135, 0, .215, .06, .215, .17); outline.bezierCurveTo(.215, .25, .13, .27, .13, .32); outline.bezierCurveTo(.13, .37, .165, .4, .165, .46); outline.bezierCurveTo(.165, .53, .09, .56, 0, .56);
+    outline.bezierCurveTo(-.09, .56, -.165, .53, -.165, .46); outline.bezierCurveTo(-.165, .4, -.13, .37, -.13, .32); outline.bezierCurveTo(-.13, .27, -.215, .25, -.215, .17); outline.bezierCurveTo(-.215, .06, -.135, 0, 0, 0);
+    add(gt, new THREE.ExtrudeGeometry(outline, { depth: .09, bevelEnabled: false, curveSegments: 16 }), toon(C.bark), 0, 0, -.09);
+    add(gt, new THREE.ShapeGeometry(outline, 16), toon(C.oak), 0, 0, .001);
+    add(gt, new THREE.RingGeometry(.056, .07, 28), toon(C.cream), 0, .375, .003, false); add(gt, new THREE.CircleGeometry(.056, 28), flat('#14110F'), 0, .375, .004, false);
+    add(gt, RB(.13, .022, .012, .004), toon(C.cocoa), 0, .14, .007);
+    add(gt, B(.046, .62, .022), toon(C.bark), 0, .86, -.008); add(gt, B(.042, .6, .006), toon(C.ink), 0, .85, .006, false);
+    for (let f = 0; f < 12; f++) glows.push(add(gt, B(.042, .004, .002), flat(C.ash), 0, 1.158 - 1.116 * (1 - 2 ** (-(f + 1) / 12)), .01, false));
+    const hd = new THREE.Shape(); hd.moveTo(-.024, 0); hd.lineTo(.024, 0); hd.lineTo(.036, .15); hd.lineTo(-.036, .15); hd.closePath();
+    add(gt, new THREE.ExtrudeGeometry(hd, { depth: .016, bevelEnabled: false }), toon(C.bark), 0, 1.16, -.006);
+    for (let k = 0; k < 3; k++) for (const sd of [-1, 1]) { add(gt, CY(.006, .006, .03, 6), toon(C.ash), sd * .046, 1.195 + k * .04, .004, false).rotation.z = Math.PI / 2; add(gt, SP(.009, 6), toon(C.cream), sd * .064, 1.195 + k * .04, .004, false); }
+    for (let k = 0; k < 6; k++) { const a = (k - 2.5) * .0065, b = (k - 2.5) * .012; const st = add(gt, B(.0019, 1.02, .0015), flat('#B9A47F'), (a + b) / 2, .655, .013, false); st.rotation.z = Math.atan2(a - b, 1.02) * -1; glows.push(st); guitarStrings.push(st); }
+    add(gt, B(.046, .004, .004), toon(C.cream), 0, 1.158, .01, false); }
+  leafy(back, -2.2, 0, BACK_Z + .38, 2.5, C.bark);
+  /* the beanbag: a slumped teardrop with a dent where someone last sat, a little handle */
+  { const bag = new THREE.Group(); room.add(bag); bag.position.set(-1.55, 0, -1.2); bag.rotation.y = .6; const cloth = toon(C.olive), pts = []; for (let i = 0; i <= 14; i++) { const u = i / 14; pts.push(new THREE.Vector2((.46 * Math.sin(Math.PI * u ** .62) + .012) * (1 - .05 * Math.sin(u * 9)), .62 * u)); }
+    const body = add(bag, new THREE.LatheGeometry(pts, 26), cloth, 0, 0, 0); body.scale.set(1.05, 1, .95); const seat = add(bag, SP(.26, 14), cloth, .05, .5, .08); seat.scale.set(1, .32, 1);
+    add(bag, CAP(.012, .08, 5), toon(C.cocoa), 0, .635, 0).rotation.z = Math.PI / 2; }
   { const fl = new THREE.Group(); room.add(fl); fl.position.set(-2.2, 0, -.2); add(fl, CY(.13, .13, .03), toon(C.ink), 0, .015, 0); add(fl, CY(.015, .015, 1.6), toon(C.steel), 0, .8, 0);
     add(fl, CY(.2, .14, .22, 16), toon(C.cream), 0, 1.65, 0); add(fl, SP(.05, 8), flat(C.glow), 0, 1.6, 0, false); glowSpot(-2.2, 1.6, -.2, .9, '#F4C77E', .3); }
   /* the end of the bed at +x, with a poster above */
@@ -161,11 +194,22 @@ export function buildRoom() {
     add(kb, RB(.46, .026, .16, .008), toon(C.coal), 0, 0, 0);
     for (let r = 0; r < 5; r++) for (let c = 0; c < (r === 4 ? 3 : 15); c++) { const w = r === 4 ? (c === 1 ? .15 : .04) : .024, x = r === 4 ? [-.1, 0, .1][c] : -.2 + c * .0285 + (r % 2) * .006;
       add(kb, RB(w, .012, .022, .003), toon(r === 0 ? C.fog : C.ash), x, .018, .058 - r * .029, false); } }   // function row far from him, spacebar nearest
+  /* a 3x3 on the desk, left of his screen, mid-solve: a black body in two parts (the top layer turns), coloured stickers on five faces, each colour one mesh */
+  { const cube = new THREE.Group(); desk.add(cube); cube.position.set(-.56, DESK.top + .0357, .72); cube.rotation.y = .55; cube.scale.setScalar(1.25); rubiks.cube = cube;
+    const S = .019, COL = [C.white, '#E3C04F', C.brick, C.shade, C.denim, C.moss], seedRnd = (i) => { const x = Math.sin(i * 91.17 + 3.3) * 43758.5453; return x - Math.floor(x); };
+    const stickers = (layerYs, seed) => { const by = COL.map(() => []); let n = seed;
+      for (const y of layerYs) for (let a = -1; a <= 1; a++) { const e = S * 1.5 + .0004;
+        for (const [px, pz, ry] of [[a * S, e, 0], [a * S, -e, 0], [e, a * S, Math.PI / 2], [-e, a * S, Math.PI / 2]]) { const g = new THREE.BoxGeometry(S * .86, S * .86, .001); g.rotateY(ry); g.translate(px, y * S, pz); by[Math.floor(seedRnd(n++) * 6)].push(g); } }
+      if (layerYs.includes(1)) for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) { const g = new THREE.BoxGeometry(S * .86, .001, S * .86); g.translate(a * S, S * 1.5 + .0004, b * S); by[Math.floor(seedRnd(n++) * 6)].push(g); }
+      return by; };
+    const dress = (parent, by) => by.forEach((gs, i) => { if (gs.length) { const m = new THREE.Mesh(mergeGeometries(gs), flat(COL[i])); parent.add(m); } });
+    add(cube, RB(S * 3, S * 2 - .0006, S * 3, .002), toon(C.ink), 0, -S * .5, 0); dress(cube, stickers([-1, 0], 7));
+    const top = rubiks.top = new THREE.Group(); cube.add(top); add(top, RB(S * 3, S - .0006, S * 3, .002), toon(C.ink), 0, S, 0); dress(top, stickers([1], 51)); markCrisp(cube); }
   const mouse = add(desk, RB(.07, .035, .115, .024), toon(C.ash), ANCHOR.mouse.x, ANCHOR.mouse.y, ANCHOR.mouse.z);
   add(desk, B(.004, .004, .03), toon(C.coal), ANCHOR.mouse.x, ANCHOR.mouse.y + .018, ANCHOR.mouse.z + .03, false);
   /* the red mug (the studio sheet), a notebook and pen, the phone on a stand, headphones on a stand, a succulent */
   /* things he picks up (say it, do it): each its own group, so a hand can take it and put it back */
-  const props = {};
+  const props = { guitarStrings, rubiks };
   { const mug = props.mug = new THREE.Group(); desk.add(mug); mug.position.set(.38, DESK.top, .5); mug.userData.home = mug.position.clone();
     add(mug, CY(.045, .045, .1, 16), toon(C.brick), 0, .05, 0); add(mug, new THREE.TorusGeometry(.028, .009, 6, 12), toon(C.brick), .05, .05, 0).rotation.y = Math.PI / 2;
     add(mug, CY(.04, .04, .005, 14), flat(C.cocoa), 0, .098, 0, false); }
@@ -234,7 +278,6 @@ export function buildRoom() {
     bookRow(sh, -.72, -.15, 1.64, 0, 4); pothos(sh, .05, 1.64, 0, .55, 1); add(sh, RB(.1, .14, .1, .02), toon(C.denim), .25, 1.71, 0); add(sh, SP(.04, 10), toon(C.amber), .42, 1.68, 0);
     frame(sh, .6, 1.74, .0, .18, .22, tex(9, 11, g => { g.fillStyle = '#8FA38A'; g.fillRect(0, 0, 9, 11); g.fillStyle = '#E3A94F'; g.fillRect(3, 3, 3, 3); }), 0, C.coal);
     leafy(sh, -.6, 2.02, 0, .8, C.sage); bookRow(sh, -.4, .25, 2.02, 0, 8); pothos(sh, .5, 2.02, 0, .7, 3); add(sh, CY(.05, .05, .09, 12), toon(C.cream), .32, 2.065, 0); }
-  blindsWindow(front, -1.55, 1.8, FRONT_Z - .01, .9, 1.0, Math.PI);
   fairyLights(front, -2.5, 2.5, 2.62, FRONT_Z - .06, Math.PI, 28);
   /* the pendant light over him */
   const hang = group(7);

@@ -27,7 +27,7 @@ export function StageHidden() {
   )
 }
 
-// his camera: the 320x180 pixel canvas, and his captions over it
+// his camera: the canvas (his pixels on the painted room; the engine sizes it), and his captions over it
 export function StageView({ className }: { className?: string }) {
   useEffect(() => { bootStage() }, [])
   return (

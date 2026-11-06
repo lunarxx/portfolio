@@ -36,6 +36,24 @@ function partColour(look, part) {
 const groupOf = (n) => /head$/.test(n) ? 1 : /neck|hood/.test(n) ? 2 : /(sleeve|cuff)R$/.test(n) ? 3 : /(sleeve|cuff)L$/.test(n) ? 4
   : /(palm|index|middle|ring|pinky|thumb|wrist)R$/.test(n) ? 5 : /(palm|index|middle|ring|pinky|thumb|wrist)L$/.test(n) ? 6 : /pant|cargo|seat/.test(n) ? 7 : /shoe|sole/.test(n) ? 8 : 9
 const PARTS = ['skin', 'top', 'top2', 'bottom', 'bottom2', 'shoe', 'sole', 'collar', 'string']
+// a blob's hand is one soft paddle: the model's ball of a palm with a block of fingers stuck on looked wrong (his note), and
+// thin separate fingers looked worse (his note). the same parts, reshaped once at load, at rest (the arm hangs down: fingers
+// point to -y, the palm's flat faces are +-x): the palm as wide as the fingers together, and they stay short, so it reads
+// as a single rounded hand with a thumb
+function reshapeHand(o, moved) {
+  const kind = /(palm|index|middle|ring|thumb)[RL]$/.exec(o.name)?.[1]; if (!kind) return
+  const [kx, ky, kz, anchor] = kind === 'palm' ? [.72, .82, .82, 'min'] : kind === 'thumb' ? [.92, .9, .92, 'max'] : [.92, .76, .84, 'max']
+  const g = o.geometry, p = g.attributes.position; g.computeBoundingBox(); const b = g.boundingBox, c = b.getCenter(new THREE.Vector3()), ya = anchor === 'min' ? b.min.y : b.max.y
+  // the model has three fingers on a palm built for four, so they sat off to the thumb's side: centred on the palm, and the
+  // thumb moves in with the narrower palm so it stays attached. read once, before any part of this hand has changed
+  const side = o.name.slice(-1), rest = (o.parent.userData.handRest ||= {}), at = (n) => { const m = o.parent.getObjectByName(o.name.replace(kind, n)); m.geometry.computeBoundingBox(); return m.geometry.boundingBox.getCenter(new THREE.Vector3()).z }
+  const R = (rest[side] ||= { palm: at('palm'), middle: at('middle') })
+  // the fingers also draw in, so together they're narrower than the palm, and sit down into it instead of on its end (his note)
+  const finger = kind !== 'palm' && kind !== 'thumb', cz = kind === 'palm' ? c.z : kind === 'thumb' ? c.z - Math.sign(c.z - R.palm) * .6 : R.palm + (c.z - R.middle) * .8, sink = finger ? .9 : 0
+  for (let i = 0; i < p.count; i++) p.setXYZ(i, c.x + (p.getX(i) - c.x) * kx, ya + (p.getY(i) - ya) * ky + sink, cz + (p.getZ(i) - c.z) * kz)
+  moved.push({ kind, side, dz: cz - c.z, sink, ky })
+  p.needsUpdate = true; g.computeVertexNormals(); g.computeBoundingBox(); g.computeBoundingSphere()
+}
 
 const VERT = `
 #include <common>
@@ -152,14 +170,25 @@ export async function createCast() {
 
   async function load(base) {
     if (models[base]) return models[base]
-    const g = await loader.loadAsync(`/meet/stage/cast/${base}.glb`), root = g.scene, mats = [], seed = base.length * 3.7
+    const g = await loader.loadAsync(`/meet/stage/cast/${base}.glb`), root = g.scene, mats = [], moved = [], seed = base.length * 3.7
     root.traverse((o) => {
       if (!o.isMesh) return
       const part = (o.material.name || '').split('.').pop(), grp = groupOf(o.name), pi = Math.max(0, PARTS.indexOf(part))
       o.material = material(grp * 16 + pi, part, seed); mats.push(o.material); o.frustumCulled = false
+      reshapeHand(o, moved)
     })
     root.updateMatrixWorld(true)
     const bones = {}; root.traverse((o) => { if (o.isBone) bones[o.name] = o })
+    // the joints move with the reshaped fingers, so a curl bends from where the finger now starts (in the hand bone's space y
+    // runs toward the fingertips and z is the world's z flipped), and the skin is bound again to the moved joints
+    for (const { kind, side, dz, sink, ky } of moved) {
+      if (kind === 'palm') continue
+      const b0 = bones[`${kind}0${side}`]; if (!b0) continue
+      b0.position.y -= sink; b0.position.z -= dz
+      for (let j = 1, b = bones[`${kind}${j}${side}`]; b; j++, b = bones[`${kind}${j}${side}`]) b.position.y *= ky
+    }
+    root.updateMatrixWorld(true)
+    { const skins = new Set(); root.traverse((o) => { if (o.isSkinnedMesh) skins.add(o.skeleton) }); skins.forEach((sk) => sk.calculateInverses()) }
     // where his head is (the rig's HC point and its front and up), carried by the head bone
     const head = root.getObjectByName(`${base}head`), box = new THREE.Box3().setFromObject(head), c = box.getCenter(new THREE.Vector3()), size = box.getSize(new THREE.Vector3())
     const hb = bones.head, inv = hb.matrixWorld.clone().invert()
@@ -257,6 +286,27 @@ export async function createCast() {
     worldRot(hb, qh, R[`hand${side}`])
     grip(m, side, qh, dirs.palm ? [dirs.palm.curls, dirs.palm.thumb, dirs.palm.spread] : [[.3, .38, .45, .52], [.15, .25], 0])
   }
+  // your hands together: each arm reaches for a shared point in front of the body, in proportion to how close yours are
+  function handsMeet(m, arms) {
+    const R = m.rest, near = Math.min(1, arms.near), out = {}, sh = {}, len = {}, at = {}, sideOf = (s) => (R[`upper${s}`].p.x > 0 ? 'right' : 'left')
+    for (const s of ['R', 'L']) {
+      const a = arms[sideOf(s)], S = R[`upper${s}`].p, L1 = R[`fore${s}`].p.distanceTo(S), L2 = R[`hand${s}`].p.distanceTo(R[`fore${s}`].p)
+      sh[s] = S; len[s] = [L1, L2]; at[s] = S.clone().addScaledVector(V(a.upper).normalize(), L1).addScaledVector(V(a.fore).normalize(), L2)
+    }
+    const reach = Math.min(len.R[0] + len.R[1], len.L[0] + len.L[1]) * .97, mid = sh.R.clone().add(sh.L).multiplyScalar(.5)
+    const y = Math.max(mid.y - reach * .7, Math.min(mid.y + reach * .55, (at.R.y + at.L.y) / 2))
+    const span = R.handR.p.distanceTo(R.middle0R.p) * 1.5   // wrists stand a hand's length off the middle, so it's the fingers that meet
+    for (const s of ['R', 'L']) {
+      const S = sh[s], [L1, L2] = len[s], off = Math.sign(S.x - mid.x) * span, tx = mid.x + off, dy = y - S.y
+      const dz = Math.sqrt(Math.max(.0001, reach * reach - (tx - S.x) ** 2 - dy * dy))
+      const T = at[s].clone().lerp(new THREE.Vector3(tx, y, S.z + dz * .92), near), d = T.clone().sub(S), dist = Math.min(L1 + L2 - 1e-3, d.length()), dir = d.normalize()
+      const along = (L1 * L1 - L2 * L2 + dist * dist) / (2 * dist), h = Math.sqrt(Math.max(0, L1 * L1 - along * along))
+      const pole = new THREE.Vector3(Math.sign(S.x - mid.x), -1, -.2); pole.addScaledVector(dir, -pole.dot(dir)).normalize()
+      const E = S.clone().addScaledVector(dir, along).addScaledVector(pole, h), W = S.clone().addScaledVector(dir, dist)
+      out[s] = { U: E.clone().sub(S).normalize(), F: W.sub(E).normalize() }
+    }
+    return out
+  }
   // octyn-px rig.py hand(), ported: every finger bends about the one knuckle axis (so the mitten's fingers stay together
   // and on the hand), with a few degrees of spread; the thumb swings across the palm or out wide, then bends. axes are the
   // rig's (blender, at rest) carried into three's y-up: across (0,k,0) -> (0,0,-k), spread (k,0,0), the thumb's z -> y
@@ -265,17 +315,20 @@ export async function createCast() {
     const rot = (axis, a) => new THREE.Quaternion().setFromAxisAngle(axis, a)
     ;['index', 'middle', 'ring', 'pinky'].forEach((f, i) => {
       const c = curls[i], amts = [1.45 * c, c > 0 ? 1.72 * c ** .9 : 0, 1.05 * c]
-      let d = rot(spr, [-1.5, -.5, .5, 1.5][i] * spread * 6 * deg).multiply(rot(across, amts[0]))
+      let d = rot(spr, [-1.5, -.5, .5, 1.5][i] * spread * 3 * deg).multiply(rot(across, amts[0]))
       for (let j = 0; j < 3; j++) {
         const b = m.bones[`${f}${j}${side}`]; if (!b) break
         if (j) d = d.clone().multiply(rot(across, amts[j]))
         worldRot(b, qh.clone().multiply(d), m.rest[`${f}${j}${side}`])
       }
     })
-    let d = rot(across, 25 * ta * deg).multiply(rot(new THREE.Vector3(0, 1, 0), -k * 40 * ta * deg))
+    // a closing hand takes the thumb with it: as the fingers curl into a fist it folds right over them, whatever the tracker
+    // made of the thumb (it's mostly hidden by then). an open hand keeps the gentle range
+    const shut = Math.max(0, Math.min(1, ((curls[0] + curls[1] + curls[2]) / 3 - .5) / .35)), swing = ta + (1 - ta) * shut, bend = tc + (1 - tc) * shut
+    let d = rot(across, (25 * swing + 20 * shut) * deg).multiply(rot(new THREE.Vector3(0, 1, 0), -k * (40 * swing + 70 * shut) * deg))
     for (let j = 0; j < 3; j++) {
       const b = m.bones[`thumb${j}${side}`]; if (!b) break
-      if (j) d = d.clone().multiply(rot(across, 55 * tc * deg))
+      if (j) d = d.clone().multiply(rot(across, 62 * bend * deg))
       worldRot(b, qh.clone().multiply(d), m.rest[`thumb${j}${side}`])
     }
   }
@@ -404,10 +457,11 @@ export async function createCast() {
     const slip = pin.sub(pinL.applyMatrix4(hb.matrixWorld))   // how far the turn carried the neck point off the neck
     if (slip.lengthSq() > 1e-12) { hb.position.copy(hb.parent.worldToLocal(hb.getWorldPosition(new THREE.Vector3()).add(slip))); hb.updateMatrixWorld(true) }
     // arms: down by the sides unless your camera sees your hand; the reaching one goes out to the seam
+    const meet = pose.arms && pose.arms.near > .02 && pose.arms.left && pose.arms.right ? handsMeet(m, pose.arms) : null
     for (const s of ['R', 'L']) {
       let a = pose.arms && pose.arms[sideOf(s)]; const out = sideOf(s) === 'right' ? 1 : -1
       if (reachDir && s === reachSide) { arm(m, s, { upper: reachDir, fore: reachDir }); m.bones[`hand${s}`].scale.setScalar(.001); continue }   // the hand is past the edge, in his tile
-      arm(m, s, a ? { upper: V(a.upper), fore: V(a.fore), palm: a.palm } : { upper: V([out * .22, -1, .08]), fore: V([out * .1, -1, .25]) })
+      arm(m, s, a ? { upper: meet ? meet[s].U : V(a.upper), fore: meet ? meet[s].F : V(a.fore), palm: a.palm } : { upper: V([out * .22, -1, .08]), fore: V([out * .1, -1, .25]) })
     }
     m.root.updateMatrixWorld(true)
     drawFace(m, pose, look, look.head)

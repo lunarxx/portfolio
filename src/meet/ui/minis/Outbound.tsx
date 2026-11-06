@@ -46,6 +46,15 @@ export function Outbound() {
           ))}
         </div>
       </LayoutGroup>
+      {/* on a phone five lanes don't fit: the same agencies as a list, each with how far along it is */}
+      <div className={m.obList}>
+        {list.map((x) => (
+          <button key={x.id} className={x.id === open ? m.obRowOn : ''} onClick={() => setOpen(x.id)}>
+            <span className={m.obName}>{x.name}<small>{x.kind} · {x.city}</small></span>
+            <span className={m.obStage}><b>{STAGES[x.stage]}</b><i>{STAGES.map((_, i) => <u key={i} className={i <= x.stage ? m.obDone : ''} />)}</i></span>
+          </button>
+        ))}
+      </div>
       <div className={m.dossier}>
         <h4>{a.name}</h4>
         <div><label>what it read</label><div>{a.work}</div></div>

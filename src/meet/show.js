@@ -34,9 +34,9 @@ async function babble(words, dur) {
 // his real voice (Flux, through /api/voice): the line's mp3 and how long it runs. the words get their times from that
 // length, shared out by syllables and the pauses at punctuation, so the captions and his gestures land with the audio.
 // slow (over 4.5 s), down or out of budget: null, and he babbles
-async function voice(text, wait = 4500) {
+async function voice(text, wait = 4500, soft = false) {
   try {
-    const res = await fetch('/api/voice', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }), signal: AbortSignal.timeout(wait) })
+    const res = await fetch('/api/voice', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text, soft }), signal: AbortSignal.timeout(wait) })
     if (!res.ok) return null
     const mp3 = await res.arrayBuffer(), ctx = stage()?.audio
     const dur = ctx ? (await ctx.decodeAudioData(mp3.slice(0))).duration : null
@@ -51,10 +51,10 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 // lines would talk over each other). every sentence's voice is asked for the moment the line is, so he starts on the
 // first while the rest are still being made; say() resolves when he's finished talking
 let lineId = 0, queue = Promise.resolve()
-/** @param {string} text @param {{ mark?: string | null, act?: string | null }} [o] */
-export function say(text, { mark = null, act = null } = {}) {
+/** @param {string} text @param {{ mark?: string | null, act?: string | null, still?: boolean, soft?: boolean }} [o] */
+export function say(text, { mark = null, act = null, still = false, soft = false } = {}) {   // still: he's fed up, his hands stay down after the first gesture
   text = text.replace(/,? \{name\}/g, (m) => { const n = spokenName(get().name); return n ? m.replace('{name}', n) : '' })
-  const parts = pieces(text), voices = parts.map((p, i) => voice(p, i ? 12000 : 4500))   // later pieces are made while earlier ones play
+  const parts = pieces(text), voices = parts.map((p, i) => voice(p, i ? 12000 : 4500, soft))   // later pieces are made while earlier ones play
   const turn = queue.then(async () => {
     set((s) => ({ log: [...s.log, { who: 'him', text }] }))
     for (const [i, part] of parts.entries()) {
@@ -65,7 +65,9 @@ export function say(text, { mark = null, act = null } = {}) {
         t = lead; for (const w of ws) { words.push([w, t]); t += weight(w) * scale }
       } else for (const w of ws) { words.push([w, t]); t += weight(w) }
       const dur = real ? real.dur : t + .2, url = real ? real.url : await babble(words, dur)
-      emit({ type: 'say', id: `p${++lineId}`, text: part, url, words, dur, marks: mark && !i ? [[0, mark]] : [], act: i ? null : act })
+      // his own mark opens the line; after it, and on lines with none, a sentence of any length gets talking hands
+      const m = mark && !i ? mark : !act && !still && ws.length >= 5 ? 'explain' : null
+      emit({ type: 'say', id: `p${++lineId}`, text: part, url, words, dur, marks: m ? [[0, m]] : [], act: i ? null : act })
       live.lastSaid = performance.now() + dur * 1000
       await sleep(dur * 1000 + 140)
     }

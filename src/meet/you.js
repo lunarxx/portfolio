@@ -51,12 +51,15 @@ function holdArms(prev, next) {
     if (n) { armsLost[side] = 0; out[side] = p ? lerpDeep(p, n, .5) : n }
     else if (p && (armsLost[side] = (armsLost[side] || 0) + 1) < 6) out[side] = p
   }
-  return Object.keys(out).length ? out : null
+  if (!Object.keys(out).length) return null
+  if (out.left && out.right) out.near = (prev?.near || 0) + ((next?.near || 0) - (prev?.near || 0)) * .35   // your hands coming together
+  return out
 }
+const DEBUG_ARMS = typeof location !== 'undefined' && new URLSearchParams(location.search).has('debug')   // ?debug: pose the character's hands from the console, with no camera
 function loop(now) {
   const t = now / 1000, step = Math.floor(t * 12)
   if (tracker && video) { const r = tracker.read(video, now); if (r !== undefined) { const p = retarget.step(r.face); if (p) pose = { ...p }; arms = holdArms(arms, r.arms); feed({ pose: p, faceSeen: !!r.face, hands: r.hands, faceLm: r.faceLm, body: r.body, aspect: r.aspect }) } }
-  else { pose = lobbyPose(idlePose(t), t); arms = null }
+  else { pose = lobbyPose(idlePose(t), t); arms = DEBUG_ARMS ? window.__fakeArms || null : null }
   if (cast && !busy && step !== lastStep && canvases.size) {
     lastStep = step; busy = true
     cast.draw(get().look, { ...pose, jaw: Math.max(pose.jaw || 0, talking(t), live.micLevel * .9), arms }, t).then((c) => {
@@ -87,6 +90,12 @@ export function start() {
   setInterval(tick, 1000)
   // its first words tell you where you are, nervously, as if you're the one being interviewed
   setTimeout(() => speak("Psst… we're interviewing Ashwini. The guy with the TV for a head.", { force: true }), 1200)
+  // and straight after, what it can do: it's been following your mouse all along, and your camera does the rest
+  setTimeout(() => {
+    if (get().cam || !inLobby()) return
+    speak(matchMedia('(pointer: fine) and (min-width: 861px)').matches ? "See, I follow your mouse. Turn your camera on and I copy your face and hands." : 'Camera on and I copy your face and hands.', { force: true })   // only a real mouse gets the mouse line
+    document.getElementById('lcam')?.animate([{ transform: 'none' }, { transform: 'rotate(-3deg) scale(1.06)' }, { transform: 'rotate(3deg) scale(1.06)' }, { transform: 'none' }], { duration: 600, iterations: 2 })
+  }, 7000)
 }
 
 // ---------------------------------------------------------------- the lobby: bubbles, cursor, pokes, nudges
@@ -127,7 +136,6 @@ export function noticed(kind, v) {
 // when things go quiet: a doze, or a nudge toward the next step (each once); the control it means wiggles
 const NUDGES = [
   { when: () => !get().name, line: "Psst. Type your name, I'm curious.", el: 'yourname' },
-  { when: () => !get().cam, line: 'The camera button. I wanna move.', el: 'lcam' },
 ]
 let dozeSaid = false
 function tick() {

@@ -3,6 +3,9 @@ const P = { fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap:
 export const Mic = () => <svg viewBox="0 0 24 24" {...P}><rect x="9" y="3" width="6" height="11" rx="3" /><path d="M5 11a7 7 0 0 0 14 0M12 18v3" /></svg>
 export const Cam = () => <svg viewBox="0 0 24 24" {...P}><rect x="3" y="7" width="13" height="10" rx="2" /><path d="M16 11l5-3v8l-5-3" /></svg>
 export const Sound = ({ on }: { on: boolean }) => <svg viewBox="0 0 24 24" {...P}><path d="M4 9v6h4l5 4V5L8 9z" />{on && <path d="M16 9a4 4 0 0 1 0 6M19 6a8 8 0 0 1 0 12" />}</svg>
+export const Note = () => <svg viewBox="0 0 24 24" {...P}><path d="M9 18V6l10-2v12" /><circle cx="6.5" cy="18" r="2.5" /><circle cx="16.5" cy="16" r="2.5" /></svg>
+export const Tv = () => <svg viewBox="0 0 24 24" {...P}><rect x="3" y="5" width="18" height="14" rx="2.5" /><rect x="6" y="8" width="9" height="8" rx="1" /><path d="M18 9v.01M18 13v.01" /></svg>
+export const Menu = () => <svg viewBox="0 0 24 24" {...P}><path d="M4 7h16M4 12h16M4 17h10" /></svg>
 export const Skip = () => <svg viewBox="0 0 24 24" {...P}><path d="M5 5l9 7-9 7zM18 5v14" /></svg>
 export const Chat = () => <svg viewBox="0 0 24 24" {...P}><path d="M4 5h16v11H9l-5 4z" /></svg>
 export const Hang = () => <svg viewBox="0 0 24 24" {...P}><path d="M3 15c5-5 13-5 18 0l-2 3-4-1v-3a10 10 0 0 0-6 0v3l-4 1z" /></svg>

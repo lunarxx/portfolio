@@ -28,7 +28,7 @@ export const G = {
   head_shake: { head: { shake: 1 }, lean: -.04, face: 'angry' },
   /* the flat stare: stops working, sits back a touch, half-lidded */
   deadpan: { lean: -.06, head: { pitch: .03 }, face: 'flat' },
-  explain: { R: [V3(-.22, .2, .4), 'open', V3(.25, -.75, -.6)], beat: 'R' },   // palm up and in, in front of his chest
+  explain: { R: [V3(-.22, .2, .4), 'loose', V3(-.85, .2, -.45)], beat: 'R', talk: 'R' },   // talking: his hand keeps changing with the phrase (TALK, below), never one open palm held for the whole line
   /* acting out the words instead of beating the air (his note on the beats: "ai looking and same same"):
      present  "okay so basically": the mouse hand comes up, palm up, and offers it once
      float    "the jump feels like the moon": the hand is the jump, up slow and drifting down
@@ -50,9 +50,33 @@ export const G = {
   peace: { R: [V3(-.3, .36, .3), 'peace', V3(0, 0, -1)], face: 'happy' },
   type: {}, mouse: {},
 };
+/* a hand while it talks (his note: an open palm the whole time): finger and thumb together making a point, a loose hand
+   edge-on, one finger up, a relaxed curl, and only sometimes a half-open palm. each lasts a phrase or so, in no fixed order */
+const TALK = [
+  { at: V3(-.2, .21, .42), shape: 'pinch', back: V3(-.85, .25, -.45) },
+  { at: V3(-.27, .15, .38), shape: 'loose', back: V3(-.9, .1, -.3) },
+  { at: V3(-.18, .25, .44), shape: 'point', back: V3(-.7, .1, -.7), aim: V3(-.05, 1, .2) },
+  { at: V3(-.24, .11, .36), shape: 'relaxed', back: V3(-.6, .5, -.5) },
+  { at: V3(-.21, .17, .43), shape: 'pinch', back: V3(-.8, .05, -.6) },
+  { at: V3(-.25, .19, .41), shape: 'loose', back: V3(.2, -.7, -.6) },
+];
+const TALK_STEP = .78;
+const talkBeat = (id, t) => { const n = Math.floor(Math.max(0, t - id) / TALK_STEP), a = i => Math.floor(rnd(id, 20 + i) * TALK.length); let k = a(n); if (n && k === a(n - 1)) k = (k + 1) % TALK.length; return TALK[k]; };
 /* at play: the right hand over the arrow keys (his right is -x), the left thumb on the space bar, nearest row */
 const ARROWS = V3(ANCHOR.kb.x - .17, DESK.top + .055, ANCHOR.kb.z - .05), SPACE = V3(ANCHOR.kb.x + .04, DESK.top + .055, ANCHOR.kb.z - .065);
-const HOME = { R: { t: V3(ANCHOR.mouse.x + .005, DESK.top + .05, ANCHOR.mouse.z - .07), shape: 'mouse' }, L: { t: V3(ANCHOR.kb.x + .1, DESK.top + .055, ANCHOR.kb.z - .06), shape: 'type' } };
+/* at the keys: his wrist sits well back of the home row, so his fingertips land on it (a wrist over the keyboard put them on
+   the function row, his note). on the mouse: wrist behind it, palm over it, two fingers on the buttons */
+const TYPE = { R: V3(ANCHOR.kb.x - .105, DESK.top + .07, ANCHOR.kb.z - .105), L: V3(ANCHOR.kb.x + .105, DESK.top + .07, ANCHOR.kb.z - .105) };
+const HOME = { R: { t: V3(ANCHOR.mouse.x + .002, DESK.top + .068, ANCHOR.mouse.z - .105), shape: 'mouse' }, L: { t: TYPE.L, shape: 'type' } };
+const AIM = { R: V3(.06, -.2, 1).normalize(), L: V3(-.06, -.2, 1).normalize(), mouse: V3(0, -.14, 1).normalize() };
+/* one keystroke at a time, a person's: both hands, mostly the strong fingers, the odd reach up or down a row, a thumb for the
+   space bar. the same t always gives the same key */
+const KEYS_PER_S = 5.5;
+function keystroke(t) {
+  const n = Math.floor(t * KEYS_PER_S), u = t * KEYS_PER_S - n, r = k => { const x = Math.sin(n * 12.9898 + k * 78.233) * 43758.5453; return x - Math.floor(x); };
+  const space = n % 6 === 5 && r(1) < .8, pick = r(2);
+  return { n, space, hand: space ? 'R' : r(3) < .5 ? 'L' : 'R', finger: space ? 4 : pick < .46 ? 0 : pick < .78 ? 1 : pick < .94 ? 2 : 3, row: r(4) < .55 ? 0 : r(4) < .85 ? 1 : -1, press: u < .55 ? Math.sin(Math.PI * u / .55) : 0 };
+}
 const FPS = 30, TWOS = 2, DT = TWOS / FPS;
 /* a phrase's own dice (seeded by when it starts), and a slow drift for held poses */
 const rnd = (seed, k) => { const x = Math.sin(seed * 12.9898 + k * 78.233) * 43758.5453; return x - Math.floor(x); };
@@ -161,13 +185,16 @@ export function makePerformer(O, mouse, world = {}) {
     /* working: uneven bursts of taps on the keyboard hand, the mouse hand drifting with the mouse; a gesture stops both */
     const busy = 1 - w * (def.slam && u < .72 ? 0 : 1), burst = Math.max(0, Math.sin(t * 1.7) + .4 * Math.sin(t * 4.3));
     const playing = mode === 'play' && !ap, drawing = mode === 'draw' && !ap, keysDown = playing ? playHands(keys, t) : null;
-    const tap = playing || drawing ? 0 : Math.max(0, Math.sin(t * 19 + 2 * Math.sin(t * 3.1))) * .012 * busy * Math.min(1, burst);
+    const working = !playing && !drawing && !ap, cyc = t % 23, mousing = drawing || (working && cyc > 16.5);   // a stretch at the keys, a while on the mouse
+    st.mk = (st.mk || 0) + ((mousing ? 1 : 0) - (st.mk || 0)) * .2;
+    const stroke = working && !mousing && busy > .4 && burst > .1 ? keystroke(t) : null;
+    if (stroke && stroke.n !== st.lastKey) { st.lastKey = stroke.n; world.keyTap && world.keyTap(stroke.space ? ' ' : 'k'); }
     const drift = playing ? V3(0, 0, 0) : drawing
       ? V3(Math.sin(t * 1.7) * .05 + Math.sin(t * 4.1) * .012, 0, Math.cos(t * 1.3) * .035 + Math.sin(t * 3.3) * .01).multiplyScalar(busy)   // strokes, not a drift
-      : V3(Math.sin(t * .9) * .03 + Math.sin(t * 2.3) * .006, 0, Math.cos(t * .7) * .02).multiplyScalar(.3 + .7 * busy);
+      : V3(Math.sin(t * .9) * .03 + Math.sin(t * 2.3) * .006, 0, Math.cos(t * .7) * .02).multiplyScalar((.3 + .7 * busy) * st.mk);
     mouse.position.set(ANCHOR.mouse.x + drift.x, ANCHOR.mouse.y, ANCHOR.mouse.z + drift.z);
     const base = playing ? { R: ARROWS.clone().add(V3(keysDown.R.dx, -.012 * keysDown.R.press, 0)), L: SPACE.clone().add(V3(0, -.014 * keysDown.L.press, 0)) }
-      : { R: HOME.R.t.clone().add(drift), L: HOME.L.t.clone() };
+      : { R: mousing || !working ? HOME.R.t.clone().add(drift) : TYPE.R.clone(), L: TYPE.L.clone() };
     springS(st.lean, (def.lean || 0) * w + (ap ? ap.lean : 0), 9, .6); springS(st.lift, (def.lift || 0) * w + (st.mood === 'laugh' ? .02 + .018 * Math.sin(t * 21) : 0), 10, .6);   // a laugh shakes his shoulders
     const sway = lib ? (lib.sway ?? (lib.yaw || 0) * .3) * .5 : 0;   // live head frames carry no sway: it follows the yaw (a missing one was NaN, and NaN hid his whole body)
     O.torso.rotation.set(st.lean.x * .7, sway + (ap ? ap.sway || 0 : 0), (lib ? lib.roll * .2 : 0) + (ap ? (ap.sway || 0) * .4 : 0));
@@ -187,8 +214,9 @@ export function makePerformer(O, mouse, world = {}) {
       const S = V3((s === 'R' ? -1 : 1) * O.shoulderW, .06 + st.lift.x, 0).applyQuaternion(tq).add(O.torso.position);
       const follows = def.lead ? def.lead !== s : s === 'L';
       const gh = follows ? at(t, lag) : g, dh = (gh && G[gh.name]) || {}, wh = gh ? gh.w : 0, uh = gh ? gh.u : 0;
-      let target = base[s], shape = playing ? 'type' : HOME[s].shape, back = V3(0, 1, 0), aimK = 0;
-      const gs = dh[s], acting = ap && (A.hand === s || A.hand === 'both');
+      let target = base[s], shape = playing ? 'type' : s === 'R' && (mousing || !working) ? 'mouse' : 'type', back = V3(0, 1, 0), aimK = 0;
+      let gs = dh[s]; const acting = ap && (A.hand === s || A.hand === 'both'), talkingHand = gs && dh.talk === s;
+      if (talkingHand) { const b = talkBeat(gh.id || 0, t); gs = [b.at, b.shape, b.back, b.aim]; }
       if (acting) {
         const a0 = place(ap.from, s, A, ap, base, tq), a1 = place(ap.to, s, A, ap, base, tq);
         target = a0.wrist.lerp(a1.wrist, ap.k); shape = mixShape(a0.shape, a1.shape, ap.k);
@@ -213,12 +241,25 @@ export function makePerformer(O, mouse, world = {}) {
         /* the fingers and the turn of the hand blend with the move; palm over goes through thumb up */
         const kk = windup ? 0 : Math.min(1, wh * 1.5);
         shape = mixShape(HOME[s].shape, gs[1], kk);
+        if (talkingHand) shape[0] = shape[0].map((x, i) => Math.max(0, x + wob(t * 1.5, i + 11) * .09));   // the fingers never quite hold still
         back = V3(0, 1, 0).lerp(gs[2], kk).addScaledVector(V3(s === 'R' ? -1 : 1, 0, 0), Math.sin(Math.PI * kk) * .6).normalize();
         if (gs[3]) { st.aim[s].lerp(gs[3].clone().normalize().applyQuaternion(tq), .5).normalize(); aimK = kk; }
+      } else if (!playing) {
+        /* at work: fingers along the keys or the mouse, the wrist drifting a little, and each keystroke a real finger going down */
+        const onMouse = s === 'R' && (mousing || !working);
+        st.aim[s].lerp(onMouse ? AIM.mouse : AIM[s], .5).normalize(); aimK = 1;
+        if (working && !onMouse) {
+          const k = s === 'R' ? 0 : 5; target = target.clone().add(V3(Math.sin(t * .6 + k) * .012, 0, Math.sin(t * .43 + k) * .007));
+          shape = shapeOf('type'); shape[0] = shape[0].map((x, i) => x + Math.sin(t * 1.1 + i * 1.9 + k) * .025);
+          if (stroke && stroke.hand === s) {
+            if (stroke.finger === 4) shape[1][0] += .55 * stroke.press;
+            else { shape[0][stroke.finger] += (stroke.row > 0 ? .1 : .42) * stroke.press; target.x += (s === 'R' ? 1 : -1) * (stroke.finger - 1.2) * .006; target.z += stroke.row * .012; target.y -= .003 * stroke.press; }
+          }
+        } else if (onMouse && Math.floor(t * .7) % 5 === 0 && t * .7 % 1 < .2) { shape = shapeOf('mouse'); shape[0][0] += .22; }   // a click, now and then
       }
       const hit = dh.slam && uh > .82;
       springV(st.hands[s], st.vel[s], target, hit ? 26 : 15, hit ? .5 : .62);
-      const T = st.hands[s].clone(); if (s === 'L' && !acting) T.y += tap;
+      const T = st.hands[s].clone();
       if (T.y < DESK.top + .04 && T.z > DESK.z0 - .02 && T.z < DESK.z1) T.y = DESK.top + .04;   // never through the desk
       /* fingers and the turn of the hand ease to where they're going (one gesture handing to the next mid-phrase would pop) */
       const want = shapeOf(shape), cur = st.shape[s];

@@ -114,6 +114,12 @@ export async function createFaceCam() {
     }
     for (const side of ['left', 'right']) if (!arms[side]) { seen[side] = 0; smooth[side] = null }
     for (const side of Object.keys(arms)) if (seen[side] < 2) delete arms[side]   // two frames running, or it's a flicker
+    // how close your two hands are, by your own palm's size (1: touching, 0: a few palms apart): the character's arms come off
+    // a wide round body, so copying your arms' directions alone never brings its hands together
+    if (arms.left && arms.right && h?.landmarks?.length === 2) {
+      const [a, b] = h.landmarks, palm = Math.hypot((a[0].x - a[9].x) * aspect, a[0].y - a[9].y) || .01, gap = Math.hypot((a[9].x - b[9].x) * aspect, a[9].y - b[9].y) / palm
+      arms.near = Math.max(0, Math.min(1, (3 - gap) / 1.7))
+    }
     // for gestures: every hand's points (mirrored like a self view), your face's points and the body's, raw
     const mir = (pts) => pts.map((q) => ({ x: 1 - q.x, y: q.y, z: q.z }))
     const handsRaw = (h?.landmarks || []).map((pts) => ({ lm: mir(pts) }))
@@ -197,9 +203,9 @@ function palmOf(w) {
   // the rig's own numbers for a hand (octyn-px rig.py GRIPS): each finger's curl 0..1, the spread, the thumb's curl and
   // how far it crosses the palm. the blob's mitten fingers are posed from these, never from your joints one by one
   const ang = (a, b) => Math.acos(Math.max(-1, Math.min(1, (a[0] * b[0] + a[1] * b[1] + a[2] * b[2]) / ((Math.hypot(...a) * Math.hypot(...b)) || 1))))
-  out.curls = ['index', 'middle', 'ring', 'pinky'].map((n) => { const [b0, b1, b2] = out.bones[n]; return Math.max(0, Math.min(1, (ang(out.fingers, b0) + ang(b0, b1) + ang(b1, b2) - .25) / 3.4)) })
+  out.curls = ['index', 'middle', 'ring', 'pinky'].map((n) => { const [b0, b1, b2] = out.bones[n]; return Math.max(0, Math.min(1, (ang(out.fingers, b0) + ang(b0, b1) + ang(b1, b2) - .25) / 2.6)) })   // a real fist reads about 2.6 here, so it closes all the way
   out.spread = Math.max(0, Math.min(1, (ang(out.bones.index[0], out.bones.pinky[0]) - .3) / .6))
   const [t0, t1, t2] = out.bones.thumb, palmW = Math.hypot(...sub(p(5), p(17))) || 1
-  out.thumb = [Math.max(0, Math.min(1, (ang(t0, t1) + ang(t1, t2)) / 1.6)), Math.max(-.6, Math.min(1, 1.2 - Math.hypot(...sub(p(4), p(5))) / palmW * 1.1))]
+  out.thumb = [Math.max(0, Math.min(1, (ang(t0, t1) + ang(t1, t2)) / 1.35)), Math.max(-.6, Math.min(1, 1.2 - Math.hypot(...sub(p(4), p(5))) / palmW * 1.1))]
   return out
 }

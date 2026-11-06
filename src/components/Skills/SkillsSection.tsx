@@ -79,7 +79,7 @@ export function SkillsSection() {
         <h2 className={styles.title}>about me</h2>
         <p className={styles.intro}>
           i am a generalist. i went from sculpting 3D characters in zbrush to designing AI powered products.
-          i learn fast, i build end to end, and i obsess over making things that people actually want to use.
+          i learn fast, and i stay with a thing until people actually want to use it.
           mooney and whofits are co founded. aarttsii and everything else here is solo built.
         </p>
       </ScrollReveal>
@@ -108,8 +108,8 @@ export function SkillsSection() {
               2,000 unique pieces, phase 1 sold out in 3 days.
             </p>
             <p className={styles.sanshuBody}>
-              after sanshu, i started media3ms, a 3D marketing agency where i took on client work
-              doing character design, product renders, and brand visuals.
+              after sanshu, i started media3ms, a small 3D studio making mascot animations for brands:
+              character design, product renders and brand visuals.
             </p>
             <div className={styles.sanshuLinks}>
               <a href="/sanshu-lor.pdf" target="_blank" rel="noopener noreferrer" className={styles.sanshuLor}>

@@ -6,7 +6,7 @@ Source prefix `mem/` = `C:\Users\user\.claude\projects\C--Users-user\memory\`. C
 ## Who he is
 - Ashwini Tiwari, GitHub handle lunarxx, cofounder of Octyn (legal entity: Core Octyn Operations LLP). [mem/reference_legal_entities.md]
 - Resume headline (updated 31 Oct 2026): "i build AI systems that run parts of a business on their own. product designer and 3D artist before that." [src/app/resume/page.tsx]
-- Self-description on the portfolio: went from sculpting 3D characters in ZBrush to designing AI-powered products; learns fast, builds end to end. [src/components/Skills/SkillsSection.tsx]
+- Self-description on the portfolio: went from sculpting 3D characters in ZBrush to designing AI-powered products; learns fast and stays with a thing until people use it. [src/components/Skills/SkillsSection.tsx]
 - One-line intro: "I build AI systems that run parts of a business on their own." [src/meet/brain.js]
 - Based in India and works on IST. [mem/project_octyn_shorts.md]
 - Education: BA (Hons) History, University of Delhi, 2023–2026. [src/app/resume/page.tsx]
@@ -33,10 +33,10 @@ Source prefix `mem/` = `C:\Users\user\.claude\projects\C--Users-user\memory\`. C
 
 ## What he's looking for
 - He wants a full-time remote job. [mem/user_career_goal.md]
-- The portfolio exists to land that job; the footer literally says "hire me maybe?". [src/components/Footer/Footer.tsx]
+- The portfolio exists to land that job.
 - On salary: depends on the role; email him. [src/meet/brain.js]
-- Why hire: "I ship the whole thing, end to end, and it still works at 3am. You are sitting inside one right now." [src/meet/brain.js]
-- Strengths: "Speed and taste. Idea to live in days, and it feels right when you use it." [src/meet/brain.js]
+- Why hire him: he stays with a system after it ships until people rely on it, and this call is a working example the visitor can test for themselves. [src/meet/brain.js]
+- Strengths: speed and taste; he gets something real in front of people within days, and cares how it feels to use. [src/meet/brain.js]
 - Weakness: "I start too many things. Working on finishing more of them." [src/meet/brain.js]
 - The quickest way to reach him is email: ashwinitiwari8888@gmail.com. [src/meet/brain.js]
 
@@ -56,7 +56,7 @@ Source prefix `mem/` = `C:\Users\user\.claude\projects\C--Users-user\memory\`. C
 - As of mid-Oct 2026, Octyn's outbound focus is agencies (social media, creator, influencer, talent and content agencies). [mem/project_octyn_agency_v0.md]
 
 ## Octyn's outbound engine (the "sales engine")
-- "Octyn finds the right people, reads up on each one, writes to them and follows up, every night, while I sleep." [src/meet/brain.js]
+- "Octyn finds the right people, reads up on each one, then writes to them and follows up on its own." [src/meet/brain.js]
 - It walks a graph of agencies, qualifies them, checks every address, writes each first line from the agency's own published work, and sends at 8–10am in their time zone. [mem/project_octyn_agency_v1.md]
 - Volume: 120 new emails a day across 12 inboxes on 6 domains, with follow-ups at +3 and +7 days. [mem/project_octyn_agency_v1.md]
 - Verified addresses bounced 0 of 313; guessed catch-all addresses bounced 16.1%, so guesses got capped by a daily bounce budget. [mem/project_octyn_agency_v1.md]
@@ -111,7 +111,7 @@ Source prefix `mem/` = `C:\Users\user\.claude\projects\C--Users-user\memory\`. C
 - Went live 23 Oct 2026; the first real WhatsApp round trip and Instagram DM worked the same day. [mem/project_aarttsii_desk.md]
 - Autobuild: the desk ships small missing features on its own as reversible, partially rolled-out releases. [mem/project_desk_autobuild.md]
 - Product principle: "take the most out of the least", drawing out everything a short message implies without inventing facts. [mem/feedback_most_out_of_least.md]
-- Status: pre-client; aarttsii itself is a test model, not a customer. [mem/project_aarttsii_desk.md]
+- Status: pre-client; aarttsii itself is the test model rather than a customer. [mem/project_aarttsii_desk.md]
 
 ## Inkling
 - A local-first markdown workspace for desktop: notes are plain files on disk, and your vault is a GitHub repo, so sync is free. [src/components/Inkling/InklingSection.tsx]
@@ -150,7 +150,7 @@ Source prefix `mem/` = `C:\Users\user\.claude\projects\C--Users-user\memory\`. C
 - TweetBrain Radar: a Chrome extension that finds high-signal tweets to reply to, filtered by 50+ slop patterns. [mem/project_tweetbrain_radar.md]
 - Rent ledger: a small phone app that works out tenants' rent slips from meter readings, with balances replayed from events. [rent-ledger/README.md]
 
-## This portfolio (/meet)
+## This portfolio (this call)
 - The portfolio is a video-call interview: visitors join a Meet-style lobby and talk to Octyn sitting at his desk. [mem/project_portfolio_interview.md]
 - It's a fork of the onair stage; the original stream engine stays untouched. [mem/project_portfolio_interview.md]
 - An in-browser sentence model matches what you type; camera and mic never leave your browser. [mem/project_portfolio_interview.md]
@@ -162,7 +162,7 @@ Source prefix `mem/` = `C:\Users\user\.claude\projects\C--Users-user\memory\`. C
 - AI does the typing, he does the thinking; he uses AI to build everything, including this portfolio. [src/components/Skills/SkillsSection.tsx]
 - "Claude's my team. I direct, review and test. This call was built that way." [src/meet/brain.js]
 - He openly calls his builds AI-assisted; the differentiator is design taste and shipping, not code purity. [mem/project_ashwini_freelance.md]
-- Research first: every project starts with a question, not a codebase. [src/app/resume/page.tsx]
+- Research first: he gets the question straight before writing any code. [src/app/resume/page.tsx]
 - Every product starts with a real frustration. [src/components/Skills/SkillsSection.tsx]
 - He turns rules into tests so a later change can't silently undo an earlier instruction. [mem/feedback_rules_are_tests.md]
 - He keeps fixed eval sets of rejected outputs and measures every change against them. [mem/project_timbre.md]
@@ -192,7 +192,7 @@ Source prefix `mem/` = `C:\Users\user\.claude\projects\C--Users-user\memory\`. C
 - Dislikes: centered orbs, big voice buttons in nav, carousels, fixed headers. [CLAUDE.md]
 - Colour: black and white with one desaturated accent used sparingly; nothing heavily saturated. [mem/feedback_colour_restraint.md]
 - Every UI must be aesthetic and UX-first from the first screen; no half-built screens. [mem/feedback_ui_aesthetic_uxfirst.md]
-- Writing: no em dashes, no "not just X, but Y", no clichés like "game-changer" or "seamless". [mem/feedback_anti_ai_voice.md]
+- Writing: he cuts anything that reads as generated: stock dashes, negation pivots, hype words. [mem/feedback_anti_ai_voice.md]
 - His own typing voice: lowercase, runs on with so/and/but, and ends on a verdict or a concrete detail, never a moral. [mem/feedback_his_x_voice.md]
 - Reels must pass the mute test: every beat needs a visual payoff. [mem/project_octyn_pilots.md]
 - Never say a build was quick or easy; describe work at its true difficulty. [mem/feedback_never_imply_easy_build.md]
@@ -203,6 +203,8 @@ Source prefix `mem/` = `C:\Users\user\.claude\projects\C--Users-user\memory\`. C
 - Crochet is the one textile a machine still can't make, which makes it scarce abroad and cheap in India. [mem/project_aarttsii_positioning.md]
 
 ## Fun and human details
+- He solves a 3x3 Rubik's cube in under 30 seconds; the cube on his desk is his. [his words, 7 Nov 2026]
+- He plays guitar; the guitar in his room is his. [his words, 7 Nov 2026]
 - Octyn's stream cat naps on the keyboard, steals the mouse and sits on his TV; on /meet she "runs this place". [mem/project_octyn_ai_streamer.md]
 - Octyn's signature reel endings: the cat walking onto the keyboard, or Octyn sipping from a red mug. [mem/project_octyn_reel_lab.md]
 - He plays the guitar on camera, and wanted the rig to read chords from sound to place the hands. [mem/project_octyn_live_abilities.md]

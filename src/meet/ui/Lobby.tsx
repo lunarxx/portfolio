@@ -6,6 +6,9 @@ import { get, set, useMeet, spokenName } from '../store.js'
 import { camera, micButton, noticed, acted, warm } from '../you.js'
 import { YouTile } from './YouTile'
 import { Customiser } from './Customiser'
+import { Agenda } from './Agenda'
+import { VoiceMute, MusicMute, Volume } from './SoundControls'
+import { PhoneMenu } from './PhoneMenu'
 import { Mic, Cam } from './icons'
 import { useEffect, useRef } from 'react'
 import { say, emit, wakeAudio } from '../show.js'
@@ -16,13 +19,18 @@ export function Lobby({ onJoin }: { onJoin: () => void }) {
   const { name, cam, camWaking, camNote, mic, heard, debugSees } = useMeet()
   return (
     <motion.div className={s.lobby} initial={{ opacity: 1 }} exit={{ opacity: 0, transition: { duration: .5 } }}>
+      <div className={s.lobbyTop}>
+        <div className={s.lobbyNav}><Agenda onPick={onJoin} /></div>
+        <div className={s.lobbySound}><VoiceMute /><MusicMute /><Volume /></div>
+        <PhoneMenu onPick={onJoin} />
+      </div>
       <div className={s.pre}>
         <YouTile lobby>
           <span className={s.lbl}>{name || 'You'}{cam && <i> · moving with you</i>}</span>
           {camWaking ? <span className={s.waking}>Waking up the tracker…</span> : camNote && <span className={s.waking}>{camNote}</span>}
           {debugSees && <span className={s.debugSees}>{debugSees}</span>}
           {!mic && <div className={`${s.nudge} ${s.nMic}`}><span>or just<br />say hi out loud</span><svg viewBox="0 0 170 70"><path d="M10 14c40-8 100 6 146 44M156 58l-3-17M156 58l-17-4" /></svg></div>}
-          {!cam && <div className={`${s.nudge} ${s.nCam}`}><svg viewBox="0 0 170 70"><path d="M160 14C120 6 60 20 14 58M14 58l3-17M14 58l17-4" /></svg><span>turn me on,<br />then just wave at him!</span></div>}
+          {!cam && <div className={`${s.nudge} ${s.nCam}`}><svg viewBox="0 0 170 70"><path d="M160 14C120 6 60 20 14 58M14 58l3-17M14 58l17-4" /></svg><span>camera on and<br />i copy your face<br />and hands</span></div>}
           <div className={s.tileBtns}>
             <button id="lmic" className={`${s.rb} ${mic ? s.lit : s.struck}`} onClick={micButton} title="Talk instead of typing"><Mic /></button>
             <button id="lcam" className={`${s.rb} ${cam ? s.lit : s.struck}`} onPointerEnter={warm} onClick={() => camera(!get().cam)} title="Your camera moves your character"><Cam /></button>
@@ -38,7 +46,6 @@ export function Lobby({ onJoin }: { onJoin: () => void }) {
           onChange={(e) => { const v = e.target.value; set({ name: v }); acted(); clearTimeout(nameTimer); nameTimer = setTimeout(() => noticed('name', v.trim()), 900) }}
           onKeyDown={(e) => { if (e.key === 'Enter') onJoin() }} />
         <button id="go" className={s.go} onClick={onJoin}>Walk in <span>→</span></button>
-        <div className={s.alt}>Short on time? <a href="/resume">Read the resume</a></div>
       </div>
     </motion.div>
   )
@@ -53,7 +60,7 @@ function HisPreview({ heard }: { heard: string | null }) {
     let raf = 0
     const draw = () => {
       const src = document.getElementById('c') as HTMLCanvasElement | null, g = cv.current?.getContext('2d')
-      if (src && g) { g.imageSmoothingEnabled = false; g.drawImage(src, 0, 0, cv.current!.width, cv.current!.height) }
+      if (src && g) { g.imageSmoothingEnabled = true; g.drawImage(src, 0, 0, cv.current!.width, cv.current!.height) }
       raf = requestAnimationFrame(draw)
     }
     raf = requestAnimationFrame(draw)

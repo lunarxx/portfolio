@@ -52,7 +52,7 @@ if (process.argv.includes('--answers')) {
   // --live: ask the running site (localhost:3311), so the interview rules and the guard are what's measured
   const live = process.argv.includes('--live')
   await evals.evaluateAnswers(hybrid, cases, async (q) => {
-    if (live) { const d = await (await fetch('http://localhost:3311/api/ask', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ q }) })).json(); return { text: d.say || '', abstained: d.covered === false } }
+    if (live) { const d = await (await fetch((process.env.ASK_URL || 'http://localhost:3311') + '/api/ask', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ q }) })).json(); return { text: d.say || '', abstained: d.covered === false } }
     const a = await rag.answer(q, { limit: 14, budget: 1600, weights: WEIGHTS, instructions: 'You are Ashwini, answering a visitor in first person, 1 to 3 short sentences.' })
     return { text: a.text, abstained: a.abstained }
   })

@@ -36,22 +36,27 @@ const slip = (p: Passage) => ({ n: p.n, section: p.context.split(' › ').pop() 
 
 export async function POST(req: Request) {
   const ip = getClientIP(req)
-  if (!rateLimit(`ask:${ip}`, 20, 60_000)) return Response.json({ say: 'Give me a second, too many questions at once.', action: null }, { status: 429 })
   const body = await req.json().catch(() => ({}))
+  if (body.mode === 'react') { if (!rateLimit(`react:${ip}`, 15, 60_000)) return Response.json({ say: null }, { status: 429 }) }
+  else if (!rateLimit(`ask:${ip}`, 40, 60_000)) return Response.json({ say: 'Give me a second, too many questions at once.', action: null }, { status: 429 })
   try {
-    return Response.json(body.mode === 'read' ? await reading(body) : body.mode === 'sources' ? await sources(body) : body.mode === 'search' ? await searchShown(body) : await answer(body))
+    return Response.json(body.mode === 'react' ? await reaction(body) : body.mode === 'read' ? await reading(body) : body.mode === 'sources' ? await sources(body) : body.mode === 'search' ? await searchShown(body) : await answer(body))
   } catch (e) {
     console.error('[ask]', e)
     return Response.json({ say: "My head's a bit fuzzy right now. Ask me that over email?", action: null, cites: [] })
   }
 }
 
-async function answer({ q, mood, name, recent }: any) {
+// what the visitor has done to him this call, as the page noted it
+const didToHim = (happened: unknown) => (Array.isArray(happened) ? happened : []).slice(-8).map((x) => `- ${clean(x, 90)}`).filter((x) => x.length > 2).join('\n')
+const FUN = ['wave', 'dance', 'spin', 'stretch']
+
+async function answer({ q, mood, moodLevel, happened, name, recent }: any) {
   if (!q || typeof q !== 'string' || q.length > 400) throw new Error('no question')
-  const r = await engine()
+  const r = await engine(), did = didToHim(happened), sore = moodLevel === 1 || moodLevel === 2
   const history = Array.isArray(recent) ? recent.slice(-6).map((l: any) => ({ who: l.who === 'him' ? 'assistant' as const : 'user' as const, text: String(l.text).slice(0, 300) })) : []
   const ask = (extra = '') => r.answer(q, {
-    history, rewrite: 'append', limit: 14, budget: 1600, weights: WEIGHTS, allowUngrounded: true, temperature: .5, maxTokens: 400,
+    history, rewrite: 'append', limit: 14, budget: 1600, weights: WEIGHTS, allowUngrounded: true, temperature: sore ? .75 : .5, maxTokens: 400,
     instructions: `You are Ashwini Tiwari, in a video-call interview on your portfolio. You appear as Octyn, your TV-headed stream character, at your desk. A visitor (maybe a hirer) is talking to you.
 Answer as Ashwini, first person, out loud: 1 to 3 short sentences, plain spoken English, casual and warm, a little dry. No em dashes, no lists, no markdown, no emojis, no hype words. Never mention notes, sources or searching; just talk.
 If the notes don't cover it, say you don't know that one and that they can email you (${EMAIL}).
@@ -60,11 +65,15 @@ ${INTERVIEW}
 ${asksAboutSetbacks(q) ? `They asked about setbacks. Pick exactly one from this list and nothing else (never call anything else a failure), tell it in a sentence or two, and land on what you learned or did next:
 ${SETBACKS}` : 'Do not use anything from the "Setbacks and lessons" notes.'}
 Never say any of these:\n${RULES}
-Your current mood: ${clean(mood || 'relaxed and friendly', 120)}. Let it colour the tone only, never refuse to answer.${name ? `\nThe visitor's name is ${clean(name, 30)}.` : ''}${extra}`,
+Your current mood: ${clean(mood || 'relaxed and friendly', 160)}. This really changes how you sound: length, warmth, patience. It never changes the facts, and you still answer anything real they ask. NO CATCHPHRASES.${did ? `\nWhat this visitor has done to you and your things this call, which you remember:\n${did}${sore ? '\nIf it fits, let them know you noticed, naturally and in your own words, at most once, about one of these.' : ''}` : ''}
+If their message isn't really a question, or it's rude, respond to it the way a person on a call would: no email, no notes, no offers. When someone insults you, you don't agree, thank them or smooth it over, and you don't pretend it was fair: you have some self-respect, and you let them hear that you're not impressed. Stay composed: dry or cold, never cruel, never swearing, nothing about how they look or who they are.
+Use the notes for facts and put them in your own words each time; never repeat a line from them word for word.
+${moodLevel === 2 ? 'Length right now: one short sentence, no lists. You are not in the mood to perform: no waving, dancing, spinning or stretching for them, and say so.' : moodLevel === 1 ? 'Length right now: at most two short sentences.' : ''}${name ? `\nThe visitor's name is ${clean(name, 30)}.` : ''}${extra}`,
     fields: {
       action: `null, or one thing to do on screen right now, only if they asked for it or it plainly fits what you just said: ${ACTIONS.join(', ')} (each opens that project's small working version on screen, only for that project: never Mooney when talking about the desk; shelf opens everything; contact your card; cat pets the cat)`,
       offer: `null, or if your answer ends by offering to show or do something, which one: ${ACTIONS.join(', ')} (only the project you just talked about). Use it instead of action when you're asking, not doing`,
       next: `2 short follow-up questions they might ask next, in their words, about what you just said, under 7 words each (e.g. "How does it price an order?")`,
+      felt: `how their last message treated you: "rude" (insulting or belittling you, swearing at you, being nasty), "kind" (a real apology or real warmth), otherwise "neutral". A tough or sceptical question is neutral.`,
     },
   })
   // every answer is checked before he says it: one retry told what it broke, then a safe line
@@ -75,10 +84,25 @@ Your current mood: ${clean(mood || 'relaxed and friendly', 120)}. Let it colour 
     broke = check(q, a.text)
     if (broke.length) return { say: /work|part|skill/.test(broke.join(' ')) ? 'My cofounder and I built it together. Want to see it?' : "That's a longer story. Ask me how any of it works, that's the fun part.", action: null, covered: true, cites: [], guarded: true }
   }
-  const action = ACTIONS.includes(a.extra.action as any) ? a.extra.action : (!a.covered ? 'contact' : null)
-  const offer = OFFERABLE.has(a.extra.offer as string) && a.extra.offer !== action ? a.extra.offer : null
+  const heardAs = ['rude', 'kind'].includes(a.extra.felt as string) ? a.extra.felt : 'neutral'
+  const fedUp = (x: unknown) => moodLevel === 2 && FUN.includes(x as string)
+  const action = ACTIONS.includes(a.extra.action as any) && !fedUp(a.extra.action) ? a.extra.action : (!a.covered && heardAs === 'neutral' && !sore ? 'contact' : null)
+  const offer = OFFERABLE.has(a.extra.offer as string) && a.extra.offer !== action && !fedUp(a.extra.offer) ? a.extra.offer : null
   const next = (Array.isArray(a.extra.next) ? a.extra.next : []).map((x: unknown) => clean(x, 60)).filter((x: string) => x && x.split(' ').length <= 9).slice(0, 2)
-  return { say: clean(a.text) || "Not sure about that one. Email me?", action, offer, next, covered: a.covered, cites: a.cites.map(slip), of: await r.store.count({ kinds: ['about'] }), ms: a.trace.ms }
+  return { say: clean(a.text) || "Not sure about that one. Email me?", action, offer, next, felt: heardAs, covered: a.covered, cites: a.cites.map(slip), of: await r.store.count({ kinds: ['about'] }), ms: a.trace.ms }
+}
+
+// he's annoyed and you just touched something: one line, from what you did and what's true about the thing
+async function reaction({ what, mood, happened, name, fond }: any) {
+  const r = await engine(), thing = clean(what, 160), did = didToHim(happened)
+  const about = (await search(r, thing, { limit: 2, budget: 220, weights: WEIGHTS, filter: { kinds: ['about'] } })).passages.map((p) => `- ${p.text}`).join('\n')
+  const out = await r.llm!.json<any>([
+    { role: 'system', content: `You are Ashwini Tiwari on a video call, sitting at your desk as Octyn, a character with a TV for a head. The visitor can reach into your room and touch things${fond ? ', and right now they are playing with something of yours that you like. You say one short, quirky, slightly odd thing about it out loud, under 14 words: dry and affectionate, with a specific thought in it, the kind of aside that makes someone laugh. Never a compliment, never a question about the interview, and you are never hurt, sad or annoyed about it. If you mention how long the cube takes you, it is 30 seconds exactly, no other number' : ', and they keep doing it. You react out loud in one short spoken sentence, under 12 words'}. Your mood: ${clean(mood, 160)}. ${fond ? 'Specific to this object' : 'The sound of a real person being interrupted by this: specific to what they just touched'}, and different from anything you've said. NO CATCHPHRASES. Never cruel, no swearing, nothing about how they look. Never invent facts. No em dashes. Stop when the thought is finished.${did ? `\nWhat they've done so far:\n${did}` : ''}${about ? `\nThings that are true, use only if one fits:\n${about}` : ''}${name ? `\nTheir name is ${clean(name, 30)}.` : ''}
+Reply as JSON: {"say": "..."}` },
+    { role: 'user', content: `What just happened: ${thing}` },
+  ], { maxTokens: 60, temperature: .9 })
+  const say = clean(out?.say, 110)
+  return { say: say && !check(thing, say).length ? say : null }
 }
 
 // a written answer's notes: what he just said, looked up (no model call: words and meaning only)

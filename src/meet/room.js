@@ -1,22 +1,40 @@
 // his room, in the call: the camera across his desk, his phone running mooney, and everything in his tile you can
 // poke (him, his mug and can to steal, his phone, the cat, the lamps as real switches, the record player...)
 import * as THREE from 'three'
-import { get, set, live, note } from './store.js'
+import { get, set, live, note, spokenName } from './store.js'
 import { say, stage, emit, fx, pick } from './show.js'
 import { play } from './brain.js'
-import { poked, pacify } from './behaviour.js'
+import { poked, pacify, moodTier, moodWords, happened } from './behaviour.js'
 
 // ---------------------------------------------------------------- the camera: across the desk, like a call
 // a little high and to the side, so his face, his mug and the cat are all in reach. W while he stands (it crops his
 // head otherwise), the cat's close-up while he pets her, the desk while you're still in the lobby
-function meetingCam(s) {
-  const d = Math.PI / 180, el = 34 * d, az = 10 * d
-  s.CAMS.M = s.ortho(.64, new THREE.Vector3(.04, 1.1, .3), new THREE.Vector3(Math.sin(az) * Math.cos(el), Math.sin(el), Math.cos(az) * Math.cos(el)), [0, 2, 3, 4, 6, 7])
+const D = Math.PI / 180, EL = 34 * D, AZ = 10 * D, AIM = new THREE.Vector3(.04, 1.1, .3)
+const camDir = (az, el) => new THREE.Vector3(Math.sin(az) * Math.cos(el), Math.sin(el), Math.cos(az) * Math.cos(el))
+function meetingCam(s) { s.CAMS.M = s.ortho(.64, AIM, camDir(AZ, EL), [0, 2, 3, 4, 6, 7]) }
+// dragging his tile walks the camera round the room. it stays across the desk from him (the wall behind it is already
+// cut away); swung far to a side, that side's wall is cut away too. it stays where you leave it until you ask for it back
+const view = { yaw: 0, pitch: 0, wantYaw: 0, wantPitch: 0 }
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x))
+export function lookAround(dx, dy, w, h) {
+  view.wantYaw = clamp(view.wantYaw - dx / w * 2.4, -1.15, 1.15); view.wantPitch = clamp(view.wantPitch + dy / h * 1.5, -.36, .5)
+  if (!get().viewMoved) { set({ viewMoved: true }); note('walked my camera round the room', 'look') }
+}
+export function resetView() { view.wantYaw = view.wantPitch = 0; set({ viewMoved: false }) }
+function aimView(c) {
+  const dy = view.wantYaw - view.yaw, dp = view.wantPitch - view.pitch
+  if (Math.abs(dy) < .0005 && Math.abs(dp) < .0005) return
+  view.yaw += dy * .16; view.pitch += dp * .16
+  const az = AZ + view.yaw, dir = camDir(az, EL + view.pitch)
+  c.position.copy(AIM).addScaledVector(dir, 10); c.lookAt(AIM)
+  if (dir.x > .3) c.layers.disable(4); else c.layers.enable(4)
+  if (dir.x < -.3) c.layers.disable(3); else c.layers.enable(3)
 }
 function shots() {
   const s = stage()
   if (s && s.CAMS) {
     if (!s.CAMS.M) meetingCam(s)
+    aimView(s.CAMS.M)
     const st = s.state, act = st.act && st.act.name
     st.camHold = get().phase === 'lobby' ? 'A' : st.move ? 'W' : act === 'pet_cat' ? 'K' : 'M'
     const z = 1 + (live.lean || 0) * .28; if (Math.abs(s.CAMS.M.zoom - z) > .002) { s.CAMS.M.zoom += (z - s.CAMS.M.zoom) * .08; s.CAMS.M.updateProjectionMatrix() }   // you lean in, his camera pushes in
@@ -39,8 +57,8 @@ function paintPhone() {
 let camNudged = false
 function lull() {
   const s = get(), now = performance.now()
-  if (camNudged || s.cam || s.phase !== 'call' || now - s.joinedAt < 40000 || stage()?.state?.line || now - live.lastSaid < 8000) return
-  camNudged = true; say('You can turn your camera on, by the way. Your character copies you. I never see your face.', { mark: 'point' })
+  if (camNudged || s.cam || s.phase !== 'call' || now - s.joinedAt < 15000 || stage()?.state?.line || now - live.lastSaid < 5000) return
+  camNudged = true; say('Turn your camera on, by the way. Your character copies your face and hands, and I never see you.', { mark: 'point' })
 }
 let started = false
 export function start() { if (started) return; started = true; requestAnimationFrame(shots); paintPhone(); setInterval(lull, 2000) }
@@ -52,10 +70,57 @@ function respond(kind, name) {
   const r = poked(kind, name); if (!r) return
   if (r.face) fx({ kind: 'face', a: { mood: r.face }, dur: 1.5 })
   if (r.act) { saidAt = performance.now(); say(r.line, { act: r.act }); return }
-  if (r.line) talk(r.line, r.mark || 'shrug', !!r.always)
+  if (!r.line) return
+  // once he's actually annoyed, he reacts to what you did, in his own words, knowing the rest of what you've done; if
+  // that's slow, the written line. a first poke stays instant
+  const t = performance.now()
+  if (moodTier() > 0 && !r.always && t - reactedAt > 5000) { reactedAt = saidAt = t; react(`${kind}${name ? ` (${name})` : ''}`, r); return }
+  talk(r.line, r.mark || 'shrug', !!r.always)
+}
+let reactedAt = 0
+// they're playing with something of his he likes: a line of his own about it, from his notes and in his mood
+async function quip(what, fallback) {
+  const t = performance.now(); if (t - saidAt < 1300) return; saidAt = t
+  let line = fallback
+  try {
+    const res = await fetch('/api/ask', { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: AbortSignal.timeout(2500),
+      body: JSON.stringify({ mode: 'react', fond: true, what, mood: moodWords(), happened: happened(), name: spokenName(get().name) }) })
+    const j = await res.json(); if (j?.say) line = j.say
+  } catch { /* the written line */ }
+  say(line, { mark: 'shrug' })
+}
+async function react(what, r) {
+  let line = r.line
+  try {
+    const res = await fetch('/api/ask', { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: AbortSignal.timeout(2500),
+      body: JSON.stringify({ mode: 'react', what, mood: moodWords(), happened: happened(), name: spokenName(get().name) }) })
+    const j = await res.json(); if (j?.say) line = j.say
+  } catch { /* the written line */ }
+  say(line, { mark: r.mark || 'deadpan' })
 }
 // a real switch on his lights: off, then back on. returns whether it's on now
 function lightSwitch(name) { const L = stage()?.lights?.[name]; if (!L) return true; L.userData.off = !L.userData.off; return !L.userData.off }
+// his guitar plays: a chord a tap, on round the progression, the strings shaking as it rings. it doesn't annoy him
+// his guitar: a tap hands it over
+function strum() {
+  set({ share: 'guitar' })
+  quip('his guitar: they just picked it up to have a go', 'Careful, that one has opinions about tuning.')
+}
+// the cube on his desk: every tap turns the top layer a quarter, however fast they come (they queue, a little quicker the
+// more are waiting). he only speaks up after a real burst of them, not a single tap
+let cubeTurns = 0, cubeBusy = false, burst = 0, burstAt = 0, cubeSaidAt = -1e9
+function turnCube() {
+  const top = stage()?.props?.rubiks?.top; if (!top || !cubeTurns) { cubeBusy = false; return }
+  cubeBusy = true; cubeTurns--; fx({ kind: 'sound', a: { sfx: 'blip' } })
+  const y0 = top.rotation.y, t0 = performance.now(), ms = cubeTurns ? 110 : 190
+  ;(function turn() { const u = Math.min(1, (performance.now() - t0) / ms); top.rotation.y = y0 + (Math.PI / 2) * u * u * (3 - 2 * u); if (u < 1) requestAnimationFrame(turn); else turnCube() })()
+}
+function twistCube() {
+  const t = performance.now(); note('played with my rubik\'s cube', 'cat:cube')
+  cubeTurns = Math.min(cubeTurns + 1, 8); if (!cubeBusy) turnCube()
+  burst = t - burstAt < 1200 ? burst + 1 : 1; burstAt = t
+  if (burst >= 3 && t - cubeSaidAt > 12000) { cubeSaidAt = t; quip('his Rubik\'s cube: they scrambled it. He does not mind at all, he solves it in under 30 seconds and loves saying so', 'Scramble it all you want. Thirty seconds and it is back.') }
+}
 // the things in his room: where they stand (room.js), what poking each does; what he says goes through his mood
 const SPOTS = [
   { name: 'record player', at: [-.43, .69, -1.67], tap: () => { stage()?.sound.skip(); talk(pick(['Next one.', 'Good pick.', 'Ooh, this one.']), 'thumbs_up') } },
@@ -66,13 +131,11 @@ const SPOTS = [
   { name: 'his pc', at: [1.0, 1.0, .72], tap: () => respond('pc', 'his pc') },
   { name: 'bookcase', at: [-1.3, 1.2, -1.7], tap: () => respond('books', 'bookcase') },
   { name: 'the print', at: [-.68, 1.52, -1.88], tap: () => respond('print', 'the print') },
-  { name: 'the window', at: [.72, 1.58, -1.89], tap: () => respond('window', 'the window') },
-  { name: 'guitar', at: [1.05, .6, -1.72], tap: () => respond('guitar', 'guitar') },
   { name: 'clock', at: [.2, 2.4, -1.87], tap: () => respond('clock', 'clock') },
   { name: 'notebook', at: [-.72, .78, .52], tap: () => respond('notebook', 'notebook') },
   { name: 'webcam', at: [.12, 1.52, .99], tap: () => respond('webcam', 'webcam') },
 ]
-const NAMES = { monitor: 'his monitor', head: 'Ashwini', him: 'Ashwini', mug: 'his coffee', can: 'his energy drink', phone: 'his phone', cat: 'the cat' }
+const NAMES = { guitar: 'his guitar', cube: "rubik's cube", monitor: 'his monitor', head: 'Ashwini', him: 'Ashwini', mug: 'his coffee', can: 'his energy drink', phone: 'his phone', cat: 'the cat' }
 // his 16:9 picture covers the tile (w x h): where it lands
 const fit = (w, h) => { const k = Math.max(w / 16, h / 9), pw = 16 * k, ph = 9 * k; return { pw, ph, ox: (pw - w) / 2, oy: (ph - h) / 2 } }
 const camNow = () => { const s = stage(); return s && s.CAMS[s.state.camHold || 'A'] }
@@ -82,7 +145,7 @@ export function under(x, y, w, h) {
   const F = fit(w, h), toTile = (v) => { const p = v.clone().project(c); return [(p.x + 1) / 2 * F.pw - F.ox, (1 - p.y) / 2 * F.ph - F.oy] }
   const ray = new THREE.Raycaster(); ray.layers.mask = c.layers.mask
   ray.setFromCamera(new THREE.Vector2((x + F.ox) / F.pw * 2 - 1, -((y + F.oy) / F.ph * 2 - 1)), c)
-  const owner = (o) => { for (let n = o; n; n = n.parent) { if (n === s.O.head) return 'head'; if (n === s.O.root) return 'him'; if (n === s.props.monitorRig) return 'monitor'; for (const k of ['mug', 'can', 'phone']) if (n === s.props[k]) return k; if (s.cat && n === s.cat.root) return 'cat' } return null }
+  const owner = (o) => { for (let n = o; n; n = n.parent) { if (n === s.O.head) return 'head'; if (n === s.O.root) return 'him'; if (n === s.props.monitorRig) return 'monitor'; if (n === s.props.rubiks?.guitar) return 'guitar'; if (n === s.props.rubiks?.cube) return 'cube'; for (const k of ['mug', 'can', 'phone']) if (n === s.props[k]) return k; if (s.cat && n === s.cat.root) return 'cat' } return null }
   let solid = 0, first = null
   for (const hit of ray.intersectObject(s.O.root.parent, true)) {   // past the see-through glows and light pools, the first solid things
     const mt = hit.object.material; if (!hit.object.visible || (mt && (mt.transparent || mt.depthWrite === false))) continue
@@ -101,6 +164,8 @@ export function under(x, y, w, h) {
 }
 export function tap(x, y, w, h) {
   const u = under(x, y, w, h); if (!u) return
+  if (u.kind === 'guitar') return strum()
+  if (u.kind === 'cube') return twistCube()
   const s = stage()
   if (u.kind === 'head' || u.kind === 'him') {
     pokes++; note(u.kind === 'head' ? 'poked me on the head' : 'poked me', u.kind === 'head' ? 'poke:head' : 'poke:me')
@@ -158,19 +223,21 @@ async function pickUp(m, x0, y0) {
   const from = { R: O.arms.R.hand.getWorldPosition(new THREE.Vector3()), L: O.arms.L.hand.getWorldPosition(new THREE.Vector3()) }
   // it fell away from him, so its top edge is out of reach: he leans in and takes it by both sides, halfway up, and his
   // hands stay on those sides (they're points on the monitor) as he stands it back up
-  const side = (s) => O.root.worldToLocal(m.localToWorld(new THREE.Vector3(s === 'R' ? .25 : -.25, .09, 0)))
+  const side = (s) => O.root.worldToLocal(m.localToWorld(new THREE.Vector3(s === 'R' ? .36 : -.36, -.05, 0)))   // its side edges, on his half: arms are .55 long, so these stay in reach from flat to upright once he's scooted in
   const toRoot = (v) => O.root.worldToLocal(v.clone())
   const GRIP = [[.95, 1, 1.05, 1.1], [.45, .75]]                                 // fingers curled round the edge
   let base = null
+  const rootZ = O.root.position.z
   state.afterPose = () => {
     const u = (performance.now() - t0) / 1000                                   // 0-.6 lean and reach, .6-1.6 lift, 1.6-2 let go
     const lift = ease(Math.min(1, Math.max(0, (u - .6) / 1)))
     m.rotation.x = x0 + 1.32 * (1 - lift); m.position.y = y0 - .2 * (1 - lift)
     const k = u < .6 ? ease(u / .6) : u < 1.6 ? 1 : 1 - ease(Math.min(1, (u - 1.6) / .4))
-    if (k <= 0 && u > 1.6) { state.afterPose = null; m.rotation.x = x0; m.position.y = y0; knocked = false; say("Got it. Please don't.", { mark: 'deadpan' }); return }
+    O.root.position.z = rootZ + k * .25                                         // he scoots in to get to it, and back
+    if (k <= 0 && u > 1.6) { state.afterPose = null; O.root.position.z = rootZ; m.rotation.x = x0; m.position.y = y0; knocked = false; say("Got it. Please don't.", { mark: 'deadpan' }); return }
     // the lean: most of it while the monitor is down, easing off as it comes up with him. his body is posed on twos
     // and this runs every frame, so the lean goes on top of the pose the body last made, never on top of itself
-    const lean = k * (.26 - .14 * lift), T = O.torso, H = O.head
+    const lean = k * .3, T = O.torso, H = O.head
     if (!base || T.rotation.x !== base.wrote[0] || T.position.z !== base.wrote[1] || H.position.z !== base.wrote[2])
       base = { rx: T.rotation.x, ty: T.position.y, tz: T.position.z, hy: H.position.y, hz: H.position.z }
     T.rotation.x = base.rx + lean * .7; T.position.z = base.tz + lean * .35; T.position.y = base.ty - lean * .05

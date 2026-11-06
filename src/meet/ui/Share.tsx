@@ -36,16 +36,32 @@ const title = (x: string) => x.replace(/\b\w/g, (c) => c.toUpperCase())
 
 export function Mooney() {
   const [rows, setRows] = useState<Row[]>([
-    { t: 'Chai', a: 20, c: CATS[0], time: '9:12 AM', id: rid++ }, { t: 'Metro card', a: 200, c: CATS[1], time: '10:03 AM', id: rid++ }, { t: 'Lunch', a: 180, c: CATS[0], time: '1:40 PM', id: rid++ },
+    { t: 'Coffee', a: 5, c: CATS[0], time: '9:12 AM', id: rid++ }, { t: 'Metro card', a: 20, c: CATS[1], time: '10:03 AM', id: rid++ }, { t: 'Lunch', a: 14, c: CATS[0], time: '1:40 PM', id: rid++ },
   ])
-  const [hint, setHint] = useState('Hold the mic, or type "chai 20"'), [v, setV] = useState(''), [rec, setRec] = useState(false)
+  const [hint, setHint] = useState('Hold the mic, type "coffee 5", or scan a receipt'), [v, setV] = useState(''), [rec, setRec] = useState(false)
   const logged = useRef(0), sr = useRef<any>(null)
   const add = (text: string) => {
     const got = parse(text)
-    if (!got.length) { setHint('No amount in that. Try "chai 20"'); return }
+    if (!got.length) { setHint('No amount in that. Try "coffee 5"'); return }
     setRows((r) => [...got.reverse().map((g) => ({ ...g, time: clock(new Date()), id: rid++ })), ...r]); setHint('')
     if (++logged.current === 1) setTimeout(() => { say(got.length > 1 ? `${got.length} in one go, each on its own line. That's Mooney.` : "Logged. That's Mooney. Want to see the front desk next?", { mark: 'thumbs_up' }); offerNext('desk', 'The front desk') }, 400)
     else say('Logged.', { mark: 'thumbs_up' })
+  }
+  // the camera: a photo of a receipt, made small here, read on the server, one row back
+  const photo = useRef<HTMLInputElement>(null), [reading, setReading] = useState(false)
+  const scan = async (file?: File) => {
+    if (!file) return
+    setReading(true); setHint('Reading your receipt...')
+    try {
+      const bmp = await createImageBitmap(file), k = Math.min(1, 1280 / Math.max(bmp.width, bmp.height)), cv = document.createElement('canvas')
+      cv.width = Math.round(bmp.width * k); cv.height = Math.round(bmp.height * k); cv.getContext('2d')!.drawImage(bmp, 0, 0, cv.width, cv.height); bmp.close()
+      const res = await fetch('/api/receipt', { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: AbortSignal.timeout(20000), body: JSON.stringify({ image: cv.toDataURL('image/jpeg', .82).split(',')[1] }) })
+      const r = await res.json()
+      if (!res.ok || !(r.total > 0)) { setHint("Couldn't find a total on that one. Try a clearer photo"); return }
+      setRows((x) => [{ t: r.merchant || 'Receipt', a: r.total, c: catOf(`${r.merchant || ''} ${r.kind || ''}`), time: clock(new Date()), id: rid++ }, ...x]); setHint('')
+      if (++logged.current === 1) setTimeout(() => { say("Read it off the photo. That's Mooney. Want to see the front desk next?", { mark: 'thumbs_up' }); offerNext('desk', 'The front desk') }, 400)
+      else say('Logged.', { mark: 'thumbs_up' })
+    } catch { setHint("Couldn't read that one. Try again?") } finally { setReading(false); if (photo.current) photo.current.value = '' }
   }
   const SR = typeof window !== 'undefined' && ((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition)
   const down = (e: React.PointerEvent) => {
@@ -75,7 +91,7 @@ export function Mooney() {
         </div>
         <div className={s.hint}>{hint}</div>
         <div className={s.ib}>
-          <div className={s.pill}><Pen /><input placeholder="What did you spend?" value={v} onChange={(e) => setV(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && v.trim()) { add(v); setV('') } }} /><button aria-label="scan a receipt"><Camera /></button></div>
+          <div className={s.pill}><Pen /><input placeholder="What did you spend?" value={v} onChange={(e) => setV(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && v.trim()) { add(v); setV('') } }} /><button aria-label="scan a receipt" title="Scan a receipt. The photo is read and not kept." disabled={reading} onClick={() => photo.current?.click()}><Camera /></button><input ref={photo} type="file" accept="image/*" hidden onChange={(e) => scan(e.target.files?.[0])} /></div>
           <button className={`${s.mmic} ${rec ? s.rec : ''}`} aria-label="hold to talk" onPointerDown={down} onPointerUp={up} onPointerLeave={up}><Mic /></button>
         </div>
       </div>

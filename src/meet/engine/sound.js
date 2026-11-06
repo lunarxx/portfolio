@@ -62,7 +62,17 @@ export function createSound(ctx, { rand = Math.random, onSong = () => {}, out = 
   const duck = ctx.createGain(); duck.gain.value = BED; duck.connect(master);   // real tracks are denser than the generated chords: a lower bed (-21 dB between lines was as loud as him)
   const lofi = createPlaylist(ctx, duck, { rand, onSong, fallback: () => createLofi(ctx, duck, { rand, onSong }) });   // real tracks, else the generated chords
   const micModel = createMic({ rand }), db = x => 10 ** (x / 20);
-  let talking = null;
+  let talking = null, musicK = 1;
+  /* his guitar: plucked strings (Karplus-Strong: a burst of noise fed round a delay as long as the note's period, losing a
+     little each time), made once per note. each of the six strings rings until it's played again, like a real one */
+  const ringing = [], SET_PLAY = { k: 1 };
+  const plucks = new Map(), guitar = ctx.createGain(), guitarSend = ctx.createGain(), warm = ctx.createBiquadFilter(), body = ctx.createBiquadFilter(); warm.type = 'lowpass'; warm.frequency.value = 1500; warm.Q.value = .4; body.type = 'lowshelf'; body.frequency.value = 220; body.gain.value = 3; guitar.gain.value = .95; guitarSend.gain.value = .4; guitar.connect(warm); warm.connect(body); body.connect(master); body.connect(guitarSend); guitarSend.connect(room);
+  function pluck(f) {
+    if (plucks.has(f)) return plucks.get(f);
+    const sr = ctx.sampleRate, n = Math.round(sr / f), b = ctx.createBuffer(1, Math.round(sr * 2.4), sr), x = b.getChannelData(0); let lp = 0;
+    for (let i = 0; i < x.length; i++) { if (i < n) { lp += (rand() * 2 - 1 - lp) * .22; x[i] = lp * 1.8; } else x[i] = .995 * .5 * (x[i - n] + x[i - n - 1 < 0 ? 0 : i - n - 1]); }
+    plucks.set(f, b); return b;
+  }
 
   function click(t, f, peak, decay, dest = keys) {
     const s = ctx.createBufferSource(), bp = ctx.createBiquadFilter(), g = ctx.createGain();
@@ -71,14 +81,25 @@ export function createSound(ctx, { rand = Math.random, onSong = () => {}, out = 
   }
   function thock(t, f, peak) { const o = ctx.createOscillator(), g = ctx.createGain(); o.frequency.value = f; g.gain.setValueAtTime(peak, t); g.gain.exponentialRampToValueAtTime(.0001, t + .03); o.connect(g); g.connect(keys); o.start(t); o.stop(t + .04); }
   return {
-    voiceIn, lofi,
-    /* the meeting's mute: everything out, his mouth still reads the dry voice */
-    mute(on) { trim.gain.setTargetAtTime(on ? 0 : .89, ctx.currentTime, .05); },
+    voiceIn, lofi, guitarOut: body,
+    /* the meeting's two mutes, separate (his note: one button shouldn't do both). his voice: his mouth still reads the dry
+       voice and the captions still run. the room: the music, his keyboard and his set's hum and static */
+    muteVoice(on) { voiceIn.gain.setTargetAtTime(on ? 0 : VOICE, ctx.currentTime, .05); },
+    muteRoom(on) { const now = ctx.currentTime; musicK = on ? 0 : 1; duck.gain.setTargetAtTime(BED * musicK * SET_PLAY.k * (talking ? .45 : 1), now, .05); keys.gain.setTargetAtTime(on ? 0 : .14, now, .05); set.hiss.gain.setTargetAtTime(on ? 0 : 1, now, .05); },
+    /* the call's volume, everything together: 0 .. 1 */
+    volume(v) { trim.gain.setTargetAtTime(.89 * v, ctx.currentTime, .03); },
+    /* one string plucked: string 0 (low) .. 5, at a frequency, how hard, how soon. the note it was ringing stops */
+    pluck(str, f, vel = .8, delay = 0) {
+      const t = ctx.currentTime + .005 + delay, last = ringing[str]; if (last) { last.g.gain.setTargetAtTime(0, t, .012); last.s.stop(t + .08); }
+      const s = ctx.createBufferSource(), g = ctx.createGain(); s.buffer = pluck(Math.round(f * 100) / 100); g.gain.value = vel * (.85 - str * .07); s.connect(g); g.connect(guitar); s.start(t); ringing[str] = { s, g };
+    },
+    /* someone's playing the guitar: the music drops right back */
+    playing(on) { SET_PLAY.k = on ? .22 : 1; duck.gain.setTargetAtTime(BED * musicK * SET_PLAY.k * (talking ? .45 : 1), ctx.currentTime, .25); },
     skip() { lofi.skip && lofi.skip(); },
     /* a line starts: the tv may flicker */
     lineStart() { set.lineStart(); },
     /* the show sets the mix live: voice and music as linear gains (1 = as built) */
-    mix({ voice, music } = {}) { const t = ctx.currentTime; if (voice != null) voiceIn.gain.setTargetAtTime(VOICE * voice, t, .1); if (music != null) duck.gain.setTargetAtTime(BED * music, t, .1); },
+    mix({ voice, music } = {}) { const t = ctx.currentTime; if (voice != null) voiceIn.gain.setTargetAtTime(VOICE * voice, t, .1); if (music != null) duck.gain.setTargetAtTime(BED * music * musicK, t, .1); },
     /* a key he pressed: a click and the key bottoming out */
     key(ch) {
       const t = ctx.currentTime + .005, v = .8 + rand() * .35;
@@ -94,7 +115,7 @@ export function createSound(ctx, { rand = Math.random, onSong = () => {}, out = 
       prox.gain.setTargetAtTime(5 - 7 * m.d - 6 * a, now, k); air.gain.setTargetAtTime(-5 * m.d - 3 * a, now, k);
       mic.gain.setTargetAtTime(db(1 - 6 * m.d - 9 * a), now, k); send.gain.setTargetAtTime(.05 + .25 * m.d + .4 * a, now, k);
       if (m.bump) { const g = ctx.createGain(); g.connect(master); click(now + .02, 160, .22, .12, g); }   // his hand on the mic
-      if (speaking !== talking) { talking = speaking; duck.gain.setTargetAtTime(speaking ? BED * .45 : BED, now, speaking ? .12 : .7); }
+      if (speaking !== talking) { talking = speaking; duck.gain.setTargetAtTime(BED * musicK * SET_PLAY.k * (speaking ? .45 : 1), now, speaking ? .12 : .7); }
       return m;
     },
   };

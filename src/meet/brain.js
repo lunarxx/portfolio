@@ -1,8 +1,8 @@
 // what he says (drafts in ashwini's voice, for him to correct), how he understands you, and what a yes does.
 // offer: what a yes does next. next: the chips after this answer
 import { get, set, live, note, noteText, spokenName } from './store.js'
-import { say, move, emit, pick } from './show.js'
-import { pacify, tone, talkedTo, moodWords } from './behaviour.js'
+import { say, move, emit, pick, fx } from './show.js'
+import { pacify, tone, talkedTo, moodWords, moodTier, felt, happened } from './behaviour.js'
 
 export const EMAIL = 'ashwinitiwari8888@gmail.com'
 const share = (what) => set({ share: what })
@@ -15,10 +15,10 @@ const A = {
   aarttsii: { seeds: ['aarttsii', 'the crochet brand', "aarttsii's estimator", 'the price estimator', 'how do you price crochet', 'the crochet store'], say: "All the tech behind a crochet brand. My favourite bit is the estimator: it prices a piece from how hard it is to make. Try it.", mark: 'explain', after: () => setTimeout(() => share('mini:aarttsii'), 500), next: ['Cookie', 'Inkling'] },
   inkling: { seeds: ['inkling', 'the notes app', 'the markdown editor', 'what is inkling'], say: "Inkling. Markdown notes, your vault is a GitHub repo, and two people can write in one note at once. Someone's in there now.", mark: 'explain', after: () => setTimeout(() => share('mini:inkling'), 500), next: ['Mooney', 'RAG + memory'] },
   rag: { seeds: ['how does it not make things up', 'how does the rag work', 'what if it doesnt know', 'hallucination', 'rag + memory', 'rag and memory', 'show me the search'], say: "Every answer is pulled from the records first, and if nothing matches it says so. This one's real: ask it about me and watch it search my notes.", mark: 'point_screen', after: () => setTimeout(() => share('mini:recall'), 500), next: ['The sales engine', 'Why should we hire you?'] },
-  engine: { seeds: ['the sales engine', 'the outbound engine', 'tell me about octyn', 'what does your company do', 'outreach engine', 'how do you get clients'], say: 'Octyn finds the right people, reads up on each one, writes to them and follows up, every night, while I sleep. Open any agency to see the line it wrote.', mark: 'explain', after: () => setTimeout(() => share('mini:outbound'), 500), next: ['Why should we hire you?', 'How do you use AI?'] },
+  engine: { seeds: ['the sales engine', 'the outbound engine', 'tell me about octyn', 'what does your company do', 'outreach engine', 'how do you get clients'], say: 'Octyn finds the right people, reads up on each one, then writes to them and follows up on its own. Open any agency to see the line it wrote.', mark: 'explain', after: () => setTimeout(() => share('mini:outbound'), 500), next: ['Why should we hire you?', 'How do you use AI?'] },
   stream: { seeds: ['why are you a tv', 'what is octyn the character', 'why the tv head', 'is this a stream', 'who is octyn'], say: "That's Octyn, my stream character. He codes live, builds his own games and talks to chat.", mark: 'me', next: ['Wave', 'Dance', 'Pet the cat'] },
-  why_hire: { seeds: ['why should we hire you', 'what makes you a good fit', 'convince me', 'sell yourself', 'what value would you bring'], say: 'I ship the whole thing, end to end, and it still works at 3am. You are sitting inside one right now.', mark: 'explain', next: ['What are your weaknesses?', 'How do I reach you?'] },
-  strengths: { seeds: ['what are your strengths', 'what are you best at', 'whats your edge', 'what makes you special'], say: 'Speed and taste. Idea to live in days, and it feels right when you use it.', mark: 'thumbs_up' },
+  why_hire: { seeds: ['why should we hire you', 'what makes you a good fit', 'convince me', 'sell yourself', 'what value would you bring'], say: "I stay with a thing until people rely on it, and you're sitting inside one right now, so poke at it.", mark: 'explain', next: ['What are your weaknesses?', 'How do I reach you?'] },
+  strengths: { seeds: ['what are your strengths', 'what are you best at', 'whats your edge', 'what makes you special'], say: 'Speed and taste. I can put something real in front of people within days, and it feels right when you use it.', mark: 'thumbs_up' },
   weakness: { seeds: ['what is your biggest weakness', 'what are your weaknesses', 'what are you bad at', 'where do you struggle'], say: 'I start too many things. Working on finishing more of them.', mark: 'shrug' },
   ai_use: { seeds: ['how do you use ai', 'how do you work with claude', 'do you write the code yourself', 'do you vibe code', 'is it you or the ai'], say: "Claude's my team. I direct, review and test. This call was built that way.", mark: 'point_screen', next: ['What stack do you use?', 'Why should we hire you?'] },
   stack: { seeds: ['what tech stack do you use', 'what stack do you use', 'which languages do you know', 'what do you code in', 'do you know react', 'do you know python'], say: 'TypeScript, React, Flutter, Python, Postgres, three.js. And my own servers.', mark: 'explain' },
@@ -102,31 +102,44 @@ const DO = { mooney: { act: 'show_phone', after: () => setTimeout(() => share('m
   shelf: { after: () => setTimeout(() => share('shelf'), 600) }, desk: { after: () => setTimeout(() => share('mini:cookie'), 600) }, engine: { after: () => setTimeout(() => share('mini:outbound'), 600) },
   aarttsii: { after: () => setTimeout(() => share('mini:aarttsii'), 600) }, inkling: { after: () => setTimeout(() => share('mini:inkling'), 600) }, rag: { after: () => setTimeout(() => share('mini:recall'), 600) },
   wave: { mark: 'hello' }, dance: { act: 'dance' }, spin: { move: 'spin' }, sip: { act: 'sip' }, stretch: { act: 'stretch' }, cat: { act: 'pet_cat' } }
-async function openAnswer(q) {
+// a: the written intent this question matched, if any. it still decides what comes up on screen and what he does with his
+// body; the words come from his notes, in his current mood. the written line is only for when the model can't answer
+async function openAnswer(q, a = null) {
   emit({ type: 'glance' })
+  const t = moodTier()
+  if (t) fx({ kind: 'face', a: { mood: t === 2 ? 'angry' : 'flat' }, dur: 2.4 })
   // a real question gets an instant 'hmm' (cached voice, so it plays at once) while the answer is thought up and
-  // voiced; not every time, never for a few words
-  if (q.split(/\s+/).length >= 4 && Math.random() < .6) say(pick(['Hmm, good question.', 'Okay, so.', 'Right, so.', 'Oh, nice one.', 'Let me think.']))
+  // voiced; not every time, never for a few words, and not when he's sore
+  if (!t && q.split(/\s+/).length >= 4 && Math.random() < .6) say(pick(['Hmm, good question.', 'Okay, so.', 'Right, so.', 'Oh, nice one.', 'Let me think.']))
   let r = null
   try {
-    const res = await fetch('/api/ask', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ q, mood: moodWords(), name: spokenName(get().name), recent: get().log.slice(-7, -1) }) })
+    const res = await fetch('/api/ask', { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: AbortSignal.timeout(7000),
+      body: JSON.stringify({ q, mood: moodWords(), moodLevel: t, happened: happened(), name: spokenName(get().name), recent: get().log.slice(-7, -1) }) })
     r = await res.json()
   } catch {}
-  if (!r || !r.say) { await say(MISS[miss++ % MISS.length], { mark: 'shrug' }); chips(); return }
+  if (!r || !r.say) {
+    if (a?.say) { if (a.move) move(a.move); const talking = say(tone() + a.say, { mark: a.mark || null, act: a.act || null, still: t === 2 }); if (a.after) a.after(); await talking; set({ offer: a.offer || null }); chips(a.next); return }
+    await say(MISS[miss++ % MISS.length], { mark: 'shrug' }); chips(); return
+  }
   if (r.cites?.length) set({ cites: { q, say: r.say, slips: r.cites, of: r.of }, revealOf: 'answer' })
-  const d = DO[r.action] || {}
+  const d = a ? { move: a.move, act: a.act, after: a.after, mark: a.mark } : DO[r.action] || {}
   if (d.move) move(d.move)
-  const talking = say(r.say, { mark: d.mark || (d.act ? null : 'explain'), act: d.act || null })
+  const mark = t === 2 ? (d.act ? null : 'deadpan') : d.mark || (d.act ? null : t ? 'lean_back' : 'explain')
+  const talking = say(r.say, { mark, act: d.act || null, still: t === 2 })
   if (d.after) d.after()   // it comes up while he talks about it
   await talking
-  const offered = r.offer === 'shelf' ? 'show_work' : r.offer
+  felt(r.felt)                // how that message treated him: the next answer knows
+  const offered = a?.offer || (r.offer === 'shelf' ? 'show_work' : r.offer)
   if (offered && A[offered]) set({ offer: offered })   // he asked "want me to...?": a yes now does exactly that
-  chips([...(r.next || []), ...(r.cites?.length ? ['How do you know?'] : [])]); if (!d.after && !r.offer) offerReading()
+  chips([...(r.next || []), ...(a?.next || []), ...(r.cites?.length ? ['How do you know?'] : [])]); if (!d.after && !offered) offerReading()
 }
 
 // a written answer's notes: the same search, no model, so "how do you know?" works after any of them
 const INFO = new Set(['intro', 'show_work', 'mooney', 'desk', 'aarttsii', 'inkling', 'rag', 'engine', 'stream', 'why_hire', 'strengths', 'weakness', 'ai_use', 'stack', 'salary', 'contact', 'three_d', 'failure'])
+// these three are mostly "here, look": written lines, quick, until he's in a mood. everything else about him is looked up
+const SHOWN = new Set(['show_work', 'mooney', 'contact'])
+// a performance you ask for: when he's fed up, you don't get one
+const FUN = new Set(['dance', 'spin', 'stand', 'wave', 'stretch'])
 function sourcesFor(q, said) {
   fetch('/api/ask', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode: 'sources', q: q || said, say: said }) })
     .then((r) => r.json()).then((r) => { if (r?.cites?.length) { set({ cites: { q: q || said, say: said, slips: r.cites, of: r.of }, revealOf: 'answer' }); if (!get().offer) chips(['How do you know?', ...get().chips]) } }).catch(() => {})
@@ -170,6 +183,9 @@ export async function play(id, q = '') {
   if (!id) { if (q) return openAnswer(q); await say(MISS[miss++ % MISS.length], { mark: 'shrug' }); chips(); return }
   const a = A[id]; asked.add(id)
   if (a.run) return a.run(q)
+  const t = moodTier()
+  if (t === 2 && FUN.has(id)) return openAnswer(q || a.seeds[0])
+  if (INFO.has(id) ? !SHOWN.has(id) || t > 0 : t > 0 && a.say && !a.act && !a.move) return openAnswer(q || a.seeds[0], a)
   if (a.move) move(a.move)
   if (INFO.has(id)) sourcesFor(q, a.say)
   // what he shows comes up while he talks about it (say() resolves when he's done), the chips once he's done

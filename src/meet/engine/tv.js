@@ -19,25 +19,26 @@ export function driveCurve(drive, bias = .08, n = 2049) {
 
 export function createTv(ctx, preset = 'warm', { rand = Math.random } = {}) {
   const p = TV[preset], input = ctx.createGain(), output = ctx.createGain();
-  if (!p) { input.connect(output); return { input, output, lineStart() {} }; }
+  if (!p) { input.connect(output); return { input, output, hiss: ctx.createGain(), lineStart() {} }; }
   const db = x => 10 ** (x / 20);
+  const hiss = ctx.createGain(); hiss.connect(output);   // the set's own noise, apart from his voice: the room's mute takes it with the music (his note)
   const hp = ctx.createBiquadFilter(), lp = ctx.createBiquadFilter(), cone = ctx.createBiquadFilter(), pre = ctx.createGain(), shaper = ctx.createWaveShaper(), post = ctx.createGain();
   hp.type = 'highpass'; hp.frequency.value = p.band[0]; lp.type = 'lowpass'; lp.frequency.value = p.band[1];
   cone.type = 'peaking'; cone.frequency.value = p.cone[0]; cone.gain.value = p.cone[1]; cone.Q.value = 1.1;
   pre.gain.value = 1.6; shaper.curve = driveCurve(p.drive); shaper.oversample = '2x'; post.gain.value = .55;
   input.connect(hp); hp.connect(lp); lp.connect(cone); cone.connect(pre); pre.connect(shaper); shaper.connect(post); post.connect(output);
   for (const [ms, g] of p.cab) { const d = ctx.createDelay(.05), k = ctx.createGain(); d.delayTime.value = ms / 1000; k.gain.value = g * .55; shaper.connect(d); d.connect(k); k.connect(output); }   // the box
-  const hum = ctx.createGain(); hum.gain.value = db(p.hum) * .6; hum.connect(output);
+  const hum = ctx.createGain(); hum.gain.value = db(p.hum) * .6; hum.connect(hiss);
   for (const [f, a] of [[60, 1], [120, .5], [180, .25]]) { const o = ctx.createOscillator(), g = ctx.createGain(); o.frequency.value = f; g.gain.value = a; o.connect(g); g.connect(hum); o.start(); }
   const noise = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate); { const x = noise.getChannelData(0); for (let i = 0; i < x.length; i++) x[i] = rand() * 2 - 1; }
-  { const s = ctx.createBufferSource(), bp = ctx.createBiquadFilter(), g = ctx.createGain(); s.buffer = noise; s.loop = true; bp.type = 'bandpass'; bp.frequency.value = 2000; bp.Q.value = .5; g.gain.value = db(p.stat); s.connect(bp); bp.connect(g); g.connect(output); s.start(); }
+  { const s = ctx.createBufferSource(), bp = ctx.createBiquadFilter(), g = ctx.createGain(); s.buffer = noise; s.loop = true; bp.type = 'bandpass'; bp.frequency.value = 2000; bp.Q.value = .5; g.gain.value = db(p.stat); s.connect(bp); bp.connect(g); g.connect(hiss); s.start(); }
   return {
-    input, output,
+    input, output, hiss,
     /* a line starts: now and then the picture flickers */
     lineStart() {
       if (rand() > p.burst) return;
       const t = ctx.currentTime, n = .06 + rand() * .08, s = ctx.createBufferSource(), bp = ctx.createBiquadFilter(), g = ctx.createGain();
-      s.buffer = noise; bp.type = 'bandpass'; bp.frequency.value = 2500; bp.Q.value = .4; s.connect(bp); bp.connect(g); g.connect(output);
+      s.buffer = noise; bp.type = 'bandpass'; bp.frequency.value = 2500; bp.Q.value = .4; s.connect(bp); bp.connect(g); g.connect(hiss);
       g.gain.setValueAtTime(db(p.burstDb) * 2, t); g.gain.exponentialRampToValueAtTime(.0001, t + n); s.start(t, rand()); s.stop(t + n + .02);
     },
   };

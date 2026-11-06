@@ -2,14 +2,18 @@
 // boop on the head, his coffee gone, his monitor knocked over), forgives you (sorry, the coffee back, heart hands, or
 // time), and talks in three tones as it builds: friendly, irritated, grumpy. at his limit he stops, sips, breathes.
 // his mood also colours his answers (and goes to the model with every question)
-import { set, note } from './store.js'
+import { get, set, note, noteText } from './store.js'
 import { say, fx, pick } from './show.js'
 
-export const mood = { annoy: 0, warmth: .5, last: 0, peak: 0, hist: [], cooldown: 0 }
+// annoy is the flare-up (fades when you stop); grudge is what he holds against you for the rest of the call (fades slowly,
+// an apology or the coffee back buys most of it). his tone follows whichever is higher
+export const mood = { annoy: 0, grudge: 0, warmth: .5, last: 0, peak: 0, hist: [], cooldown: 0 }
 const now = () => performance.now()
+const level = () => Math.max(mood.annoy, mood.grudge)
 // how much each kind of poke gets on his nerves
 const WEIGHT = { head: .16, him: .12, monitor: .3, mug: .18, can: .14, cat: .02, phone: .04, none: .02, default: .06 }
-const tier = () => (mood.annoy < .35 ? 0 : mood.annoy < .7 ? 1 : 2)
+const tier = () => (level() < .3 ? 0 : level() < .62 ? 1 : 2)
+export const moodTier = tier
 // a line for the thing, in his current tone; repeats of the same thing get their own lines
 const LINES = {
   head: [['Hey.', 'Ow.', 'Is that part of the interview?', 'Boop received.'], ['Okay, I felt that.', 'You do this to every candidate?', 'My head is not a button.'], ['Stop.', 'Seriously.', '...']],
@@ -33,7 +37,8 @@ export function poked(kind, name) {
   const key = LINES[kind] ? kind : LINES[name] ? name : 'default'
   mood.hist.push({ t, kind, name }); mood.hist = mood.hist.filter((h) => t - h.t < 30000)
   const patience = t < mood.cooldown ? .5 : 1   // just after he's calmed himself down, things bother him half as much
-  mood.annoy = Math.min(1, mood.annoy + (WEIGHT[kind] ?? WEIGHT.default) * patience); mood.peak = Math.max(mood.peak, mood.annoy); mood.last = t
+  const hit = (WEIGHT[kind] ?? WEIGHT.default) * patience
+  mood.annoy = Math.min(1, mood.annoy + hit); mood.grudge = Math.min(1, mood.grudge + hit * .5); mood.peak = Math.max(mood.peak, level()); mood.last = t
   set({ mood: tier() })
   const recent = mood.hist.filter((h) => t - h.t < 12000), same = recent.filter((h) => (h.name || h.kind) === (name || kind)).length
   // his limit: he stops, sips, breathes, and comes back calmer
@@ -55,25 +60,40 @@ export function poked(kind, name) {
 // you made up for it: sorry, the coffee back, heart hands, a thumbs up while he's sore
 export function pacify(how) {
   decay(now()); if (how === 'sorry') note('said sorry', 'sorry')
-  if (mood.annoy < .25) return null
-  mood.annoy = Math.max(0, mood.annoy - (how === 'sorry' ? .5 : how === 'gift' ? .35 : .3)); set({ mood: tier() })
+  if (level() < .25) return null
+  const by = how === 'sorry' ? .5 : how === 'gift' ? .35 : .3
+  mood.annoy = Math.max(0, mood.annoy - by); mood.grudge = Math.max(0, mood.grudge - by * .8); set({ mood: tier() })
   fx({ kind: 'face', a: { mood: 'happy' }, dur: 1.6 })
   return pick(how === 'gift' ? ['Thank you.', 'Finally. Thank you.'] : ['Okay. We are good.', 'Fine. Forgiven.', 'Apology accepted.'])
 }
-// time heals: annoyance fades once you leave him alone a few seconds; from a real sulk he says so
+// what you said to him: the model reads each message and says how it treated him ('rude' | 'kind' | 'neutral'), in any
+// language and any wording, so there's no list of bad words here to get around
+export function felt(how) {
+  if (how === 'rude') { mood.annoy = Math.min(1, mood.annoy + .35); mood.grudge = Math.min(1, mood.grudge + .35); mood.peak = Math.max(mood.peak, level()); mood.last = now(); note('said something rude to me', 'rude'); fx({ kind: 'face', a: { mood: 'angry' }, dur: 2 }) }
+  else if (how === 'kind') { mood.annoy = Math.max(0, mood.annoy - .2); mood.grudge = Math.max(0, mood.grudge - .15) }
+  set({ mood: tier() })
+}
+// what he's holding on to, for the model: only what you did to him and his things, this call
+const DID = /^(poke|took|gave|cat|monitor|phone|rude|sorry)/
+export const happened = () => {
+  const s = get(), done = s.notes.filter((n) => DID.test(n.key || '')).slice(-8).map(noteText)
+  if (s.mine) done.push(`still has my ${s.mine} and hasn't given it back`)
+  return done
+}
+// time heals: the flare-up fades after a while of being left alone; the grudge slowly; from a real sulk he says so
 function decay(t) {
   if (!mood.last) return
   const quiet = (t - mood.last) / 1000
-  if (quiet > 2) mood.annoy = Math.max(0, mood.annoy - .06 * (quiet - 2)), mood.last = t - 2000
+  if (quiet > 5) mood.annoy = Math.max(0, mood.annoy - .025 * (quiet - 5)), mood.last = t - 5000
 }
 let overSaid = 0
 setInterval(() => {
-  const t = now(); decay(t); set({ mood: tier() })
-  if (mood.peak > .6 && mood.annoy < .15 && t - overSaid > 60000) { overSaid = t; mood.peak = 0; say("Okay, I'm over it.", { mark: 'shrug' }) }
+  const t = now(); decay(t); mood.grudge = Math.max(0, mood.grudge - .006); set({ mood: tier() })
+  if (mood.peak > .6 && level() < .15 && t - overSaid > 60000) { overSaid = t; mood.peak = 0; say("Okay, I'm over it.", { mark: 'shrug' }) }
 }, 2000)
 // his answers, in his mood: a curt start when he's sore
 export const tone = () => (tier() === 2 ? pick(['Fine. ', 'Okay. ', '']) : tier() === 1 ? pick(['', 'Right. ', '']) : '')
 // you asked him something: back to the interview, he lets it go a little
-export function talkedTo() { decay(now()); mood.annoy = Math.max(0, mood.annoy - .15); set({ mood: tier() }) }
-// for the model's prompt
-export const moodWords = () => ['relaxed and friendly', 'a bit irritated (the visitor has been poking his stuff)', 'grumpy (the visitor keeps poking him), curt but still answers'][tier()]
+export function talkedTo() { decay(now()); mood.annoy = Math.max(0, mood.annoy - .05); set({ mood: tier() }) }
+// for the model's prompt: the attitude, never the words
+export const moodWords = () => ['relaxed, warm, a little dry', 'irritated by how this visitor is behaving: shorter than usual, drier, less patient, no warmth to spare', 'properly fed up with this visitor: clipped and cold, as few words as will answer it, unimpressed and not hiding it'][tier()]

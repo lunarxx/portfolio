@@ -39,7 +39,8 @@ async function callGroqVision(prompt: string, base64Image: string, maxTokens: nu
         method: 'POST',
         headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+          model: 'qwen/qwen3.8-27b',
+          reasoning_effort: 'none',
           messages: [{ role: 'user', content: [
             { type: 'image_url', image_url: { url: `data:image/jpeg;base64,${base64Image}` } },
             { type: 'text', text: prompt },
@@ -58,6 +59,14 @@ async function callGroqVision(prompt: string, base64Image: string, maxTokens: nu
     }
   }
   throw new Error('All Groq keys rate limited')
+}
+
+export interface ReadReceipt { merchant: string; total: number; kind: string }
+/** a photo of a receipt: who it's from and what was paid, or a total of 0 when there's no receipt in it */
+export async function readReceipt(base64Image: string): Promise<ReadReceipt> {
+  const data = await callGroqVision('Read this photo of a receipt. Reply with JSON only: {"merchant": the name of the shop as a person would say it, "total": the final amount paid as a plain number, "kind": one word for what was bought, like coffee, groceries, fuel, or dinner}. If there is no receipt or no readable total, use {"merchant": "", "total": 0, "kind": ""}.', base64Image, 200)
+  const j = JSON.parse(String(data.choices?.[0]?.message?.content || '').match(/\{[\s\S]*\}/)?.[0] || '{}')
+  return { merchant: String(j.merchant || '').slice(0, 40), total: Math.max(0, Number(j.total) || 0), kind: String(j.kind || '').slice(0, 20) }
 }
 
 export interface ParsedExpense {

@@ -60,6 +60,13 @@ export function feed({ pose, faceSeen, hands, faceLm, aspect }) {
   const t = now()
   if (!get().cam) return
   const H = (hands || []).map((h) => readHand(h.lm, aspect)), fl = faceLm
+  // playing his guitar: your hands are for that and nothing else. in the mirror the hand on the right sweeps, the one on the
+  // left holds the chord; one hand alone sweeps
+  if (get().share === 'guitar') {
+    const [a, b] = [...H].sort((p, q) => p.c.x - q.c.x), sweep = b || a, fret = b ? a : null
+    live.guitar = sweep ? { y: sweep.c.y, at: t, shape: fret ? fret.shape : null } : live.guitar
+    return
+  }
   const chin = fl ? fl[152] : null, fw = fl ? D(fl[234], fl[454], aspect) : .2
   const aboveShoulder = (h) => !chin || h.c.y < chin.y + fw * .6
   // nod and shake: yes and no to his question; otherwise he nods along, or looks puzzled

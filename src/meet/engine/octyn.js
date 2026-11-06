@@ -111,7 +111,8 @@ export function buildOctyn(scene, at = V3(0, 0, 0)) {
    1.45 stands it straight out from the side of the hand, a thumbs up)] */
 export const SHAPES = {
   open: [[.05, .05, .05, .05], [.1, .2]], flat: [[.12, .12, .15, .18], [.1, .4]], type: [[.45, .4, .45, .5], [.3, .5]],
-  mouse: [[.5, .45, .7, .8], [.3, .6]], relaxed: [[.5, .6, .7, .8], [.3, .6]], fist: [[1.5, 1.5, 1.5, 1.5], [.9, 1.1]],
+  mouse: [[.26, .3, .6, .72], [.28, .75]], relaxed: [[.5, .6, .7, .8], [.3, .6]], fist: [[1.5, 1.5, 1.5, 1.5], [.9, 1.1]],
+  loose: [[.22, .38, .5, .62], [.2, .45]], pinch: [[.82, .42, .34, .3], [.62, .95]],   // how a hand sits while it talks: half closed; finger and thumb together, making a point
   point: [[0, 1.5, 1.5, 1.5], [.8, 1]], peace: [[0, 0, 1.5, 1.5], [.9, 1]], thumbsup: [[1.5, 1.5, 1.5, 1.5], [-.1, 0, 1.45]],
 };
 function shapeHand(a, name) {

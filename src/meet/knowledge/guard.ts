@@ -1,6 +1,7 @@
 // how he talks in an interview, and the check every answer passes before he says it. the facts are true either way;
-// this is about what a strong candidate volunteers. a rule here is also a test (golden.jsonl `mustNot`), so a later
-// prompt change can't quietly bring an underselling line back
+// this is about what a strong candidate volunteers, and about sounding like a person. a rule here is also a test
+// (golden.jsonl `mustNot`, and scripts/guard-test.ts runs every written line in the call through it), so a later prompt
+// or copy change can't quietly bring a bad line back
 
 /** goes into the answer prompt every time */
 export const INTERVIEW = `How you talk in this interview, always:
@@ -11,7 +12,8 @@ export const INTERVIEW = `How you talk in this interview, always:
 - Never undersell a skill ("I'm not really technical", "I just glued it together", "I'm bad at"). If something isn't yours, say what you did do.
 - Never speak badly about anyone: past teams, clients, competitors, other tools.
 - Results belong to their project: only quote outcomes and numbers that are in the notes, and only for the project they're about (aarttsii's replies are aarttsii's, never Octyn's). Never describe something as going well without a fact that says so.
-- When you don't know something, say it plainly and point them to email, without apologising.`
+- When you don't know something, say it plainly and point them to email, without apologising.
+- Sound like someone thinking out loud, never like a tagline. No slogans, no punchlines, no line that could go on a landing page. Stop when the thought is finished: a time, a place or a number goes inside the sentence or not at all, never hung on the end of a sentence that was already complete. Say what the thing does in plain words instead of describing how you work in general.`
 
 /** a question about failures, mistakes or lessons: the only time setbacks may come up */
 export const asksAboutSetbacks = (q: string) => /\b(fail|failure|mistake|wrong|lesson|learn|regret|didn'?t work|did not work|weakness|struggle|hardest|challenge|setback|went bad|flop|what happened|why did|why'?d|stopped|paused|status of|still working)/i.test(q)
@@ -27,10 +29,33 @@ const SETBACK: [RegExp, string][] = [
   [/\b0\s+(positive|closes?|replies)\b|\bzero\s+(positive|closes?|replies)\b|\b1,?277\b|\b20 meetings\b/i, 'volunteered a low number'],
   [/\bnever posted\b|\bpaused because\b|\bmonotone\b|\bwent dark\b|\b183\b/i, 'volunteered a setback'],
 ]
+// what reads as generated, whoever wrote it. his calls: "at 3am is horribly ai sounding", "random additions you do to a
+// totally complete sentence", "builds AI systems end to end, from idea to live" is cliche
+const AI_VOICE: [RegExp, string][] = [
+  [/\b([1-5])\s?(a\.?m\.?)\b|\bat midnight\b|\bin the middle of the night\b/i, 'a small-hours flourish'],
+  [/\bwhile (you|i|we|they|everyone) (sleep|sleeps|slept)\b|\bin (your|my) sleep\b/i, 'a while-you-sleep flourish'],
+  [/\bend[- ]to[- ]end\b|\bidea to (live|launch|production|prod|shipped)\b|\bzero to one\b|\bship(s|ped)? the whole\b/i, 'a builder cliche'],
+  [/\b(and|that)\s+(it\s+)?(still|actually)\s+works?\b/i, 'a "still works" punchline'],
+  [/\bnot just\b[^.?!]{0,70}\bbut\b|\bit'?s not (just )?[^.,?!]{1,40}[,;:] it'?s\b|\bmore than just\b/i, 'a negation pivot'],
+  [/\b(seamless(ly)?|game[- ]?chang\w*|cutting[- ]edge|leverag\w+|passionate about|supercharg\w*|revolutioni[sz]\w*|delv(e|ing)|at the end of the day|the magic happens)\b/i, 'a hype word'],
+  [/,\s*(every|each|all)\s+(single\s+)?(night|day|morning|week)[.!?]*\s*$/im, 'a tail hung on a finished sentence'],
+  [/,\s*(at|by|around)\s+\d[^.,?!]{0,12}[.!?]*\s*$/im, 'a tail hung on a finished sentence'],
+  [/—|(?<!\d)\s–\s/, 'an em dash'],   // (2021 – 2023 is a date range)
+  [/, not (a|an|the) [a-z]+[.!?]/i, 'an "A, not B" line'],   // "starts with a question, not a codebase"
+]
+
+/** what reads as generated in any line he says or the page says (empty: fine) */
+export const aiTells = (text: string): string[] => AI_VOICE.filter(([re]) => re.test(text)).map(([, why]) => why)
+
+// his cube time is 30 seconds, his call: "never" any other number (the model made up 20 and 29)
+const OTHER_NUMBER = /\b(?:ten|eleven|twelve|fifteen|eighteen|twenty(?:-\w+)?|twenty|twenty \w+|forty|fifty|sixty|ninety|(?!30\b|3\b)\d+)\b/i
+const CUBE = /\b(cube|rubik|scrambl|solv)/i, OTHER_TIME = /\b(?!30\b|thirty(?![-\w]))(\d+(?:\.\d+)?|[a-z]+(?:-[a-z]+)?)\s*(?:seconds?|secs?|minutes?|mins?)\b/i
 
 /** what's wrong with an answer, if anything (empty: fine to say) */
 export function check(q: string, text: string): string[] {
   const out = UNDERSELL.filter(([re]) => re.test(text)).map(([, why]) => why)
+  if (CUBE.test(q + ' ' + text) && (OTHER_TIME.test(text) || OTHER_NUMBER.test(text))) out.push('a cube time other than 30 seconds')
   if (!asksAboutSetbacks(q)) out.push(...SETBACK.filter(([re]) => re.test(text)).map(([, why]) => why))
+  out.push(...aiTells(text))
   return out
 }

@@ -55,12 +55,12 @@ export default function ResumePage() {
               <span className={styles.expDate}>2025 – present</span>
             </div>
             <ul className={styles.expList}>
-              <li>an intelligent systems firm: each system is custom built for one company, then run and kept current. the same people do the consult, the build and the run</li>
-              <li>client systems end to end, from the paid consult to the running system, like a guided product demo for a health-tech company. every client gets a private proposal site served from our own servers</li>
-              <li>sales that runs itself: outreach written from each prospect’s own work, then a sample HQ built for every agency from one link (their name, teams, colours) to click through before the call</li>
-              <li>octyn.co built like a product: live demos of our systems you can click through, instead of screenshots</li>
+              <li>we build a system for one company at a time, then keep running it for them. whoever does the consult also does the build and stays on for the run, so there's no handover</li>
+              <li>i take client work from the paid consult to the thing running in production, like a guided product demo for a health-tech company. every client gets their own private proposal site, on our servers</li>
+              <li>our sales runs on its own: outreach written from each prospect’s own work, and every agency gets a sample HQ from one link, with their name, teams and colours, to click around in before we talk</li>
+              <li>octyn.co has live demos of our systems you can click through, so there isn't a screenshot on it</li>
               {!compact && (
-                <li>run our own infrastructure: a self hosted VPS and home servers, deploy on push, and one control panel for every service, scheduled job and agent session</li>
+                <li>we run our own infrastructure, a VPS and home servers, deploy on push, and i built one control panel for every service, scheduled job and agent session</li>
               )}
             </ul>
           </div>
@@ -72,7 +72,6 @@ export default function ResumePage() {
             </div>
             <ul className={styles.expList}>
               <li>my own 3D studio, three of us, making personalized mascot animations for brands. ran the full pipeline: modeling, texturing, lighting, compositing, editing</li>
-              {!compact && <li>closed it without landing a client. the lesson behind everything since: sell before you build</li>}
             </ul>
           </div>
 
@@ -195,7 +194,7 @@ export default function ResumePage() {
           <div className={styles.skillGrid}>
             <div className={styles.skillGroup}>
               <strong>product design</strong>
-              <span>zero to one product thinking, user research, competitive analysis, GTM strategy</span>
+              <span>working out what to build and who for, user research, competitive analysis, GTM</span>
             </div>
             <div className={styles.skillGroup}>
               <strong>3D art</strong>
@@ -211,7 +210,7 @@ export default function ResumePage() {
             </div>
             <div className={styles.skillGroup}>
               <strong>brand and identity</strong>
-              <span>visual identity, site design, tone of voice, full product personality</span>
+              <span>visual identity, site design, tone of voice, how a product sounds and feels</span>
             </div>
             <div className={styles.skillGroup}>
               <strong>ops and automation</strong>
@@ -226,15 +225,15 @@ export default function ResumePage() {
           <div className={styles.thinkGrid}>
             <div className={styles.thinkItem}>
               <strong>research first, then build</strong>
-              <span>every project starts with a question, not a codebase. before aarttsii had a single screen, there was a 40,000 word research doc covering pricing psychology, competitor teardowns, and a full go to market plan.</span>
+              <span>i like having the question straight before i write any code. before aarttsii had a single screen i had written 40,000 words on pricing psychology, competitors and how we'd sell it.</span>
             </div>
             <div className={styles.thinkItem}>
               <strong>built around real problems</strong>
-              <span>mooney exists because expense tracking apps assume you want to type. aarttsii’s estimator exists because crochet artists were getting lowballed in dms with no pricing framework. the call copilot exists because 12 of 12 first calls went dark. every product here started with someone being annoyed.</span>
+              <span>mooney came from every expense app making you type, and aarttsii’s estimator from watching crochet artists get lowballed in dms because nobody had a way to price the work. most of what i build starts with someone being annoyed, usually me.</span>
             </div>
             <div className={styles.thinkItem}>
               <strong>ai does the typing, i do the thinking</strong>
-              <span>i direct, review and test. what keeps it honest is measurement: every system has a fixed eval set, rules become tests so a later change can’t quietly undo them, and a change ships only when the numbers agree.</span>
+              <span>i direct it, review it and test it. what keeps me honest is that every system has a fixed eval set and every rule i care about is a test, so a change only ships when the numbers say it's better.</span>
             </div>
           </div>
         </div>
@@ -243,9 +242,9 @@ export default function ResumePage() {
         <div className={`${styles.section} ${styles.compactOnly}`}>
           <h2 className={styles.sectionTitle}>how i think</h2>
           <ul className={styles.thinkListCompact}>
-            <li><strong>research first, then build</strong> every project starts with a question, not a codebase. aarttsii had a 40,000 word research doc before a single screen.</li>
-            <li><strong>built around real problems</strong> every product here exists because someone was annoyed enough that it needed to exist.</li>
-            <li><strong>ai does the typing, i do the thinking</strong> every system has a fixed eval set, and a change ships only when the numbers agree.</li>
+            <li><strong>research first, then build</strong> i like having the question straight before i write any code. aarttsii had 40,000 words of research before it had a screen.</li>
+            <li><strong>built around real problems</strong> most of what i build starts with someone being annoyed, usually me.</li>
+            <li><strong>ai does the typing, i do the thinking</strong> every system has a fixed eval set, so a change only ships when the numbers say it's better.</li>
           </ul>
         </div>
 
@@ -296,7 +295,7 @@ export default function ResumePage() {
           <div className={styles.skillGrid}>
             <div className={styles.skillGroup}>
               <strong>product</strong>
-              <span>zero to one thinking, user research, competitive analysis, GTM strategy, brand identity</span>
+              <span>working out what to build and who for, user research, competitive analysis, GTM, brand identity</span>
             </div>
             <div className={styles.skillGroup}>
               <strong>AI</strong>
