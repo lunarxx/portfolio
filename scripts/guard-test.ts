@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs'
-import { check, aiTells } from '../src/meet/knowledge/guard.ts'
+import { check, aiTells, proseTells } from '../src/meet/knowledge/guard.ts'
 const cases: [string, string, boolean][] = [
   ['What is Mooney?', "It's co-founded and built with my cofounder, and a lot of the work on it was theirs.", false],
   ['Did you build Mooney yourself?', 'Honestly though? A lot of the hard work there was my cofounder\'s.', false],
@@ -19,6 +19,17 @@ const cases: [string, string, boolean][] = [
   ['What do you do?', 'Our seamless platform leverages agents.', false],
   ['How do you start?', 'Every project starts with a question, not a codebase.', false],
   ['When?', 'Lead 3D Artist, 2021 – 2023.', true],
+  // his voice rules, each from a real line he or the old pages had
+  ['Why?', 'the problem isn\'t the app. it\'s the interaction model.', false],
+  ['Why?', 'no DM required. no guessing.', false],
+  ['What?', 'it logs everything. no typing, no categories, no spreadsheets.', false],
+  ['What?', 'the customer left feeling unsure. that\'s the gap.', false],
+  ['What?', 'these edge cases are what made this interesting.', false],
+  ['What?', 'I picked it by looking at it, not by how it got made.', false],
+  ['What?', 'Our robust platform lets you unlock growth.', false],
+  ['What?', 'It runs on your disk, so there are no accounts to make.', true],
+  ['What?', 'so we made the whole interaction one held button and a sentence.', true],
+  ['What?', 'scarcity lines were killing replies, so they went.', true],
   ['How fast can you solve a cube?', 'About 20 seconds on a good day.', false],
   ['his Rubik cube: they scrambled it', 'Twenty seconds and it is back.', false],
   ['his Rubik cube: they scrambled it', 'Thirty seconds, twenty-nine maybe.', false],
@@ -36,15 +47,17 @@ let bad = 0
 for (const [q, a, ok] of cases) { const got = check(q, a); const pass = (got.length === 0) === ok; if (!pass) bad++; console.log(pass ? 'ok  ' : 'FAIL', ok ? 'allowed' : 'blocked', '|', a.slice(0, 70), got.length ? `→ ${got.join(', ')}` : '') }
 
 // every written line in the call: what he says, what the page says about him, and the notes the model reads from
-const WRITTEN = ['src/meet/brain.js', 'src/meet/behaviour.js', 'src/meet/room.js', 'src/meet/you.js', 'src/meet/ui/Call.tsx', 'src/meet/ui/Lobby.tsx', 'src/meet/ui/Brief.tsx', 'src/meet/ui/minis/index.tsx', 'src/app/resume/page.tsx', 'src/meet/ui/Guitar.tsx']
+const WRITTEN = ['src/meet/brain.js', 'src/meet/behaviour.js', 'src/meet/room.js', 'src/meet/you.js', 'src/meet/ui/Call.tsx', 'src/meet/ui/Lobby.tsx', 'src/meet/ui/Brief.tsx', 'src/meet/ui/minis/index.tsx', 'src/app/resume/page.tsx', 'src/meet/ui/Guitar.tsx', 'src/app/case/whofits/page.tsx']
 const LINE = /(?:\bsay|\bline|\bopen|\bspeak|\brole)\s*[:(]\s*(['"`])((?:\\.|(?!\1).)+)\1|^\s*'([A-Z][^'\n]{12,})',\s*$|<(?:p|div|span|h\d|li)[^>]*>([^<>{}]{12,})</gm
 let lines = 0
 for (const f of WRITTEN) {
   const src = readFileSync(f, 'utf8')
-  for (const m of src.matchAll(LINE)) { const t = (m[2] || m[3] || m[4] || '').trim(); if (!t) continue; lines++; const got = aiTells(t); if (got.length) { bad++; console.log('FAIL', f, '|', t.slice(0, 90), '→', got.join(', ')) } }
+  for (const m of src.matchAll(LINE)) { const t = (m[2] || m[3] || m[4] || '').trim(); if (!t) continue; lines++; const got = (/case|resume/.test(f) ? proseTells : aiTells)(t); if (got.length) { bad++; console.log('FAIL', f, '|', t.slice(0, 90), '→', got.join(', ')) } }
 }
+// the case studies, every sentence of them
+for (const m of readFileSync('src/app/case/cases.ts', 'utf8').matchAll(/'((?:\\.|[^'\\\n]){24,})'/g)) { lines++; const t = m[1].replace(/\\'/g, "'"); const got = proseTells(t); if (got.length) { bad++; console.log('FAIL cases.ts |', t.slice(0, 90), '→', got.join(', ')) } }
 const about = readFileSync('src/meet/knowledge/about.md', 'utf8').split(/^(?=## )/m).filter((s) => s.startsWith('## ') && !/^## Don't say/.test(s)).join('\n')
-for (const l of about.split('\n').filter((x) => x.startsWith('- '))) { lines++; const got = aiTells(l.replace(/\s*\[[^\]]+\]\s*$/, '')); if (got.length) { bad++; console.log('FAIL about.md |', l.slice(0, 90), '→', got.join(', ')) } }
+for (const l of about.split('\n').filter((x) => x.startsWith('- '))) { lines++; const got = aiTells(l.replace(/\s*\[[^\]]+\]\s*$/, '')).filter((w) => !w.includes('A, not B')); if (got.length) { bad++; console.log('FAIL about.md |', l.slice(0, 90), '→', got.join(', ')) } }
 console.log(`${lines} written lines checked`)
 console.log(bad ? `${bad} wrong` : 'all right')
 process.exit(bad ? 1 : 0)

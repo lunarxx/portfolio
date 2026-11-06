@@ -4,6 +4,7 @@
 import { motion } from 'framer-motion'
 import { EMAIL } from '../brain.js'
 import { openMini } from './minis'
+import { CASES as ALL_CASES } from '@/app/case/cases'
 import s from './meet.module.css'
 
 const BUILT: { id: string; name: string; line: string }[] = [
@@ -12,13 +13,12 @@ const BUILT: { id: string; name: string; line: string }[] = [
   { id: 'recall', name: 'RAG + memory', line: 'The search behind this call. Puts the right note first 81% of the time, up from 38%.' },
   { id: 'outbound', name: 'Outbound', line: 'Email, LinkedIn, Instagram and X, each message written from the prospect’s own work.' },
   { id: 'inkling', name: 'Inkling', line: 'Local-first markdown workspace with real-time multiplayer, shipped on desktop.' },
-  { id: 'aarttsii', name: 'aarttsii', line: 'All the tech behind a crochet brand, including a price estimator that reads a photo.' },
+  { id: 'aarttsii', name: 'aarttsii', line: 'All the tech behind a crochet brand: a store, a photo price estimator, and the outreach that landed Hocco.' },
 ]
 
 // the longer read on three of them
 const CASES: { href: string; name: string; line: string }[] = [
-  { href: '/case/mooney', name: 'Mooney', line: 'The expense tracker that listens.' },
-  { href: '/case/aarttsii', name: 'aarttsii', line: 'Pricing crochet without the guesswork.' },
+  ...ALL_CASES.map((c) => ({ href: `/case/${c.slug}`, name: c.name, line: c.line })),
   { href: '/case/whofits', name: 'WhoFits', line: 'Finding creators worth working with.' },
 ]
 export function Cases() {

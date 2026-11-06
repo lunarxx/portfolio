@@ -118,8 +118,8 @@ export default function ResumePage() {
               <span className={styles.projectName}>aarttsii</span>
               <span className={styles.projectDesc}>
                 {compact
-                  ? 'all the tech behind a crochet brand: a code drawn storefront, an ops portal, courier booking from telegram, and a price estimator that reads a photo.'
-                  : 'all the tech behind a crochet brand: a storefront drawn in code, an ops portal with CRM and shareable invoices, courier booking from telegram, and a photo price estimator whose model was picked on measured error.'
+                  ? 'all the tech behind a crochet brand that landed hocco from a cold email: a code drawn storefront, an ops portal, courier booking from telegram, and a price estimator that reads a photo.'
+                  : 'all the tech behind a crochet brand that landed hocco from a cold email: a storefront drawn in code, an ops portal with CRM and shareable invoices, courier booking from telegram, and a photo price estimator whose model was picked on measured error.'
                 }
               </span>
               <span className={styles.projectMeta}>solo built</span>
@@ -163,7 +163,7 @@ export default function ResumePage() {
               <span className={styles.projectDesc}>
                 {compact
                   ? 'omnichannel outbound for octyn and aarttsii: email, linkedin and instagram and x through cloud browsers, every message researched from the prospect’s own work.'
-                  : 'omnichannel outbound for octyn and aarttsii: email, linkedin through its official API with a daily warm-up, instagram and x through cloud browser setups, every message written from the prospect’s own work and approved or skipped from telegram. 16 of 99 indian brands replied to aarttsii’s.'
+                  : 'omnichannel outbound for octyn and aarttsii: email, linkedin through its official API with a daily warm-up, instagram and x through cloud browser setups, every message written from the prospect’s own work and approved or skipped from telegram. 37 of 212 brands replied to aarttsii’s, 17%.'
                 }
               </span>
             </div>

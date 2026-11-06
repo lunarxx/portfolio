@@ -40,6 +40,13 @@ const AI_VOICE: [RegExp, string][] = [
   [/\b(seamless(ly)?|game[- ]?chang\w*|cutting[- ]edge|leverag\w+|passionate about|supercharg\w*|revolutioni[sz]\w*|delv(e|ing)|at the end of the day|the magic happens)\b/i, 'a hype word'],
   [/,\s*(every|each|all)\s+(single\s+)?(night|day|morning|week)[.!?]*\s*$/im, 'a tail hung on a finished sentence'],
   [/,\s*(at|by|around)\s+\d[^.,?!]{0,12}[.!?]*\s*$/im, 'a tail hung on a finished sentence'],
+  // what his corrections keep finding, and what the old case studies were full of
+  [/\bnot (?:the |just |only |a |an )?[^.,;?!]{1,40}[,;] (?:but|it'?s)\b|\bthe problem isn'?t\b|\bwasn'?t [^.,;?!]{1,40}[.,;] it was\b/i, 'a negation pivot'],
+  [/, not [a-z]+(?: [a-z]+){0,5}[.!?]/i, 'an "A, not B" line'],
+  [/\bno [a-z]+(?: [a-z]+)?[,.] no [a-z]+(?: [a-z]+)?[,.] (?:and )?no [a-z]+/i, 'a "no X, no Y, no Z" triad'],
+  [/\bno [a-z]+(?: [a-z]+){0,2}\. no [a-z]+(?: [a-z]+){0,2}\./i, 'a "no X. no Y." beat'],
+  [/\b(?:that'?s|this is|and that'?s) (?:the|what) (?:whole |real |entire )?(?:point|pitch|gap|difference|magic|secret|trick|makes (?:it|this|them))\b|\bwhat made this interesting\b|\bwhich is its own kind of\b|\bmade all the difference\b|\bthe rest is history\b/i, 'a closing punchline'],
+  [/\b(here'?s the thing|turns out|at its core|when it comes to|the beauty of|in today'?s|deep dive|a testament to|pivotal|meticulous(?:ly)?|tapestry|nuanced?|boasts?|harness(?:es|ing)?|foster(?:s|ing)?|elevat(?:e|es|ing)|empower(?:s|ing)?|streamlin(?:e|es|ed|ing)|effortless(?:ly)?|robust|unlock(?:s|ing)?|journey)\b/i, 'a stock phrase'],
   [/—|(?<!\d)\s–\s/, 'an em dash'],   // (2021 – 2023 is a date range)
   [/, not (a|an|the) [a-z]+[.!?]/i, 'an "A, not B" line'],   // "starts with a question, not a codebase"
 ]
@@ -50,6 +57,11 @@ export const aiTells = (text: string): string[] => AI_VOICE.filter(([re]) => re.
 // his cube time is 30 seconds, his call: "never" any other number (the model made up 20 and 29)
 const OTHER_NUMBER = /\b(?:ten|eleven|twelve|fifteen|eighteen|twenty(?:-\w+)?|twenty|twenty \w+|forty|fifty|sixty|ninety|(?!30\b|3\b)\d+)\b/i
 const CUBE = /\b(cube|rubik|scrambl|solv)/i, OTHER_TIME = /\b(?!30\b|thirty(?![-\w]))(\d+(?:\.\d+)?|[a-z]+(?:-[a-z]+)?)\s*(?:seconds?|secs?|minutes?|mins?)\b/i
+
+// on a written page, short sentences in a row are a drumbeat; out loud they're just how he talks ("Got it. Please don't.")
+const FRAGMENTS = /(?:^|[.!?]\s+)(?:[a-z'-]+\s+){0,2}[a-z'-]+\.\s+(?:[a-z'-]+\s+){0,2}[a-z'-]+\.(?:\s|$)/i
+/** the same, for pages people read */
+export const proseTells = (text: string): string[] => [...aiTells(text), ...(FRAGMENTS.test(text) ? ['two punch fragments in a row'] : [])]
 
 /** what's wrong with an answer, if anything (empty: fine to say) */
 export function check(q: string, text: string): string[] {

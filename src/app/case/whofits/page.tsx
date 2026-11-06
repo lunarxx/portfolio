@@ -40,7 +40,7 @@ export default function WhoFitsCaseStudy() {
           <p className={styles.sectionLabel}>the insight</p>
           <h2 className={styles.sectionTitle}>follower count is meaningless</h2>
           <p className={styles.body}>
-            you can buy 50k followers overnight. what you can&apos;t fake is being embedded in a creator ecosystem. who replies to your tweets, who engages with your content consistently, where you sit in the network graph. whofits ranks creators by their actual position in the network, not by a number anyone can inflate.
+            you can buy 50k followers overnight. what you can&apos;t fake is being embedded in a creator ecosystem. who replies to your tweets, who engages with your content consistently, where you sit in the network graph. whofits ranks creators by their actual position in the network, since follower counts can be inflated and that can&apos;t.
           </p>
           <div className={styles.callout}>
             the product started with a simple question: what if follower count is actually a bad signal? that question led to crawling 25,000 profiles and building a 7 signal ranking formula to find out.
@@ -75,7 +75,7 @@ export default function WhoFitsCaseStudy() {
             <div className={styles.gridCard}><strong>niche relevance</strong><span>embedding similarity to the campaign brief</span></div>
           </div>
           <p className={styles.body}>
-            deep qualification triggers a grok powered analysis that returns a qualification card with top 3 reasons, evidence posts with urls, integrity flags, and a qualified/monitor/reject verdict. all auditable. all reproducible.
+            deep qualification triggers a grok powered analysis that returns a qualification card with top 3 reasons, evidence posts with urls, integrity flags, and a qualified/monitor/reject verdict, and you can audit and reproduce every one of them.
           </p>
         </div>
 

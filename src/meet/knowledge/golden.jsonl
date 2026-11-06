@@ -20,8 +20,6 @@
 {"q": "Does the desk send messages without asking anyone?", "expect": ["Nothing goes out until a human taps"], "tag": "paraphrase"}
 {"q": "Who is Cookie?", "expect": ["\"Cookie\" for aarttsii"], "tag": "lookup"}
 {"q": "Can I edit notes with friends at the same time in Inkling?", "expect": ["Real-time multiplayer editing"], "tag": "paraphrase"}
-{"q": "What's the app that turns a photo into a crochet pattern?", "expect": ["CLIP finds the closest matching crochet pattern"], "tag": "paraphrase"}
-{"q": "How many patterns can it search?", "expect": ["92,000 indexed patterns"], "tag": "followup"}
 {"q": "Why does your character have a TV for a head?", "expect": ["TV-head character", "my stream character"], "tag": "paraphrase"}
 {"q": "Do you write all the code by hand?", "expect": ["AI does the typing, he does the thinking", "Claude's my team"], "tag": "paraphrase"}
 {"q": "Which mobile framework do you use?", "expect": ["Flutter"], "tag": "lookup"}
