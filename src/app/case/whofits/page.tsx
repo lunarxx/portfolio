@@ -17,12 +17,12 @@ export default function WhoFitsCaseStudy() {
       <div className={styles.hero}>
         <h1 className={styles.title}>finding creators worth working with</h1>
         <p className={styles.subtitle}>
-          whofits is a creator discovery and qualification platform for influencer marketing agencies. instead of scrolling feeds for days, you upload a seed list and the system tells you who&apos;s actually worth reaching out to.
+          whofits was a creator discovery and qualification platform for influencer marketing agencies. instead of scrolling feeds for days, you uploaded a seed list and the system told you who was worth reaching out to.
         </p>
         <div className={styles.meta}>
           <div className={styles.metaItem}>role<strong>co founded</strong></div>
           <div className={styles.metaItem}>stack<strong>next.js, supabase, grok, playwright</strong></div>
-          <div className={styles.metaItem}>status<strong>crawler built, qualification shipping</strong></div>
+          <div className={styles.metaItem}>status<strong>finished, reused at shown media</strong></div>
           <div className={styles.metaItem}>data<strong>25,000+ creators crawled</strong></div>
         </div>
       </div>
@@ -62,9 +62,9 @@ export default function WhoFitsCaseStudy() {
 
         <div className={styles.section}>
           <p className={styles.sectionLabel}>qualification</p>
-          <h2 className={styles.sectionTitle}>seven signals, not seven opinions</h2>
+          <h2 className={styles.sectionTitle}>seven signals and the evidence behind each</h2>
           <p className={styles.body}>
-            the ranking formula uses 7 signals: engagement velocity, audience overlap, brand safety, content consistency, growth trajectory, niche relevance, and response rate. each signal is weighted and combined into a composite score. the result isn&apos;t &ldquo;this creator is good.&rdquo; it&apos;s &ldquo;this creator is good for this specific campaign, and here&apos;s the evidence.&rdquo;
+            the ranking formula uses 7 signals: engagement velocity, audience overlap, brand safety, content consistency, growth trajectory, niche relevance, and response rate. each signal is weighted and combined into a composite score, so what an agency gets back is &ldquo;this creator is good for this specific campaign, and here&apos;s the evidence.&rdquo;
           </p>
           <div className={styles.grid}>
             <div className={styles.gridCard}><strong>engagement velocity</strong><span>how quickly and consistently their audience responds</span></div>
@@ -80,11 +80,14 @@ export default function WhoFitsCaseStudy() {
         </div>
 
         <div className={styles.section}>
-          <p className={styles.sectionLabel}>status</p>
-          <h2 className={styles.sectionTitle}>crawler running, qualification shipping next</h2>
+          <p className={styles.sectionLabel}>where it went</p>
+          <h2 className={styles.sectionTitle}>it lives on at shown media</h2>
           <p className={styles.body}>
-            the crawler pipeline is built and has processed 25,000+ creator profiles. the qualification engine formulas are locked. the marketing site is live with a 3d character model. full mock dashboard with 50+ components. the plan is to ship qualification before discovery because agencies already have their own creator lists. they just need a better way to vet them.
+            work on whofits has finished, and this page is the record of it. by the end the crawler had processed 25,000+ creator profiles, the qualification formulas were locked, and there was a marketing site with a 3d character model and a mock dashboard of 50+ components.
           </p>
+          <div className={styles.callout}>
+            what we built got a second life. my cofounder reused it at shown media, where it profiles 1,000+ creators a day.
+          </div>
         </div>
       </div>
     </article>

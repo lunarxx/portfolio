@@ -19,7 +19,7 @@ const BUILT: { id: string; name: string; line: string }[] = [
 // the longer read on three of them
 const CASES: { href: string; name: string; line: string }[] = [
   ...ALL_CASES.map((c) => ({ href: `/case/${c.slug}`, name: c.name, line: c.line })),
-  { href: '/case/whofits', name: 'WhoFits', line: 'Finding creators worth working with.' },
+  { href: '/case/whofits', name: 'WhoFits', line: 'Finding creators worth working with, later reused at Shown Media.' },
 ]
 export function Cases() {
   return (
