@@ -28,7 +28,7 @@ export const CASES: CaseStudy[] = [
       {
         label: 'the outreach', title: '17 percent of the brands we wrote to wrote back',
         body: [
-          '37 of the 212 brands we wrote to replied, split evenly enough across google and outlook inboxes that it wasn\'t a fluke of one provider. on the india list it was 16 of 99, and 15 of those were warm, asking for concepts, pictures or a call. i count replies by scanning the real inboxes, because a flag in a database can be wrong and i wanted to know.',
+          '37 of the 212 brands we wrote to replied, and the rate held on both google and outlook inboxes, 17 and 19 percent. on the india list it was 16 of 99, and 15 of those were warm, asking for concepts, pictures or a call. i count replies by scanning the real inboxes, because a flag in a database can be wrong and i wanted to know.',
           'measuring properly changed what we sent. scarcity lines were killing replies, so they went. offering a couple of concepts or a quick call beat offering a call alone, and a domain inbox pulled about 3.3 times what a gmail one did across 458 real sends.',
         ],
         grid: [['17%', '37 of 212 brands replied'], ['16 of 99', 'on the india list, 15 of them warm'], ['9.7% vs 4.7%', 'two ways to say yes against a call only'], ['7.0% vs 1.6%', 'emails without scarcity lines against emails with them'], ['3.3x', 'a domain inbox against gmail, over 458 sends']],
