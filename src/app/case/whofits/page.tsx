@@ -22,7 +22,7 @@ export default function WhoFitsCaseStudy() {
         <div className={styles.meta}>
           <div className={styles.metaItem}>role<strong>co founded</strong></div>
           <div className={styles.metaItem}>stack<strong>next.js, supabase, grok, playwright</strong></div>
-          <div className={styles.metaItem}>status<strong>finished, reused at shown media</strong></div>
+          <div className={styles.metaItem}>status<strong>half built, then we pivoted</strong></div>
           <div className={styles.metaItem}>data<strong>25,000+ creators crawled</strong></div>
         </div>
       </div>
@@ -83,10 +83,10 @@ export default function WhoFitsCaseStudy() {
           <p className={styles.sectionLabel}>where it went</p>
           <h2 className={styles.sectionTitle}>it lives on at shown media</h2>
           <p className={styles.body}>
-            work on whofits has finished, and this page is the record of it. by the end the crawler had processed 25,000+ creator profiles, the qualification formulas were locked, and there was a marketing site with a 3d character model and a mock dashboard of 50+ components.
+            we stopped halfway. the crawler had processed 25,000+ creator profiles, the qualification formulas were locked, and there was a marketing site with a 3d character model and a mock dashboard of 50+ components. then we looked at where the market was going and pivoted from software as a service to service as software, and that&apos;s how we work at octyn now.
           </p>
           <div className={styles.callout}>
-            what we built got a second life. my cofounder reused it at shown media, where it profiles 1,000+ creators a day.
+            what we built still got used. my cofounder reused it at shown media, where it profiles 1,000+ creators a day.
           </div>
         </div>
       </div>
