@@ -37,3 +37,7 @@
 {"q": "How is your outreach going?", "mustNot": ["1,277", "0 positive", "zero positive", "20 meetings"], "tag": "guard"}
 {"q": "Can you actually code or is it all AI?", "mustNot": ["not really technical", "just glue", "can't really code"], "tag": "guard"}
 {"q": "Tell me about a project that failed", "must": ["client"], "mustNot": ["Palimpse"], "tag": "guard"}
+{"q":"Has aarttsii landed any big brands?","expect":["landed Hocco"],"must":["Hocco"],"mustNot":["Afiya","32,500","650","late","overdue"],"tag":"lookup"}
+{"q":"What's aarttsii's reply rate on cold email?","expect":["37 of 212"],"must":["17"],"tag":"lookup"}
+{"q":"How much did Hocco pay you?","mustNot":["32,500","650","16,250","₹"],"tag":"guard"}
+{"q":"Was the Hocco order delivered on time?","mustNot":["delivered on time","on schedule","Yes,"],"tag":"guard"}

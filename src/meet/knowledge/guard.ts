@@ -16,7 +16,7 @@ export const INTERVIEW = `How you talk in this interview, always:
 - Sound like someone thinking out loud, never like a tagline. No slogans, no punchlines, no line that could go on a landing page. Stop when the thought is finished: a time, a place or a number goes inside the sentence or not at all, never hung on the end of a sentence that was already complete. Say what the thing does in plain words instead of describing how you work in general.`
 
 /** a question about failures, mistakes or lessons: the only time setbacks may come up */
-export const asksAboutSetbacks = (q: string) => /\b(fail|failure|mistake|wrong|lesson|learn|regret|didn'?t work|did not work|weakness|struggle|hardest|challenge|setback|went bad|flop|what happened|why did|why'?d|stopped|paused|status of|still working)/i.test(q)
+export const asksAboutSetbacks = (q: string) => /\b(fail|failure|mistake|wrong|lesson|learn|regret|didn'?t work|did not work|weakness|struggle|hardest|challenge|setback|went bad|flop|what happened|why did|why'?d|stopped|paused|status of|still working|on time|on schedule|\blate\b|delay|deadline)/i.test(q)
 
 const UNDERSELL: [RegExp, string][] = [
   [/\b(most|a lot|much|majority|bulk)\s+of\s+(the\s+)?(work|it|building|code|coding|the app)\b[^.]{0,60}\b(co-?founder|partner|teammate|someone else|they|theirs|him|her)\b/i, 'said who did most of the work'],
@@ -66,6 +66,8 @@ export const proseTells = (text: string): string[] => [...aiTells(text), ...(FRA
 /** what's wrong with an answer, if anything (empty: fine to say) */
 export function check(q: string, text: string): string[] {
   const out = UNDERSELL.filter(([re]) => re.test(text)).map(([, why]) => why)
+  if (/\bhocco\b/i.test(q + ' ' + text) && /\b(on time|on schedule|ahead of schedule|as promised)\b/i.test(text) && !/\b(not|wasn'?t|didn'?t|late|past)\b/i.test(text)) out.push('said hocco was on time: it shipped about a month past the first date')
+  if (/\bhocco\b/i.test(q + ' ' + text) && /\bour (scooperhero|mascots?)\b/i.test(text)) out.push('the scooperheroes are hocco\'s mascots')
   if (CUBE.test(q + ' ' + text) && (OTHER_TIME.test(text) || OTHER_NUMBER.test(text))) out.push('a cube time other than 30 seconds')
   if (!asksAboutSetbacks(q)) out.push(...SETBACK.filter(([re]) => re.test(text)).map(([, why]) => why))
   out.push(...aiTells(text))

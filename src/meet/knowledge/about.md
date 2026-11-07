@@ -94,6 +94,8 @@ Source prefix `mem/` = `C:\Users\user\.claude\projects\C--Users-user\memory\`. C
 - The site was rebuilt as a "pixel house": a code-drawn cross-section where a procedural pixel cat reveals each room. [mem/project_aarttsii_catwalk.md]
 - aarttsii's orders come from cold email outreach, not inbound chats. [mem/feedback_no_aarttsii_inbound_data.md]
 - Its outreach runs daily: drafting on his laptop, a deterministic sender on the VPS, Telegram approval cards (Send / Edit / Skip). [mem/project_aarttsii_rebuild_2026_09.md]
+- aarttsii's outreach landed Hocco, an Indian ice cream brand: a cold email led to samples, a negotiation and a purchase order for 50 of Hocco's own Scooperhero mascots, made in crochet, closed above their counter-offer, and shipped. [mem/project_aarttsii_hocco_deal.md]
+- aarttsii's cold email reply rate: 37 of 212 brands replied, 17% (31 of 180 on Google inboxes, 6 of 32 on Outlook). [his table, 7 Nov 2026]
 - Recorded reply rates (to 25 Oct): India 16 of 99 replied (15 warm), abroad 11 of 85 (4 warm). [mem/project_octyn_agency_v1.md]
 - Lesson the system records: sending has no model in it, after a model once reported a send that never happened. [mem/reference_octyn_site_positioning.md]
 - He also built a shipping desk (courier booking from Telegram) and an admin portal with orders, invoices and a company CRM. [mem/project_aarttsii_shipping_desk.md]
@@ -218,6 +220,7 @@ Source prefix `mem/` = `C:\Users\user\.claude\projects\C--Users-user\memory\`. C
 - He often works late and wakes late; scheduled jobs were set around that. [mem/project_octyn_skits.md]
 
 ## Setbacks and lessons (only when asked about failures, mistakes or lessons)
+- The Hocco order shipped about a month past the date first promised, because each piece took far more hours than estimated; aarttsii now quotes timelines from logged hours per piece. [mem/project_aarttsii_hocco_deal.md]
 - His own correction (29 Sep 2026): media3ms was his own business and never landed a client. [mem/project_media3ms.md]
 - On failure: "My first agency never landed a client. Taught me to sell before I build." [src/meet/brain.js]
 - Honest result: early copy sent 1,277 emails for 6 human replies and 0 positive; the rewrite sent 590 for 1 positive reply (a call booked). [mem/project_octyn_agency_v1.md]
@@ -234,7 +237,7 @@ Source prefix `mem/` = `C:\Users\user\.claude\projects\C--Users-user\memory\`. C
 - Never state Octyn's headcount. [mem/feedback_never_state_headcount.md]
 - Don't say he owns a real cat; the cats in his work are characters. [mem/project_octyn_ai_streamer.md]
 - Don't volunteer Mooney user counts or traction. [mem/project_reach_no_clients.md]
-- Don't name aarttsii's founder, its brand buyers, their prices, or any Octyn client or prospect. [mem/reference_octyn_site_positioning.md]
+- Don't name aarttsii's founder, its brand buyers other than Hocco, any prices, or any Octyn client or prospect. About Hocco, never give the price or the contact's name, and never say it was delivered on time; only if asked about its timing, say what the setbacks note says. [mem/reference_octyn_site_positioning.md]
 - Don't claim the desk handles real buyer chats at scale; it went live 23 Oct 2026, pre-client. [mem/feedback_no_aarttsii_inbound_data.md]
 - Don't cite Sanshu's sale totals or ambassadors as his achievement. [mem/project_media3ms.md]
 - Don't push his X link until he confirms the account is back. [octyn-site/src/lib/site.ts]

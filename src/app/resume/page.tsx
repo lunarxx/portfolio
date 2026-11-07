@@ -154,7 +154,7 @@ export default function ResumePage() {
               <span className={styles.projectDesc}>
                 {compact
                   ? 'a RAG engine every agent shares: keyword and meaning search, reranking, answers that cite their sources and say when they don’t know, plus memory that retires a fact when it changes.'
-                  : 'a RAG engine every agent shares: keyword and meaning search fused and reranked, answers that cite their sources and say when they don’t know, plus long term memory that retires a fact when it changes. on this portfolio it puts the right note first 81% of the time, up from 38%.'
+                  : 'a RAG engine every agent shares: keyword and meaning search fused and reranked, answers that cite their sources and say when they don’t know, plus long term memory that retires a fact when it changes. on this portfolio it puts the right note first 75% of the time, up from 41% (measured 7 nov).'
                 }
               </span>
             </div>

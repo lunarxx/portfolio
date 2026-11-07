@@ -10,7 +10,7 @@ import s from './meet.module.css'
 const BUILT: { id: string; name: string; line: string }[] = [
   { id: 'cookie', name: 'Cookie', line: 'A front desk for made-to-order businesses. Prices orders from their own costs, sends the proposal, collects the advance, chases the balance.' },
   { id: 'mooney', name: 'Mooney', line: 'Voice-first expense tracker, live on Google Play. Under 5 seconds from speech to saved row, in 60+ countries.' },
-  { id: 'recall', name: 'RAG + memory', line: 'The search behind this call. Puts the right note first 81% of the time, up from 38%.' },
+  { id: 'recall', name: 'RAG + memory', line: 'The search behind this call. Puts the right note first 75% of the time, up from 41% (measured 7 Nov).' },
   { id: 'outbound', name: 'Outbound', line: 'Email, LinkedIn, Instagram and X, each message written from the prospect’s own work.' },
   { id: 'inkling', name: 'Inkling', line: 'Local-first markdown workspace with real-time multiplayer, shipped on desktop.' },
   { id: 'aarttsii', name: 'aarttsii', line: 'All the tech behind a crochet brand: a store, a photo price estimator, and the outreach that landed Hocco.' },

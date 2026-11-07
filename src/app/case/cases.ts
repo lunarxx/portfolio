@@ -163,10 +163,10 @@ export const CASES: CaseStudy[] = [
       {
         label: 'measuring it', title: 'the right note first, about twice as often',
         body: [
-          'on a fixed golden set the old word overlap put the right note first 38 percent of the time. the engine, weighted two to one toward meaning, got to 81 percent when i measured it on 31 october, with the right note in the top three 97 percent of the time.',
+          'on a fixed golden set the old word overlap put the right note first 41 percent of the time. the engine, weighted two to one toward meaning, got to 75 percent when i measured it on 7 november, with the right note in the top three 97 percent of the time.',
           'i tested that weighting against equal weights and it won, so that\'s what shipped.',
         ],
-        grid: [['38% to 81%', 'right note first, old search against this one, 31 oct'], ['97%', 'right note in the top three'], ['100%', 'must-have facts present in answers on the eval']],
+        grid: [['41% to 75%', 'right note first, old search against this one, 7 nov'], ['97%', 'right note in the top three'], ['100%', 'must-have facts present in answers on the eval']],
       },
       {
         label: 'in the call', title: 'you can ask it how it knows',

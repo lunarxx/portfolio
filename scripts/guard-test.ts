@@ -18,6 +18,10 @@ const cases: [string, string, boolean][] = [
   ['What is Cookie?', "It's not just a chatbot, it's a whole front desk.", false],
   ['What do you do?', 'Our seamless platform leverages agents.', false],
   ['How do you start?', 'Every project starts with a question, not a codebase.', false],
+  ['Was the Hocco order delivered on time?', 'Yes, the Hocco order was delivered on time.', false],
+  ['Was the Hocco order delivered on time?', 'No, it shipped about a month past the first date, and now we quote from logged hours.', true],
+  ['Has aarttsii landed big brands?', 'Hocco bought 50 of our Scooperhero mascots.', false],
+  ['Has aarttsii landed big brands?', 'Hocco ordered 50 of their Scooperhero mascots in crochet.', true],
   ['When?', 'Lead 3D Artist, 2021 – 2023.', true],
   // his voice rules, each from a real line he or the old pages had
   ['Why?', 'the problem isn\'t the app. it\'s the interaction model.', false],
